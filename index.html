@@ -220,18 +220,17 @@ button.p{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(-
 .bk-bt{transform:rotateX(-90deg) translateZ(calc(var(--bh) / 2 - 5px))}
 .bk-p1{inset:5px 8px 5px 4px;transform:translateZ(calc(var(--bd) / 2 - 3px));background:#fbf3df;border-radius:2px 6px 6px 2px;box-shadow:inset -14px 0 20px rgba(120,80,20,.25)}
 .bk-p1::after{content:"";position:absolute;inset:16px;border:3px double #b0802a;border-radius:8px;background:radial-gradient(circle,rgba(176,128,42,.18),transparent 60%)}
-.bk-cv{inset:0;transform-style:preserve-3d;transform-origin:100% 50%;transform:translateZ(calc(var(--bd) / 2)) rotateY(0deg);transition:transform 1s cubic-bezier(.55,.05,.3,1);backface-visibility:visible!important}
+.bk-cv{inset:0;transform-style:preserve-3d;transform-origin:100% 50%;transform:translateZ(calc(var(--bd) / 2)) rotateY(0deg);backface-visibility:visible!important}
 .bk-cv>div{position:absolute;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .bk-front{box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),inset 0 0 40px rgba(0,0,0,.45),inset -8px 0 12px rgba(0,0,0,.35);overflow:hidden}
 .bk-front::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,240,200,.22) 45%,transparent 60%);background-size:250% 100%;animation:sheen 7s ease-in-out infinite}
 @keyframes sheen{0%,100%{background-position:120% 0}50%{background-position:-20% 0}}
 .bk-front>svg,.bk-back>svg,.bk-spine>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.bk-in{transform:rotateY(180deg);background:linear-gradient(135deg,#3a1d5c,#6a2a4a);box-shadow:inset 0 0 0 8px #5a1420,inset 0 0 0 10px var(--gold2)}
+.bk-in{transform:rotateY(180deg);background:#f1e4c4;box-shadow:inset 0 0 0 7px #5a1420,inset 0 0 0 9px #c9962c,inset 14px 0 22px rgba(90,60,20,.3)}
 .bshadow{position:absolute;bottom:22px;left:50%;width:220px;height:30px;transform:translateX(-50%);background:radial-gradient(closest-side,rgba(0,0,0,.45),transparent);filter:blur(4px);animation:bsh 6s ease-in-out infinite;pointer-events:none}
 @keyframes bsh{0%,100%{transform:translateX(-50%) scale(.9);opacity:.75}50%{transform:translateX(-50%) scale(1.05);opacity:.5}}
-.bscene.open .bk-cv{transform:translateZ(calc(var(--bd) / 2)) rotateY(-165deg)}
-.bscene.open .bfloat{animation:none}
-.bscene.open .book{transition:transform .9s ease;transform:rotateX(4deg) rotateY(0deg) translateZ(60px)}
+.bopen .hero>:not(.bscene),.bopen #homeBody,.bopen .fab,.bopen #fx{opacity:0;transition:opacity .35s}
+.bopen .bscene{position:relative;z-index:60}
 .bflash{position:fixed;inset:0;z-index:70;background:var(--paper);opacity:0;pointer-events:none;transition:opacity .28s}
 .bflash.on{opacity:1}
 .where{font-size:1rem;color:var(--ink);max-width:34ch}
@@ -246,7 +245,7 @@ button.p{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(-
 .flat .book>div:not(.bk-cv),.flat .bk-in{display:none}
 .flat .bk-cv{transform:none!important;transition:none}
 .flat .bk-front{box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),inset 0 0 40px rgba(0,0,0,.45),-8px 10px 0 -2px #e9dcbc,-9px 11px 0 -2px #b9a57a,0 18px 30px rgba(0,0,0,.35)}
-@media (prefers-reduced-motion:reduce){.bfloat,.bshadow,.bk-front::after,.ring3d .rs{animation:none!important}.bk-cv,.bscene.open .book{transition:none!important}}
+@media (prefers-reduced-motion:reduce){.bfloat,.bshadow,.bk-front::after,.ring3d .rs{animation:none!important}.bk-cv{transition:none!important}}
 /* 3D streak ring */
 .ringcard{flex-direction:row;align-items:center;gap:16px}
 .ring3d{flex:none;width:128px;height:128px;position:relative;perspective:520px}
@@ -1447,10 +1446,21 @@ const HOME=(()=>{
   function open(){
     if(opening)return;const p=S.bm?S.bm.p:1;ensureFont(p);
     if(flat||CALMQ()){enter();return}
-    opening=true;audioCtx();sound('flip');scene.classList.add('open');
-    setTimeout(()=>{$('#bflash').classList.add('on');
-      setTimeout(()=>{enter();scene.classList.remove('open');opening=false;
-        setTimeout(()=>$('#bflash').classList.remove('on'),120)},300)},900);
+    /* like a real book: it turns to face you, the cover swings open on the spine, then the eye moves in onto the first page */
+    opening=true;audioCtx();document.body.classList.add('bopen','anim');
+    const fl=scene.querySelector('.bfloat'),cvr=scene.querySelector('.bk-cv'),sh=scene.querySelector('.bshadow');
+    fl.style.animation='none';
+    const r=scene.getBoundingClientRect(),bw=book.offsetWidth,bh=book.offsetHeight;
+    const z=Math.min(innerWidth*1.02/bw,innerHeight*1.02/bh),dx=innerWidth/2-(r.left+r.width/2),dy=innerHeight/2-(r.top+r.height/2);
+    const rx0=cur.rx.toFixed(1)+'deg',ry0=cur.ry.toFixed(1)+'deg',ez='cubic-bezier(.45,.05,.25,1)',an=[];
+    an.push(book.animate([{transform:`rotateX(${rx0}) rotateY(${ry0})`},{transform:'rotateX(6deg) rotateY(0deg)',offset:.3},{transform:'rotateX(0deg) rotateY(0deg)'}],{duration:1900,easing:ez,fill:'forwards'}));
+    an.push(cvr.animate([{transform:'translateZ(calc(var(--bd) / 2)) rotateY(0deg)'},{transform:'translateZ(calc(var(--bd) / 2)) rotateY(0deg)',offset:.22},{transform:'translateZ(calc(var(--bd) / 2)) rotateY(12deg)',offset:.32},{transform:'translateZ(calc(var(--bd) / 2)) rotateY(178deg)',offset:.78},{transform:'translateZ(calc(var(--bd) / 2)) rotateY(178deg)'}],{duration:1900,easing:'ease-in-out',fill:'forwards'}));
+    an.push(scene.animate([{transform:'none'},{transform:'none',offset:.45},{transform:`translate(${dx}px,${dy}px) scale(${z})`}],{duration:1900,easing:'cubic-bezier(.6,0,.3,1)',fill:'forwards'}));
+    if(sh)an.push(sh.animate([{opacity:.7},{opacity:0}],{duration:600,fill:'forwards'}));
+    setTimeout(()=>sound('flip'),420);
+    setTimeout(()=>$('#bflash').classList.add('on'),1650);
+    setTimeout(()=>{enter();an.forEach(a=>a.cancel());fl.style.animation='';document.body.classList.remove('bopen','anim');opening=false;
+      setTimeout(()=>$('#bflash').classList.remove('on'),140)},1950);
   }
   scene.addEventListener('pointerdown',e=>{if(e.button>0)return;drag={x:e.clientX,y:e.clientY,rx:cur.rx,ry:cur.ry,m:false,id:e.pointerId};try{scene.setPointerCapture(e.pointerId)}catch(x){}sync()});
   scene.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>8)drag.m=true;
