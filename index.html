@@ -824,7 +824,20 @@ const saveLast=()=>{try{localStorage.setItem('muraja3a-last',MP)}catch(e){}};
 function syncSnd(){
   const sn=S.sound?'الصوت: شغّال':'الصوت: مقفول',mg=S.margin?'العلامات: شغّالة':'العلامات: مقفولة',ft=(S.rfit||(innerWidth>=900?'h':'w'))==='h'?'الملاءمة: الارتفاع':'الملاءمة: العرض';
   [['#snd',sn],['#rsnd',sn],['#mgn',mg],['#rmg',mg],['#rfit',ft]].forEach(([q,t])=>{const b=$(q);if(b)b.textContent=t});
+  ['#hdM','#rhd'].forEach(q=>{const b=$(q);if(b){b.textContent='إخفاء السطور';b.setAttribute('aria-pressed',String(!!S.hideMode));b.classList.toggle('p',!!S.hideMode)}});
+  ['#hnl','#rhnl'].forEach(q=>{const b=$(q);if(b)b.hidden=!S.hideMode});
 }
+/* hide lines outside the test: every line hidden except the page's first, tap a line (or "اكشف السطر") to reveal it */
+let HSH={p:0,show:new Set()};
+function firstShow(p){const s=new Set(),f=D.p[p-1].findIndex(e=>Array.isArray(e));if(f>=0)s.add(f);return s}
+function hideFor(p){
+  if(!S.hideMode)return null;
+  const show=HSH.p===p?HSH.show:firstShow(p),h=new Set();
+  D.p[p-1].forEach((e,i)=>{if(Array.isArray(e)&&!show.has(i))h.add(i)});return h;
+}
+function revealLine(i){if(HSH.p!==MP)HSH={p:MP,show:firstShow(MP)};HSH.show.add(i);renderMushaf();if(READ)applyReaderFit()}
+function revealNext(){const h=hideFor(MP);if(!h||!h.size)return;revealLine(Math.min(...h))}
+function toggleHide(){S.hideMode=!S.hideMode;HSH={p:0,show:new Set()};save();renderMushaf();syncSnd();if(READ)applyReaderFit()}
 function syncBm(){
   const here=S.bm&&S.bm.p===MP;
   [['#bmB',here?'شيل العلامة':'علّم الصفحة هنا'],['#rbm',here?'شيل العلامة':'علّم الصفحة']].forEach(([q,t])=>{const b=$(q);if(b)b.textContent=t});
@@ -858,7 +871,7 @@ function renderMushaf(){
   const el=$('#t-mushaf');
   if(!el.dataset.init){
     el.dataset.init=1;
-    el.innerHTML=`<div class="row"><button id="pv">السابقة</button><input id="pg" type="number" min="1" max="604" aria-label="رقم الصفحة"><button class="p" id="nx">التالية</button><button id="snd" class="g"></button><button id="mgn" class="g"></button><button id="fsM">ملء الشاشة</button><button id="bmB"></button><button id="bmG" hidden></button>${zoomSel()}</div>
+    el.innerHTML=`<div class="row"><button id="pv">السابقة</button><input id="pg" type="number" min="1" max="604" aria-label="رقم الصفحة"><button class="p" id="nx">التالية</button><button id="snd" class="g"></button><button id="mgn" class="g"></button><button id="fsM">ملء الشاشة</button><button id="hdM" aria-pressed="false">إخفاء السطور</button><button id="hnl" hidden>اكشف السطر</button><button id="bmB"></button><button id="bmG" hidden></button>${zoomSel()}</div>
      <div class="nav4"><select id="jz" aria-label="الجزء"></select><select id="hz" aria-label="الحزب"></select><select id="rb" aria-label="الربع"></select><select id="su" aria-label="السورة"></select></div>
      <div class="stagewrap"><button class="edge nx" id="enx" aria-label="التالية">‹</button><button class="edge pv" id="epv" aria-label="السابقة">›</button><div class="stage" id="stage"></div><div class="nextcue" id="nextcue"></div></div>
      <div class="pchips" id="pchips"></div>
@@ -878,17 +891,19 @@ function renderMushaf(){
     $('#pchips').onclick=()=>openPageSheet(MP);
     $('#mgn').onclick=()=>{S.margin=!S.margin;save();renderMushaf()};
     $('#fsM').onclick=()=>enterReader('mushaf');
+    $('#hdM').onclick=toggleHide;$('#hnl').onclick=revealNext;
     $('#bmB').onclick=toggleBookmark;
     $('#bmG').onclick=()=>{if(S.bm)navigate(S.bm.p)};
     $('#stage').onclick=e=>{
       if(swiped){swiped=false;return}
+      const hl=S.hideMode&&e.target.closest('.ln.hide');if(hl){revealLine(+hl.dataset.i);return}
       const w=e.target.closest('.w');if(!w)return;
       openSheet(+w.dataset.id,{line:+w.dataset.i+1,word:w.dataset.w});
     };
     applyZoom();
   }
   const mark=MHL?new Set([MHL]):null;
-  $('#stage').replaceChildren(makeLeaf(MP,{mark}));
+  $('#stage').replaceChildren(makeLeaf(MP,{mark,hide:hideFor(MP)}));
   fitStage();syncNav();renderChips();saveLast();
   const cur=MP;if(!glOK(cur))ensureFont(cur).then(ok=>{if(ok&&MP===cur&&!BUSY)renderMushaf()});
   if(cur<604)ensureFont(cur+1);
@@ -1041,7 +1056,7 @@ function prepTurn(np){
   const oldCss=old.style.cssText,H0=old.offsetHeight;
   stage.style.minHeight=H0+'px';
   const HFULL=READ?';height:100%':'';
-  const nw=makeLeaf(np);
+  const nw=makeLeaf(np,{hide:hideFor(np)});
   nw.style.cssText='position:absolute;top:0;left:0;width:100%'+HFULL;
   stage.appendChild(nw);nw.querySelectorAll('.mushaf').forEach(fit);
   stage.style.minHeight=Math.max(H0,nw.offsetHeight)+'px';
@@ -1083,7 +1098,7 @@ async function navigate(np){
   const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!old||calm){
     const adj=Math.abs(np-MP)===1,cross=Math.ceil(np/2)!==Math.ceil(MP/2);sound(!adj?'jump':cross?'flip':'shift');
-    MP=np;MHL=null;stage.replaceChildren(makeLeaf(np));fitStage();syncNav();renderChips();saveLast();return}
+    MP=np;MHL=null;stage.replaceChildren(makeLeaf(np,{hide:hideFor(np)}));fitStage();syncNav();renderChips();saveLast();if(READ)applyReaderFit();return}
   const tr=prepTurn(np);
   sound(tr.kind);
   try{await runAnim(tr.kind==='flip'?900:tr.kind==='shift'?380:260,t=>tr.set(easeIO(t)))}catch(e){}
@@ -1099,9 +1114,10 @@ function renderRbar(){
     $('#rall').onclick=()=>{const x=$('#all');if(x)x.click()};
     $('#rrt').onclick=e=>{const r=e.target.dataset.r;if(!r)return;const x=document.querySelector('#rt [data-r="'+r+'"]');if(x)x.click()};
   }else{
-    b.innerHTML=`<button id="rx">إغلاق</button><span class="rinfo" id="rinfo"></span>${AUDIO?'<button id="rpl">▶ تلاوة</button>':''}<button id="rbm"></button><button id="rmg" class="g"></button><button id="rsnd" class="g"></button>`;
+    b.innerHTML=`<button id="rx">إغلاق</button><span class="rinfo" id="rinfo"></span>${AUDIO?'<button id="rpl">▶ تلاوة</button>':''}<button id="rbm"></button><button id="rhd" aria-pressed="false">إخفاء السطور</button><button id="rhnl" hidden>اكشف السطر</button><button id="rmg" class="g"></button><button id="rsnd" class="g"></button>`;
     $('#rmg').onclick=()=>{S.margin=!S.margin;save();renderMushaf();syncSnd();applyReaderFit()};
     $('#rbm').onclick=toggleBookmark;
+    $('#rhd').onclick=toggleHide;$('#rhnl').onclick=revealNext;
     if(AUDIO)$('#rpl').onclick=()=>{if(AU.on&&AU.playing){toggleAudio()}else{AU.until=0;playAyah(AU.on&&AY[AU.id]&&AY[AU.id].page===MP?AU.id:FA[MP])}};
     $('#rsnd').onclick=()=>{S.sound=!S.sound;save();syncSnd();if(S.sound)sound('shift')};
     const i=$('#rinfo');if(i)i.textContent='صفحة '+AR(MP)+' · '+pageHeadL(MP);
