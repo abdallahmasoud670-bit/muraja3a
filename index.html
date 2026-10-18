@@ -760,7 +760,7 @@ function renderToday(){
    <p class="muted">كل جلسة ١٠ صفحات بترتيب المصحف. ٦٠ جلسة تعمل ختمة مراجعة.</p></div>
    ${aod}
    <div class="card"><div class="row sp"><h2>رفّ الأجزاء</h2><span class="muted">اضغط على جزء يفتح</span></div><div class="shelf">${shelf}</div><div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز</span><span><i style="background:var(--st3)"></i>ثابت</span><span><i style="background:var(--st2)"></i>بتردد</span><span><i style="background:var(--st1)"></i>ناسيه</span><span><i style="background:var(--st0)"></i>لم يُختبر</span></div>
-    <div class="legend"><span><i style="background:var(--st3)"></i>ثابت</span><span><i style="background:var(--st2)"></i>متوسط</span><span><i style="background:var(--st1)"></i>ضعيف</span><span><i style="background:var(--st0)"></i>لم يُختبر</span></div></div>`;
+    </div>`;
   const hb=$('#homeBody');
   hb.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>toggle(b.dataset.t));
   hb.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPage(+b.dataset.open,b.dataset.aid?+b.dataset.aid:null));
