@@ -1373,7 +1373,7 @@ function coverSVG(back){
    ${corners}${pend(1)}${pend(-1)}
    <path d="${med}" fill="url(#cg)"/><path d="${med}" fill="url(#cf)"/><path d="${med}" fill="none" stroke="#5a3a0a" stroke-width=".8"/><path d="${med2}" fill="none" stroke="#5a3a0a" stroke-width=".8"/>
    <circle cx="${cx}" cy="${cy}" r="34" fill="url(#cg)"/><circle cx="${cx}" cy="${cy}" r="30.5" fill="#3a0b14" stroke="#5a3a0a" stroke-width="1"/><circle cx="${cx}" cy="${cy}" r="27.5" fill="none" stroke="url(#cg)" stroke-width="1"/>
-   ${back?'':`<g fill="url(#cg)" font-family="'KFGQPC Hafs','Amiri',serif" text-anchor="middle" direction="rtl"><text x="${cx}" y="${cy-2}" font-size="17">القرآن</text><text x="${cx}" y="${cy+17}" font-size="15">الكريم</text></g>`}
+   ${back?'':`<image class="cvt" x="${cx-27}" y="${cy-27}" width="54" height="54"/>`}
    <rect width="${W}" height="${H}" fill="url(#cv)"/></svg>`;
 }
 function spineSVG(){
@@ -1382,9 +1382,26 @@ function spineSVG(){
    <rect x="4" y="5" width="${W-8}" height="${H-10}" fill="url(#cg)"/><rect x="4" y="5" width="${W-8}" height="${H-10}" fill="url(#cf)"/>
    <rect x="4" y="5" width="${W-8}" height="${H-10}" fill="none" stroke="#5a3a0a" stroke-width=".8"/><rect x="8" y="9" width="${W-16}" height="${H-18}" fill="none" stroke="#5a3a0a" stroke-width=".6"/>
    <rect x="12" y="92" width="${W-24}" height="88" rx="10" fill="#3a0b14" stroke="#5a3a0a"/><rect x="14.5" y="94.5" width="${W-29}" height="83" rx="8" fill="none" stroke="url(#cg)" stroke-width=".8"/>
-   <text transform="translate(${W/2},136) rotate(90)" fill="url(#cg)" font-family="'KFGQPC Hafs','Amiri',serif" font-size="11" text-anchor="middle" dominant-baseline="middle" direction="rtl">القرآن الكريم</text></svg>`;
+   <image class="cvs" x="12" y="96" width="22" height="80"/></svg>`;
 }
 $('#bkFront').innerHTML=coverSVG(false);$('#bkBack').innerHTML=coverSVG(true);$('#bkSpine').innerHTML=spineSVG();
+/* the titles are painted once into still images, so they do not shimmer while the book tilts */
+function paintTitles(){
+  const gold=(c,w,h)=>{const g=c.createLinearGradient(0,0,w,h);g.addColorStop(0,'#f7e08a');g.addColorStop(.4,'#e2b84c');g.addColorStop(1,'#a8781e');return g};
+  const ff='"KFGQPC Hafs","Amiri",serif';
+  try{
+    let cv=document.createElement('canvas'),c=cv.getContext('2d');cv.width=cv.height=216;
+    c.direction='rtl';c.textAlign='center';c.textBaseline='alphabetic';c.fillStyle=gold(c,216,216);
+    c.font='68px '+ff;c.fillText('القرآن',108,100);c.font='60px '+ff;c.fillText('الكريم',108,172);
+    document.querySelectorAll('.cvt').forEach(i=>i.setAttribute('href',cv.toDataURL()));
+    cv=document.createElement('canvas');c=cv.getContext('2d');cv.width=88;cv.height=320;
+    c.translate(44,160);c.rotate(Math.PI/2);c.direction='rtl';c.textAlign='center';c.textBaseline='middle';c.fillStyle=gold(c,160,40);
+    c.font='42px '+ff;c.fillText('القرآن الكريم',0,0);
+    document.querySelectorAll('.cvs').forEach(i=>i.setAttribute('href',cv.toDataURL()));
+  }catch(e){}
+}
+paintTitles();
+if(document.fonts&&document.fonts.load)document.fonts.load('40px "KFGQPC Hafs"').then(paintTitles).catch(()=>{});
 
 load();
 /* ---- home: the 3D mushaf, golden particles; paused whenever the home screen is not on show ---- */
