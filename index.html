@@ -141,6 +141,21 @@ body.anim{overflow-x:hidden}
 /* bookmark: a red corner flag on the spine-side top corner; an ayah bookmark also underlines that ayah in red */
 .w.bmw{text-decoration:underline;text-decoration-color:#d62828;text-decoration-thickness:2.5px;text-underline-offset:.45em}
 .w.playing{background:color-mix(in srgb,var(--accent) 24%,transparent);border-radius:4px}
+/* recitation tab: the mushaf page with a moving highlight layer */
+.astw{position:relative;padding-inline:4px;margin-block:4px 8px}
+#astage .w.playing{background:none}
+#astage .leaf{position:relative;z-index:1}
+.ahl{position:absolute;inset:0;pointer-events:none;z-index:2;transition:opacity .25s}
+#astage .leaf.ain-n~.ahl,#astage .leaf.ain-p~.ahl{opacity:0;transition:none}
+.ahl i{position:absolute;border-radius:6px;background:color-mix(in srgb,var(--gold2) 34%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 40%,transparent);mix-blend-mode:multiply;opacity:0;transition:left .45s cubic-bezier(.3,.7,.2,1),top .45s cubic-bezier(.3,.7,.2,1),width .45s cubic-bezier(.3,.7,.2,1),height .45s,opacity .35s}
+:root[data-theme="dark"] .ahl i{mix-blend-mode:screen}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ahl i{mix-blend-mode:screen}}
+.ahl i.on{opacity:1}
+#astage .leaf.ain-n{animation:aturnN .55s cubic-bezier(.3,.6,.2,1)}#astage .leaf.ain-p{animation:aturnP .55s cubic-bezier(.3,.6,.2,1)}
+@keyframes aturnN{from{transform:rotateY(-70deg);transform-origin:right center;opacity:.2}to{transform:none;transform-origin:right center;opacity:1}}
+@keyframes aturnP{from{transform:rotateY(70deg);transform-origin:left center;opacity:.2}to{transform:none;transform-origin:left center;opacity:1}}
+@media (prefers-reduced-motion:reduce){.ahl i{transition:opacity .2s}#astage .leaf{animation:none!important}}
+.flat #astage .leaf{animation:none!important}
 .bmc{position:absolute;top:0;width:36px;height:36px;background:#d62828;opacity:.92;pointer-events:none;z-index:3}
 .leaf.bm-tr .phead{padding-right:34px}
 .leaf.bm-tl .phead{padding-left:34px}
@@ -652,7 +667,7 @@ function wireWords(el,opts){
 /* ---- navigation ---- */
 const TABS=[['today','الرئيسية'],['mushaf','المصحف']].concat(AUDIO?[['aud','تلاوة']]:[]).concat([['test','اختبرني'],['mis','أخطائي'],['tad','تدبّري'],['me','حالتي']]);
 let TAB='today';
-function showTab(id){TAB=id;TABS.forEach(t=>{$('#t-'+t[0]).hidden=t[0]!==id});document.querySelectorAll('.fi[data-t]').forEach(b=>{if(b.dataset.t===id)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});window.scrollTo(0,0);document.querySelectorAll('.mushaf').forEach(fit);if(window.HOME)HOME.sync()}
+function showTab(id){TAB=id;TABS.forEach(t=>{$('#t-'+t[0]).hidden=t[0]!==id});document.querySelectorAll('.fi[data-t]').forEach(b=>{if(b.dataset.t===id)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});window.scrollTo(0,0);document.querySelectorAll('.mushaf').forEach(fit);if(id==='aud'&&AUDIO){AUDP=0;audSync()}if(window.HOME)HOME.sync()}
 function goTab(t){if(t==='mushaf'){let p=MP;try{p=+localStorage.getItem('muraja3a-last')||MP}catch(x){}MP=Math.min(604,Math.max(1,p||1));renderMushaf()}showTab(t);if(t==='mushaf')document.querySelectorAll('.mushaf').forEach(fit)}
 let MP=1,MHL=null;
 function openPage(p,hl){MP=Math.min(604,Math.max(1,p|0));MHL=hl||null;renderMushaf();showTab('mushaf')}
@@ -1189,6 +1204,7 @@ function onEnded(){
 }
 function markPlaying(){
   document.querySelectorAll('.w.playing').forEach(x=>x.classList.remove('playing'));
+  if(AUDIO)audSync();
   if(!AU.on||AU.mode!=='ayah'||!AU.id)return;
   document.querySelectorAll('.w[data-id="'+AU.id+'"]').forEach(x=>x.classList.add('playing'));
 }
@@ -1219,12 +1235,14 @@ function syncPlayer(){
 function renderAud(){
   if(!AUDIO)return;const el=$('#t-aud');if(!el)return;
   const id=AUD.sel||1,A=AY[id],s=A.s;
-  el.innerHTML=`<div class="card"><h2>تلاوة</h2>
+  if(!el.dataset.init){el.dataset.init=1;AUDP=0;
+    el.innerHTML='<div class="card"><div class="astw"><div class="stage" id="astage"></div></div></div><div id="actl"></div>';
+    $('#astage').onclick=e=>{const w=e.target.closest('.w');if(!w)return;AU.until=0;playAyah(+w.dataset.id)}}
+  $('#actl').innerHTML=`<div class="card"><h2>تلاوة</h2>
    <label class="muted" for="arc">القارئ</label>
    <select id="arc">${REC.map(r=>`<option value="${r.k}"${r.k===S.rc||(!S.rc&&r.k==='husary')?' selected':''}>${r.n}</option>`).join('')}</select>
    <div class="row"><select id="asu" aria-label="السورة" style="flex:2">${Object.keys(D.n).map(k=>`<option value="${k}"${+k===s?' selected':''}>${k}. ${esc(D.n[k])}</option>`).join('')}</select>
    <select id="aay" aria-label="الآية" style="flex:1">${[...Array(AYC[s])].map((_,i)=>`<option value="${i+1}"${i+1===A.a?' selected':''}>آية ${AR(i+1)}</option>`).join('')}</select></div>
-   <p class="ayat">${esc(ayahText(id))}</p>
    <div class="row"><button id="aprev">⏮ السابقة</button><button class="p" id="aplay">${AU.playing?'⏸ إيقاف مؤقت':'▶ شغّل'}</button><button id="anext">التالية ⏭</button><button id="astop">⏹ إيقاف</button></div>
    <div class="row"><button id="asurah">شغّل السورة كلها</button><button id="apage">شغّل من الصفحة المفتوحة</button><button id="aopen" class="g">افتح الآية في المصحف</button></div>
    <div class="row"><label>التكرار <select id="arep">${REPS.map(v=>`<option value="${v}"${v===curRep()?' selected':''}>${v===0?'بلا نهاية':v===1?'بدون تكرار':'×'+AR(v)}</option>`).join('')}</select></label>
@@ -1247,7 +1265,35 @@ function renderAud(){
   $('#asp').onchange=e=>{S.sp=+e.target.value;save();if(AU.a)AU.a.playbackRate=S.sp};
   $('#aauto').onchange=e=>{S.auto=e.target.checked;save()};
   $('#afol').onchange=e=>{S.follow=e.target.checked;save()};
+  audSync();
 }
+/* recitation tab page: same leaf as the mushaf tab; turns by itself when the ayah moves to another page */
+let AUDP=0;
+function audSync(){
+  const st=$('#astage');if(!st||$('#t-aud').hidden)return;
+  const id=AU.on&&AU.mode==='ayah'&&AU.id?AU.id:(AUD.sel||1),p=AY[id].page;
+  if(p!==AUDP||!st.querySelector('.leaf')){
+    const prev=AUDP;AUDP=p;
+    const lf=makeLeaf(p,{});const hl=document.createElement('div');hl.className='ahl';
+    if(prev&&prev!==p&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){lf.classList.add(p>prev?'ain-n':'ain-p');const done=()=>{lf.classList.remove('ain-n','ain-p');audHL(AU.on&&AU.mode==='ayah'&&AU.id?AU.id:(AUD.sel||1))};lf.addEventListener('animationend',done,{once:true});lf.addEventListener('animationcancel',done,{once:true})}
+    st.replaceChildren(lf,hl);st.querySelectorAll('.mushaf').forEach(fit);
+    if(!glOK(p))ensureFont(p).then(ok=>{if(ok&&AUDP===p){AUDP=0;audSync()}});
+    if(p<604)ensureFont(p+1);
+  }
+  audHL(id);
+}
+function audHL(id){
+  const st=$('#astage');if(!st)return;const hl=st.querySelector('.ahl');if(!hl)return;
+  const sr=st.getBoundingClientRect(),rows=new Map();
+  st.querySelectorAll('.w[data-id="'+id+'"]').forEach(w=>{const ln=w.closest('.ln'),r=w.getBoundingClientRect();if(!r.width)return;
+    const b=rows.get(ln);if(b){b.l=Math.min(b.l,r.left);b.r=Math.max(b.r,r.right);b.t=Math.min(b.t,r.top);b.b=Math.max(b.b,r.bottom)}else rows.set(ln,{l:r.left,r:r.right,t:r.top,b:r.bottom})});
+  const bx=[...rows.values()],have=[...hl.children];
+  while(have.length<bx.length){const i=document.createElement('i');hl.appendChild(i);have.push(i)}
+  have.forEach((i,k)=>{const b=bx[k];
+    if(!b){i.classList.remove('on');return}
+    Object.assign(i.style,{left:(b.l-sr.left-3)+'px',top:(b.t-sr.top-1)+'px',width:(b.r-b.l+6)+'px',height:(b.b-b.t+2)+'px'});i.classList.add('on')});
+}
+window.addEventListener('resize',()=>{if(AUDIO&&AUDP&&!$('#t-aud').hidden){const st=$('#astage');st.querySelectorAll('.mushaf').forEach(fit);audHL(AU.on&&AU.mode==='ayah'&&AU.id?AU.id:(AUD.sel||1))}});
 
 /* ---- test tab ---- */
 let T=null;
