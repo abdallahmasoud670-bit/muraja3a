@@ -208,7 +208,7 @@ body.reading .nextcue{margin:10px 8px 18px}
 .item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
 .item:first-child{border-top:0}.item>div:first-child{min-width:0}
 .dots{display:flex;gap:4px;margin-top:4px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--st0)}.dots i.on{background:var(--st3)}
-.rate button{flex:1 1 90px;color:#fff;border:0;font-weight:600}.rate .r3{background:var(--st3)}.rate .r2{background:var(--st2);color:#1a1300}.rate .r1{background:var(--st1)}
+.rate button{flex:1 1 90px;color:#fff;border:0;font-weight:600}.rate .r4{background:linear-gradient(135deg,#ffffff,#cfe8ff 45%,#9fcfff);color:#1d4f86;box-shadow:inset 0 0 0 1px rgba(120,180,240,.6)}.rate .r3{background:var(--st3)}.rate .r2{background:var(--st2);color:#1a1300}.rate .r1{background:var(--st1)}
 /* sheet */
 .back{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50}
 .sheet{position:fixed;inset-inline:0;bottom:0;max-height:86dvh;overflow:auto;background:var(--surface);border-top:1px solid var(--line);border-radius:14px 14px 0 0;z-index:51;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:12px;max-width:720px;margin:0 auto}
@@ -404,7 +404,7 @@ const pageErr=p=>{const c=S.pc[p];return c?c.f+c.w:0};
 /* page strength from the mistake count; only pages that were tested or have a counter get a level */
 const LVL=['لم تُختبر','ناسيها','بتردد','ثابتة','ممتاز'];
 const pageTested=p=>!!((S.pages[p]&&S.pages[p].r)||S.pc[p]);
-function pageLvl(p){if(!pageTested(p))return 0;const n=pageErr(p);return n===0?4:n<=2?3:n<=6?2:1}
+function pageLvl(p){if(!pageTested(p))return 0;const n=pageErr(p),r=S.pages[p];if(r&&r.r===4&&n<=(r.e4||0))return 4;return n===0?4:n<=2?3:n<=6?2:1}
 function cntText(id,word){
   const A=AY[id],w=word&&S.wc[id+'|'+word],pe=pageErr(A.page),parts=[];
   if(w)parts.push('غلطت في «'+word+'» '+AR(w.n)+' مرة');
@@ -678,7 +678,8 @@ function unitFor(task){const r=day()[task];if(r&&r.done)return r.unit;const k=ta
 function pageRate(p,r){
   const rec=S.pages[p]||(S.pages[p]={iv:0});rec.r=r;rec.d=TODAY();
   if(r===1)bumpPage(p,'f');if(r===2)bumpPage(p,'s');
-  rec.iv=r===1?1:r===2?3:Math.min(90,Math.max(7,Math.round((rec.iv||3)*2.2)));
+  if(r===4)rec.e4=pageErr(p);
+  rec.iv=r===1?1:r===2?3:r===4?Math.min(120,Math.max(14,Math.round((rec.iv||3)*3))):Math.min(90,Math.max(7,Math.round((rec.iv||3)*2.2)));
   rec.due=addDays(TODAY(),rec.iv);
 }
 const MIS_IV=[1,3,7,30];
@@ -758,7 +759,7 @@ function renderToday(){
    <div class="card"><div class="row sp"><span>دورة المراجعة</span><span class="muted">${AR(pos)}٪ · ختمات: ${AR(Math.floor(S.sessions/60))}</span></div><div class="bar"><i style="width:${pos}%"></i></div>
    <p class="muted">كل جلسة ١٠ صفحات بترتيب المصحف. ٦٠ جلسة تعمل ختمة مراجعة.</p></div>
    ${aod}
-   <div class="card"><div class="row sp"><h2>رفّ الأجزاء</h2><span class="muted">اضغط على جزء يفتح</span></div><div class="shelf">${shelf}</div>
+   <div class="card"><div class="row sp"><h2>رفّ الأجزاء</h2><span class="muted">اضغط على جزء يفتح</span></div><div class="shelf">${shelf}</div><div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز</span><span><i style="background:var(--st3)"></i>ثابت</span><span><i style="background:var(--st2)"></i>بتردد</span><span><i style="background:var(--st1)"></i>ناسيه</span><span><i style="background:var(--st0)"></i>لم يُختبر</span></div>
     <div class="legend"><span><i style="background:var(--st3)"></i>ثابت</span><span><i style="background:var(--st2)"></i>متوسط</span><span><i style="background:var(--st1)"></i>ضعيف</span><span><i style="background:var(--st0)"></i>لم يُختبر</span></div></div>`;
   const hb=$('#homeBody');
   hb.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>toggle(b.dataset.t));
@@ -901,7 +902,7 @@ function openPageSheet(p){
    <p>${p%2?'صفحة يمين':'صفحة شمال'} · ${st}</p>
    <div class="card"><b>عدد مرات الغلط في الصفحة دي</b><span>${AR(c.w)} مرة في كلمات سجّلتها · ${AR(c.f)} مرة نسيتها في الاختبار · ${AR(c.s)} مرة ترددت</span></div>
    ${words.length?`<div class="card">${words.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">سورة ${esc(sname(AY[x.aid].s))} آية ${AR(AY[x.aid].a)}</span></div><div class="row"><span class="pchip ${x.n>=2?'warn':''}">${AR(x.n)} مرة</span><button data-dec="${esc(x.aid+'|'+x.w)}">نقّص ١</button></div></div>`).join('')}</div>`:''}
-   <div class="row rate" id="prt"><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></div>
+   <div class="row rate" id="prt"><button class="r4" data-r="4">ممتاز</button><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></div>
    <p class="muted">مستوى الصفحة بيتحسب لوحده من عدد الأخطاء: صفر = ممتاز، ١–٢ ثابتة، ٣–٦ بتردد، أكتر من ٦ ناسيها. التقييم هنا بيحدّث جدول التثبيت ومش بيتحسب من اختبارات اليوم.</p></div>`;
   $('#sbk').onclick=$('#x').onclick=closeSheet;
   $('#prt').onclick=e=>{const r=+e.target.dataset.r;if(!r)return;pageRate(p,r);save();closeSheet();renderAll();toast('اتسجّل التقييم')};
@@ -1061,7 +1062,7 @@ let READ=null;
 function renderRbar(){
   const b=$('#rbar');
   if(READ==='test'){
-    b.innerHTML=`<button id="rx">إغلاق</button><button id="rnl">اكشف السطر</button><button id="rall">اكشف الصفحة</button><span class="rate row" id="rrt" style="flex:1 1 100%;display:flex"><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></span>`;
+    b.innerHTML=`<button id="rx">إغلاق</button><button id="rnl">اكشف السطر</button><button id="rall">اكشف الصفحة</button><span class="rate row" id="rrt" style="flex:1 1 100%;display:flex"><button class="r4" data-r="4">ممتاز</button><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></span>`;
     $('#rnl').onclick=()=>{const x=$('#nl');if(x)x.click()};
     $('#rall').onclick=()=>{const x=$('#all');if(x)x.click()};
     $('#rrt').onclick=e=>{const r=e.target.dataset.r;if(!r)return;const x=document.querySelector('#rt [data-r="'+r+'"]');if(x)x.click()};
@@ -1312,7 +1313,7 @@ function renderTest(){
   el.innerHTML=`<div class="card"><div class="row sp"><h2>صفحة ${AR(T.p)}</h2><span class="muted">الجزء ${AR(juzOfPage(T.p))}</span></div>
    <div class="stagewrap"><div id="tp" class="stage"></div></div>
    <div class="row"><button id="nl">اكشف السطر التالي</button><button id="all">اكشف الصفحة</button><button id="fsT" class="g">ملء الشاشة</button></div>
-   <div class="row rate" id="rt"><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></div></div>`;
+   <div class="row rate" id="rt"><button class="r4" data-r="4">ممتاز</button><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></div></div>`;
   const tp=$('#tp');
   const draw=()=>{tp.innerHTML=leafHTML(T.p,{hide:T.hide});tp.querySelectorAll('.mushaf').forEach(fit);if(AUDIO)markPlaying();const pp=T.p;if(!glOK(pp))ensureFont(pp).then(ok=>{if(ok&&T&&T.p===pp)draw()})};
   el.querySelector('.row.sp').insertAdjacentHTML('beforeend',zoomSel());applyZoom();
@@ -1322,7 +1323,7 @@ function renderTest(){
   $('#fsT').onclick=()=>enterReader('test');
   $('#rt').onclick=e=>{const r=+e.target.dataset.r;if(!r)return;
     pageRate(T.p,r);const d=day();d.q=d.q||{n:0};d.q.n++;if(d.q.n>=3)d.q.done=true;save();
-    toast(r===3?'ما شاء الله، ثابتة':r===2?'هترجع لها بعد ٣ أيام':'هترجع لها بكره');T=null;exitReader();renderAll()};
+    toast(r===4?'ما شاء الله، ممتازة':r===3?'ما شاء الله، ثابتة':r===2?'هترجع لها بعد ٣ أيام':'هترجع لها بكره');T=null;exitReader();renderAll()};
 }
 
 /* ---- mistakes tab ---- */
