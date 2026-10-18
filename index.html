@@ -129,7 +129,7 @@ body.anim{overflow-x:hidden}
 .pchips{display:flex;gap:6px;flex-wrap:wrap;cursor:pointer}
 .pchip{padding:2px 10px;border-radius:999px;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
 .pchip.warn{border-color:var(--st1);color:var(--st1);font-weight:600}
-.pchip.s3{border-color:var(--st3);color:var(--st3)}.pchip.s2{border-color:var(--st2)}.pchip.s1{border-color:var(--st1);color:var(--st1)}
+.pchip.s4{border-color:#9fd3ff;color:#2a6fb0;background:linear-gradient(120deg,#f4fbff,#d6ecff 45%,#ffffff 55%,#cfe6ff)}.pchip.s3{border-color:var(--st3);color:var(--st3)}.pchip.s2{border-color:var(--st2)}.pchip.s1{border-color:var(--st1);color:var(--st1)}
 .w.rep{background:color-mix(in srgb,var(--st1) 22%,transparent);text-decoration:underline wavy var(--st1);text-decoration-thickness:2px;text-underline-offset:.35em}
 .nav4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 @media (min-width:600px){.nav4{grid-template-columns:repeat(4,1fr)}}
@@ -178,6 +178,15 @@ body.reading .nextcue{margin:10px 8px 18px}
 .juz{aspect-ratio:1;border:0;border-radius:8px;font-weight:600;color:#fff;background:var(--st0);padding:0;display:grid;place-items:center;line-height:1.1}
 .juz small{font-size:.65rem;font-weight:400}
 .juz[data-s="0"]{color:var(--muted)}.juz[data-s="1"]{background:var(--st1)}.juz[data-s="2"]{background:var(--st2);color:#1a1300}.juz[data-s="3"]{background:var(--st3)}
+/* level 4 "ممتاز": crystal, icy white-blue with a passing glint */
+.juz[data-s="4"],.vbook[data-s="4"],.pchip.s4{position:relative;overflow:hidden;isolation:isolate}
+.juz[data-s="4"]{background:linear-gradient(135deg,#ffffff,#d8eeff 35%,#a9d4ff 60%,#eaf6ff);color:#1d4f86;box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 0 10px rgba(140,200,255,.55)}
+.vbook[data-s="4"]{--bc:linear-gradient(160deg,#ffffff,#d6ecff 40%,#9fcfff 70%,#e6f4ff);color:#1d4f86;box-shadow:0 3px 0 -1px rgba(60,120,190,.35),0 0 12px rgba(150,205,255,.6)}
+.juz[data-s="4"]::after,.vbook[data-s="4"]>.gl,.pchip.s4::after{content:"";position:absolute;inset:-20% auto -20% -60%;width:45%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.95) 45%,rgba(200,235,255,.7) 55%,transparent);transform:skewX(-18deg);animation:glint 3.4s ease-in-out infinite;pointer-events:none;z-index:1}
+.vbook[data-s="4"]>.gl{display:block}
+@keyframes glint{0%,55%{left:-60%}85%,100%{left:130%}}
+@media (prefers-reduced-motion:reduce){.juz[data-s="4"]::after,.vbook[data-s="4"]>.gl,.pchip.s4::after{animation:none;left:30%;opacity:.5}}
+.flat .juz[data-s="4"]::after,.flat .vbook[data-s="4"]>.gl,.flat .pchip.s4::after{animation:none;left:30%;opacity:.5}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px}
 .heat{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .heat i{aspect-ratio:1;border-radius:4px;background:var(--st0)}.heat i[data-l="1"]{background:var(--st2)}.heat i[data-l="2"]{background:var(--st3)}.heat i.t{outline:2px solid var(--gold)}
@@ -377,6 +386,10 @@ const pageHeadL=p=>{const r=rubAt(p);return 'الجزء '+AR(Math.ceil(r/8))+'،
 const pageSurahName=p=>sname(AY[FA[p]].s);
 function bumpPage(p,k){const c=S.pc[p]||(S.pc[p]={f:0,s:0,w:0});c[k]++}
 const pageErr=p=>{const c=S.pc[p];return c?c.f+c.w:0};
+/* page strength from the mistake count; only pages that were tested or have a counter get a level */
+const LVL=['لم تُختبر','ناسيها','بتردد','ثابتة','ممتاز'];
+const pageTested=p=>!!((S.pages[p]&&S.pages[p].r)||S.pc[p]);
+function pageLvl(p){if(!pageTested(p))return 0;const n=pageErr(p);return n===0?4:n<=2?3:n<=6?2:1}
 function cntText(id,word){
   const A=AY[id],w=word&&S.wc[id+'|'+word],pe=pageErr(A.page),parts=[];
   if(w)parts.push('غلطت في «'+word+'» '+AR(w.n)+' مرة');
@@ -719,7 +732,7 @@ function renderToday(){
   const aod=`<div class="card aod quote"><div class="row sp"><h2>آية اليوم</h2><span class="muted">سورة ${esc(sname(DA.s))} · آية ${AR(DA.a)}</span></div><p class="q">${esc(ayahText(did))}</p>
     <div class="row"><button id="aodT">التفسير</button><button id="aodD">اكتب تدبّرك</button>${AUDIO?`<button class="p" id="aodP">${la?'▶ كمّل التلاوة · '+esc(sname(AY[la].s))+' '+AR(AY[la].a):'▶ اسمع آية اليوم'}</button>`:''}</div></div>`;
   /* the shelf: 30 standing books coloured by strength */
-  let shelf='';for(let j=1;j<=30;j++){const st=juzState(j),h=62+((j*37)%5)*4;shelf+=`<button class="vbook" data-j="${j}" data-s="${st.s}" style="--h:${h}px" aria-label="الجزء ${j}${['',' ضعيف',' متوسط',' ثابت'][st.s]||' لم يُختبر'}">${AR(j)}</button>`}
+  let shelf='';for(let j=1;j<=30;j++){const st=juzState(j),h=62+((j*37)%5)*4;shelf+=`<button class="vbook" data-j="${j}" data-s="${st.s}" style="--h:${h}px" aria-label="الجزء ${j}${['',' ناسيه',' بتردد',' ثابت',' ممتاز'][st.s]||' لم يُختبر'}">${st.s===4?'<i class="gl"></i>':''}${AR(j)}</button>`}
   $('#homeBody').innerHTML=`<div class="card ringcard">${ring}<div class="ringtx"><h2>النهارده: ${AR(nd)} من ٤ جلسات</h2><p class="muted">${nd===4?'اليوم اكتمل. تقبّل الله منك.':esc(m.lines.join(' '))}</p></div></div>
    ${mk('c','المواصلات','حوالي ٢٥ دقيقة')}
    ${mk('s','قبل النوم','حوالي ٢٥ دقيقة')}
@@ -820,7 +833,7 @@ function syncNav(){
 function renderChips(){
   const p=MP,rec=S.pages[p],n=pageErr(p),side=p%2?'يمين':'شمال';
   const due=rec&&rec.r&&rec.r<3&&rec.due<=TODAY();
-  const st=rec&&rec.r?`<span class="pchip s${rec.r}">${{3:'ثابتة',2:'بتردد',1:'ضعيفة'}[rec.r]}${due?' · مستحقة للتثبيت':''}</span>`:'<span class="pchip">لم تُختبر</span>';
+  const lv=pageLvl(p),st=lv?`<span class="pchip s${lv}">${LVL[lv]}${due?' · مستحقة للتثبيت':''}</span>`:'<span class="pchip">لم تُختبر</span>';
   const er=n>0?`<span class="pchip ${n>=3?'warn':''}">غلطت هنا ${AR(n)} مرة${n>=3?' · موضع متكرر الغلط':''}</span>`:'';
   const bmc=S.bm&&S.bm.p===p?'<span class="pchip warn">علامتك هنا</span>':'';
   $('#pchips').innerHTML=`<span class="pchip">صفحة ${side}</span>${bmc}${st}${er}<span class="pchip">تفاصيل الصفحة</span>`;
@@ -867,14 +880,14 @@ function renderMushaf(){
 function openPageSheet(p){
   const c=S.pc[p]||{f:0,s:0,w:0},rec=S.pages[p]||{};
   const words=Object.keys(S.wc).map(k=>{const i=k.indexOf('|');return {aid:+k.slice(0,i),w:k.slice(i+1),n:S.wc[k].n,p:S.wc[k].p}}).filter(x=>x.p===p&&AY[x.aid]).sort((a,b)=>b.n-a.n);
-  const st=rec.r?({3:'ثابتة',2:'بتردد',1:'ضعيفة'}[rec.r]+' · آخر اختبار '+rec.d):'لم تُختبر بعد';
+  const lv=pageLvl(p),st=lv?(LVL[lv]+' (من عدد الأخطاء)'+(rec.d?' · آخر اختبار '+rec.d:'')):'لم تُختبر بعد';
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="تفاصيل الصفحة">
    <div class="row sp"><h3>صفحة ${AR(p)} · ${esc(pageHeadL(p))}</h3><button class="g" id="x">إغلاق</button></div>
    <p>${p%2?'صفحة يمين':'صفحة شمال'} · ${st}</p>
    <div class="card"><b>عدد مرات الغلط في الصفحة دي</b><span>${AR(c.w)} مرة في كلمات سجّلتها · ${AR(c.f)} مرة نسيتها في الاختبار · ${AR(c.s)} مرة ترددت</span></div>
    ${words.length?`<div class="card">${words.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">سورة ${esc(sname(AY[x.aid].s))} آية ${AR(AY[x.aid].a)}</span></div><div class="row"><span class="pchip ${x.n>=2?'warn':''}">${AR(x.n)} مرة</span><button data-dec="${esc(x.aid+'|'+x.w)}">نقّص ١</button></div></div>`).join('')}</div>`:''}
    <div class="row rate" id="prt"><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></div>
-   <p class="muted">التقييم هنا بيحدّث جدول التثبيت ومش بيتحسب من اختبارات اليوم.</p></div>`;
+   <p class="muted">مستوى الصفحة بيتحسب لوحده من عدد الأخطاء: صفر = ممتاز، ١–٢ ثابتة، ٣–٦ بتردد، أكتر من ٦ ناسيها. التقييم هنا بيحدّث جدول التثبيت ومش بيتحسب من اختبارات اليوم.</p></div>`;
   $('#sbk').onclick=$('#x').onclick=closeSheet;
   $('#prt').onclick=e=>{const r=+e.target.dataset.r;if(!r)return;pageRate(p,r);save();closeSheet();renderAll();toast('اتسجّل التقييم')};
   $('#sheetRoot').querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>{decWord(b.dataset.dec);openPageSheet(p)});
@@ -1316,17 +1329,17 @@ const TIPS=[
 ];
 function juzState(j){
   const a=JS[j],b=j<30?JS[j+1]-1:604;let n=0,sum=0;
-  for(let p=a;p<=b;p++){const r=S.pages[p];if(r&&r.r){n++;sum+=r.r}}
-  if(!n)return {s:0,n,t:b-a+1};const m=sum/n;return {s:m<1.6?1:m<2.5?2:3,n,t:b-a+1};
+  for(let p=a;p<=b;p++){const l=pageLvl(p);if(l){n++;sum+=l}}
+  if(!n)return {s:0,n,t:b-a+1};const m=sum/n;return {s:m<1.6?1:m<2.5?2:m<3.5?3:4,n,t:b-a+1};
 }
 function renderMe(){
-  const cnt=[0,0,0,0],cells=[];
+  const cnt=[0,0,0,0,0],cells=[];
   for(let j=1;j<=30;j++){const st=juzState(j);cnt[st.s]++;cells.push(`<button class="juz" data-j="${j}" data-s="${st.s}" aria-label="الجزء ${j}">${AR(j)}<small>${AR(st.n)}/${AR(st.t)}</small></button>`)}
   const heat=[];for(let i=34;i>=0;i--){const k=addDays(TODAY(),-i),r=S.days[k];const l=!kept(k)?0:(r.c&&r.c.done&&r.s&&r.s.done)?2:1;heat.push(`<i data-l="${l}" class="${i===0?'t':''}" title="${k}"></i>`)}
   $('#t-me').innerHTML=`
    ${AUDIO?'':`<div class="card"><h2>النسخة الكاملة بالتلاوة</h2><p class="muted">افتح النسخة دي علشان تسمع الآيات بصوت الشيوخ آية بآية، وتثبّتها على شاشة الموبايل. بياناتك هناك منفصلة: انسخ كود النسخة الاحتياطية من تحت والصقه هناك في "حالتي" ثم "استرجاع".</p><a href="https://abdallahmasoud670-bit.github.io/muraja3a/" target="_blank" rel="noopener" style="display:inline-block;background:var(--accent);color:var(--accent-ink);padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;align-self:flex-start">افتح النسخة الكاملة</a></div>`}
-   <div class="card"><h2>خريطة الأجزاء</h2><p class="muted">اللون من نتائج اختباراتك للصفحات. الرقم تحت الجزء: صفحات اتختبرت من إجمالي الجزء.</p><div class="grid">${cells.join('')}</div>
-    <div class="legend"><span><i style="background:var(--st3)"></i>ثابت ${AR(cnt[3])}</span><span><i style="background:var(--st2)"></i>متوسط ${AR(cnt[2])}</span><span><i style="background:var(--st1)"></i>ضعيف ${AR(cnt[1])}</span><span><i style="background:var(--st0)"></i>لم يُختبر ${AR(cnt[0])}</span></div></div>
+   <div class="card"><h2>خريطة الأجزاء</h2><p class="muted">اللون من عدد أخطائك في الصفحات اللي اتختبرت. الرقم تحت الجزء: صفحات اتختبرت من إجمالي الجزء.</p><div class="grid">${cells.join('')}</div>
+    <div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز ${AR(cnt[4])}</span><span><i style="background:var(--st3)"></i>ثابت ${AR(cnt[3])}</span><span><i style="background:var(--st2)"></i>بتردد ${AR(cnt[2])}</span><span><i style="background:var(--st1)"></i>ناسيه ${AR(cnt[1])}</span><span><i style="background:var(--st0)"></i>لم يُختبر ${AR(cnt[0])}</span></div></div>
    <div class="card"><h2>آخر ٣٥ يوم</h2><div class="heat">${heat.join('')}</div><div class="legend"><span><i style="background:var(--st3)"></i>جلستين</span><span><i style="background:var(--st2)"></i>أقل من كده</span></div></div>
    <div class="card"><h2>تأكد من المصحف بعينك</h2><p class="muted">النص اتقارن آليًا بنص مجمع الملك فهد. توزيع السطور من بيانات مصحف المدينة ولازم تتأكد منه بعينك على عينة. افتح كل صفحة وقارن بمصحفك، وعلّم اللي طابقت. صفحة ٧٧ اتأكدت منها بالفعل مقابل مصحفك.</p>
     <div class="chips">${SAMPLE.map(p=>`<button data-v="${p}" style="${S.verified[p]?'border-color:var(--st3)':''}">${S.verified[p]?'✓ ':''}${AR(p)}</button>`).join('')}</div>
