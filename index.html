@@ -63,7 +63,7 @@ nav{scrollbar-width:thin}
 .ln.ctr{justify-content:center;gap:.4em}
 .mushaf.measure .ln{width:max-content;justify-content:flex-start;gap:.12em}
 .w{white-space:nowrap;border-radius:4px;cursor:pointer}
-.w.mk{text-decoration:underline wavy var(--st1);text-underline-offset:.35em}
+.w.mk{background:linear-gradient(to bottom,transparent 58%,color-mix(in srgb,var(--st1) 30%,transparent) 58%,color-mix(in srgb,var(--st1) 30%,transparent) 92%,transparent 92%);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .w.hl{background:color-mix(in srgb,var(--gold) 28%,transparent)}
 .ln.hide .w{color:transparent;background:var(--line);border-radius:6px;user-select:none}
 .ln.blank{min-height:2.15em}
@@ -130,7 +130,7 @@ body.anim{overflow-x:hidden}
 .pchip{padding:2px 10px;border-radius:999px;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
 .pchip.warn{border-color:var(--st1);color:var(--st1);font-weight:600}
 .pchip.s4{border-color:#9fd3ff;color:#2a6fb0;background:linear-gradient(120deg,#f4fbff,#d6ecff 45%,#ffffff 55%,#cfe6ff)}.pchip.s3{border-color:var(--st3);color:var(--st3)}.pchip.s2{border-color:var(--st2)}.pchip.s1{border-color:var(--st1);color:var(--st1)}
-.w.rep{background:color-mix(in srgb,var(--st1) 22%,transparent);text-decoration:underline wavy var(--st1);text-decoration-thickness:2px;text-underline-offset:.35em}
+.w.rep{background:color-mix(in srgb,var(--st1) 24%,transparent);border-radius:6px;box-shadow:inset 0 -3px 0 color-mix(in srgb,var(--st1) 70%,transparent)}
 .nav4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 @media (min-width:600px){.nav4{grid-template-columns:repeat(4,1fr)}}
 .nav4 select{width:100%;min-width:0}
@@ -164,7 +164,13 @@ body.anim{overflow-x:hidden}
 /* mini player */
 .mini{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(560px,calc(100% - 20px));z-index:49;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 8px;box-shadow:0 6px 24px rgba(0,0,0,.28)}
 .mini[hidden]{display:none}
-.mini button{padding:6px 10px}
+.mini{padding:6px 8px 6px 6px;border-radius:20px;background:var(--glass);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);gap:2px}
+.flat .mini{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)}
+.mini .ib{width:38px;height:38px}
+.playb.sm{width:44px;height:44px;margin-inline:2px}.playb.sm svg{width:20px;height:20px}
+.mrep{display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 10px;border-radius:999px;font-size:.78rem;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:0;flex:none}
+.mrep svg{width:16px;height:16px}
+.mlab{padding-inline:6px}
 .mlab{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;font-size:.8rem}
 .mlab b,.mlab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* margin signs and the next-page cue */
@@ -1439,7 +1445,9 @@ function syncPlayer(){
       const a=D.a[AU.id-1];
       const lab=AU.mode==='surah'?'سورة '+sname(AU.s)+' (كاملة)':'سورة '+sname(a[0])+' · آية '+AR(a[1]);
       m.hidden=false;
-      m.innerHTML=`<button id="mpv" aria-label="السابقة">⏮</button><button id="mpl" class="p" aria-label="تشغيل أو إيقاف">${AU.playing?'⏸':'▶'}</button><button id="mnx" aria-label="التالية">⏭</button><button id="mst" aria-label="إيقاف">⏹</button><div class="mlab"><b>${esc(lab)}</b><span class="muted">${esc(recOf().n)}</span></div><button id="mrp" class="g">${repLabel()}</button>`;
+      m.innerHTML=`<div class="mlab"><b>${esc(lab)}</b><span class="muted">${esc(recOf().n)}</span></div>
+       <button class="ib" id="mpv" aria-label="الآية السابقة">${ic('skipp')}</button><button class="playb sm" id="mpl" aria-label="${AU.playing?'إيقاف مؤقت':'تشغيل'}">${ic(AU.playing?'pause':'play')}</button><button class="ib" id="mnx" aria-label="الآية التالية">${ic('skipn')}</button>
+       <button class="mrep" id="mrp" aria-label="التكرار">${ic('rep')}<span>${curRep()===0?'∞':'×'+AR(curRep())}</span></button><button class="ib" id="mst" aria-label="إيقاف">${ic('stop')}</button>`;
       $('#mpv').onclick=()=>stepAyah(-1);$('#mnx').onclick=()=>stepAyah(1);$('#mst').onclick=stopAudio;$('#mpl').onclick=toggleAudio;
       $('#mrp').onclick=()=>{S.rep=REPS[(REPS.indexOf(curRep())+1)%REPS.length];save();AU.left=curRep()===0?1e9:curRep();syncPlayer();if(!$('#t-aud').hidden)renderAud()};
     }
