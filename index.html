@@ -990,72 +990,104 @@ function runAnim(dur,fn){
 function buildRig(old,hingeLeft,N){
   const W=old.offsetWidth,H=old.offsetHeight,sw=W/N;
   const rig=document.createElement('div');
-  rig.style.cssText=`position:absolute;top:0;left:0;width:${W}px;height:${H}px;transform-style:preserve-3d;pointer-events:none`;
+  rig.style.cssText=`position:absolute;top:0;left:0;width:${W}px;height:${H}px;transform-style:preserve-3d;pointer-events:none;z-index:3`;
   const segs=[];let parent=rig;
   for(let i=0;i<N;i++){
     const seg=document.createElement('div');
     const left=i===0?(hingeLeft?0:W-sw):(hingeLeft?sw:-sw);
     seg.style.cssText=`position:absolute;top:0;left:${left}px;width:${sw+0.6}px;height:${H}px;transform-style:preserve-3d;transform-origin:${hingeLeft?'0':'100%'} 50%`;
     const face=document.createElement('div');
-    face.style.cssText='position:absolute;inset:0;overflow:hidden;backface-visibility:hidden';
+    face.style.cssText='position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden';
     const cp=old.cloneNode(true);
-    cp.style.cssText=`position:absolute;top:0;left:${hingeLeft?-i*sw:-(W-(i+1)*sw)}px;width:${W}px;height:${H}px;margin:0;visibility:visible`;
-    const sh=document.createElement('div');sh.style.cssText='position:absolute;inset:0;background:#000;opacity:0;pointer-events:none';
-    face.append(cp,sh);seg.append(face);parent.append(seg);parent=seg;segs.push({seg,sh});
+    cp.style.cssText=`position:absolute;top:0;left:${hingeLeft?-i*sw:-(W-(i+1)*sw)}px;width:${W}px;height:${H}px;margin:0;visibility:visible;box-shadow:none`;
+    const sh=document.createElement('div');sh.style.cssText='position:absolute;inset:0;pointer-events:none';
+    face.append(cp,sh);
+    /* the back of the leaf is plain paper, so the page can go all the way over to 180 degrees */
+    const back=document.createElement('div');
+    back.style.cssText='position:absolute;inset:0;background:var(--paper);transform:rotateY(180deg);backface-visibility:hidden;-webkit-backface-visibility:hidden';
+    const bsh=document.createElement('div');bsh.style.cssText='position:absolute;inset:0;pointer-events:none';back.append(bsh);
+    seg.append(face,back);parent.append(seg);parent=seg;segs.push({seg,sh,bsh});
   }
-  return {rig,segs};
+  return {rig,segs,W};
 }
-function setCurl(segs,t,hingeLeft){
-  const sg=hingeLeft?-1:1,N=segs.length,A=128*t,k=4.2*Math.sin(Math.PI*Math.min(1,t*1.1));
-  let abs=0;
-  segs.forEach((s,i)=>{const rel=A/N+k*(i/(N-1));abs+=rel;s.seg.style.transform=`rotateY(${sg*rel}deg)`;s.sh.style.opacity=String(Math.min(.55,abs/150))});
+/* t 0..1 turns the leaf 0..180 degrees; the free edge bends ahead mid-turn. Each strip is shaded with a gradient
+   that starts where the previous strip's ends, so the light changes smoothly instead of in steps. */
+const R2D=Math.PI/180;
+const frontDark=a=>.25*(1-Math.cos(Math.min(180,a)*R2D));
+const backDark=a=>.16*(1+Math.cos(Math.min(180,a)*R2D));
+function setCurl(rg,t,hingeLeft,shade){
+  const segs=rg.segs,N=segs.length,A=180*t,k=(70/N)*Math.sin(Math.PI*t);
+  const fd=hingeLeft?'right':'left',bd=hingeLeft?'left':'right',sw=rg.W/N;
+  let abs=0,x=0;
+  segs.forEach((s,i)=>{
+    const rel=A/N+k*(i/(N-1)),a0=abs;abs+=rel;x+=sw*Math.cos(abs*R2D);
+    s.seg.style.transform=`rotateY(${(hingeLeft?-1:1)*rel}deg)`;
+    s.sh.style.background=`linear-gradient(to ${fd},rgba(0,0,0,${frontDark(a0).toFixed(3)}),rgba(0,0,0,${frontDark(abs).toFixed(3)}))`;
+    s.bsh.style.background=`linear-gradient(to ${bd},rgba(0,0,0,${backDark(a0).toFixed(3)}),rgba(0,0,0,${backDark(abs).toFixed(3)}))`;
+  });
+  if(shade){
+    /* the shadow the lifting leaf throws on the page underneath, darkest at its free edge */
+    const pe=Math.max(0,x/rg.W)*100,al=.42*Math.sin(Math.min(180,abs)*R2D);
+    shade.style.background=`linear-gradient(to ${fd},rgba(0,0,0,${(al*.6).toFixed(3)}) 0%,rgba(0,0,0,${al.toFixed(3)}) ${pe.toFixed(1)}%,rgba(0,0,0,0) ${Math.min(100,pe+30+40*(1-t)).toFixed(1)}%)`;
+  }
+}
+/* a turn from MP to np that a drag can drive (set(t), t 0..1) or that plays through; end(true) keeps np, end(false) goes back */
+function prepTurn(np){
+  const stage=$('#stage'),old=stage.querySelector('.leaf'),from=MP;
+  if(!old)return null;
+  const adj=Math.abs(np-from)===1,cross=Math.ceil(np/2)!==Math.ceil(from/2);
+  const kind=!adj?'jump':cross?'flip':'shift';
+  BUSY=true;document.body.classList.add('anim');
+  const oldCss=old.style.cssText,H0=old.offsetHeight;
+  stage.style.minHeight=H0+'px';
+  const HFULL=READ?';height:100%':'';
+  const nw=makeLeaf(np);
+  nw.style.cssText='position:absolute;top:0;left:0;width:100%'+HFULL;
+  stage.appendChild(nw);nw.querySelectorAll('.mushaf').forEach(fit);
+  stage.style.minHeight=Math.max(H0,nw.offsetHeight)+'px';
+  let set,rig=null,shadeEl=null;
+  if(kind==='flip'){
+    const hingeLeft=from%2===1;
+    rig=buildRig(old,hingeLeft,22);
+    const shade=document.createElement('div');
+    shade.style.cssText='position:absolute;inset:0;pointer-events:none';shadeEl=shade;
+    nw.appendChild(shade);
+    old.style.visibility='hidden';stage.appendChild(rig.rig);
+    set=e=>setCurl(rig,e,hingeLeft,shade);
+  }else if(kind==='shift'){
+    const dir=np%2===0?1:-1,Wd=stage.offsetWidth+14;
+    old.style.cssText+=';position:absolute;top:0;left:0;width:100%'+HFULL;
+    stage.style.overflow='hidden';
+    set=e=>{old.style.transform=`translateX(${dir*Wd*e}px)`;nw.style.transform=`translateX(${-dir*Wd*(1-e)}px)`};
+  }else{
+    old.style.cssText+=';position:absolute;top:0;left:0;width:100%'+HFULL;
+    set=e=>{old.style.opacity=String(1-e);nw.style.opacity=String(e)};
+  }
+  set(0);
+  return {kind,set,end(keep){
+    if(rig)rig.rig.remove();
+    if(keep){old.remove();MP=np;MHL=null;nw.style.cssText='';if(shadeEl)shadeEl.remove()}
+    else{nw.remove();old.style.cssText=oldCss}
+    stage.style.minHeight='';stage.style.overflow='';
+    document.body.classList.remove('anim');
+    fitStage();syncNav();renderChips();saveLast();if(READ)applyReaderFit();BUSY=false;
+    if(keep&&!glOK(np))ensureFont(np).then(ok=>{if(ok&&MP===np&&!BUSY)renderMushaf()});
+  }};
 }
 async function navigate(np){
   np=Math.min(604,Math.max(1,Math.round(+np)||1));
   if(np===MP||BUSY)return;
   if(!glOK(np)){BUSY=true;await Promise.race([ensureFont(np),new Promise(r=>setTimeout(r,3500))]);BUSY=false;if(np===MP)return}
   if(np<604)ensureFont(np+1);
-  const stage=$('#stage'),old=stage.querySelector('.leaf'),from=MP;
-  const adj=Math.abs(np-from)===1,cross=Math.ceil(np/2)!==Math.ceil(from/2);
-  const kind=!adj?'jump':cross?'flip':'shift';
-  MP=np;MHL=null;
-  const nw=makeLeaf(np);
-  sound(kind);
+  const stage=$('#stage'),old=stage.querySelector('.leaf');
   const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(!old||calm){stage.replaceChildren(nw);fitStage();syncNav();renderChips();saveLast();return}
-  BUSY=true;document.body.classList.add('anim');
-  const H0=old.offsetHeight;
-  stage.style.minHeight=H0+'px';
-  const HFULL=READ?';height:100%':'';
-  nw.style.cssText='position:absolute;top:0;left:0;width:100%'+HFULL;
-  stage.appendChild(nw);fitStage();
-  stage.style.minHeight=Math.max(H0,nw.offsetHeight)+'px';
-  try{
-    if(kind==='flip'){
-      const hingeLeft=from%2===1;
-      const {rig,segs}=buildRig(old,hingeLeft,16);
-      const shade=document.createElement('div');
-      shade.style.cssText=`position:absolute;inset:0;pointer-events:none;background:linear-gradient(to ${hingeLeft?'right':'left'},rgba(0,0,0,.5),transparent 65%);opacity:0`;
-      nw.appendChild(shade);
-      old.style.visibility='hidden';stage.appendChild(rig);
-      await runAnim(720,t=>{const e=easeIO(t);setCurl(segs,e,hingeLeft);shade.style.opacity=String(.9*(1-e))});
-      rig.remove();shade.remove();
-    }else if(kind==='shift'){
-      const dir=np%2===0?1:-1,Wd=stage.offsetWidth+14;
-      old.style.cssText+=';position:absolute;top:0;left:0;width:100%'+HFULL;
-      stage.style.overflow='hidden';
-      await runAnim(380,t=>{const e=easeIO(t);old.style.transform=`translateX(${dir*Wd*e}px)`;nw.style.transform=`translateX(${-dir*Wd*(1-e)}px)`});
-    }else{
-      old.style.cssText+=';position:absolute;top:0;left:0;width:100%'+HFULL;
-      nw.style.opacity='0';
-      await runAnim(260,t=>{old.style.opacity=String(1-t);nw.style.opacity=String(t)});
-    }
-  }catch(e){}
-  old.remove();
-  nw.style.cssText='';
-  stage.style.minHeight='';stage.style.overflow='';
-  document.body.classList.remove('anim');
-  fitStage();syncNav();renderChips();saveLast();if(READ)applyReaderFit();BUSY=false;
+  if(!old||calm){
+    const adj=Math.abs(np-MP)===1,cross=Math.ceil(np/2)!==Math.ceil(MP/2);sound(!adj?'jump':cross?'flip':'shift');
+    MP=np;MHL=null;stage.replaceChildren(makeLeaf(np));fitStage();syncNav();renderChips();saveLast();return}
+  const tr=prepTurn(np);
+  sound(tr.kind);
+  try{await runAnim(tr.kind==='flip'?900:tr.kind==='shift'?380:260,t=>tr.set(easeIO(t)))}catch(e){}
+  tr.end(true);
 }
 /* full-screen reader */
 let READ=null;
@@ -1108,22 +1140,46 @@ function exitReader(){
 document.addEventListener('fullscreenchange',()=>{if(READ&&!document.fullscreenElement)exitReader()});
 window.addEventListener('resize',()=>{if(READ)applyReaderFit()});
 if(window.visualViewport)visualViewport.addEventListener('resize',()=>{if(READ)applyReaderFit()});
-/* swipe: touch events for fingers (they survive the browser's own scrolling), pointer events for the mouse */
-let SW=null,swiped=false;
-function swipeStart(x,y){SW={x,y,t:Date.now()}}
-function swipeEnd(x,y){
-  if(!SW)return;const dx=x-SW.x,dy=y-SW.y,s=SW;SW=null;
-  if((S.zoom||1)>1)return;
-  if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3&&Date.now()-s.t<900){swiped=true;navigate(MP+(dx>0?1:-1));setTimeout(()=>{swiped=false},150)}
+/* swipe and drag (finger or mouse): the leaf follows the pointer and only turns on release.
+   Right drag = next page. Past ~35% of the page width, or a quick flick, finishes the turn; otherwise it falls back. */
+let DR=null,swiped=false;
+const easeOut=t=>1-Math.pow(1-t,3);
+document.addEventListener('pointerdown',e=>{
+  if(DR||BUSY||!(e.target.closest&&e.target.closest('#stage')))return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  const calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  DR={x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId,live:null,p:0,v:[],still:calm||(S.zoom||1)>1};
+  if(!DR.still){if(MP<604)ensureFont(MP+1);if(MP>1)ensureFont(MP-1)}
+});
+window.addEventListener('pointermove',e=>{
+  if(!DR||e.pointerId!==DR.id||DR.still)return;
+  const dx=e.clientX-DR.x,dy=e.clientY-DR.y;
+  if(!DR.live){
+    if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.3)return;
+    const np=MP+(dx>0?1:-1);if(np<1||np>604||BUSY){DR=null;return}
+    DR.dir=dx>0?1:-1;DR.live=prepTurn(np);if(!DR.live){DR=null;return}swiped=true;
+  }
+  const W=$('#stage').offsetWidth||300;
+  DR.p=Math.max(0,Math.min(1,dx*DR.dir/W));DR.live.set(DR.p);
+  DR.v.push([performance.now(),dx*DR.dir]);if(DR.v.length>6)DR.v.shift();
+});
+async function dragEnd(e,cancel){
+  if(!DR||e.pointerId!==DR.id)return;const d=DR;DR=null;
+  if(!d.live){
+    /* no live drag (reduced motion): a plain swipe still turns the page; zoomed in, swipes do nothing */
+    const dx=e.clientX-d.x,dy=e.clientY-d.y;
+    if(!cancel&&(S.zoom||1)<=1&&Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.3&&Date.now()-d.t<900){swiped=true;navigate(MP+(dx>0?1:-1));setTimeout(()=>{swiped=false},150)}
+    return;
+  }
+  let vel=0;if(d.v.length>1){const a=d.v[0],b=d.v[d.v.length-1];vel=(b[1]-a[1])/Math.max(1,b[0]-a[0])}
+  const keep=!cancel&&(d.p>.35||(vel>.45&&d.p>.04));
+  if(keep)sound(d.live.kind);
+  const p0=d.p,p1=keep?1:0,dur=Math.max(160,Math.abs(p1-p0)*(d.live.kind==='flip'?850:380));
+  try{await runAnim(dur,t=>d.live.set(p0+(p1-p0)*easeOut(t)))}catch(x){}
+  d.live.end(keep);setTimeout(()=>{swiped=false},150);
 }
-document.addEventListener('touchstart',e=>{
-  if(!(e.target.closest&&e.target.closest('#stage'))||e.touches.length!==1){SW=null;return}
-  swipeStart(e.touches[0].clientX,e.touches[0].clientY);
-},{passive:true});
-document.addEventListener('touchend',e=>{if(SW&&e.changedTouches[0])swipeEnd(e.changedTouches[0].clientX,e.changedTouches[0].clientY)},{passive:true});
-document.addEventListener('touchcancel',()=>{SW=null},{passive:true});
-document.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0&&e.target.closest&&e.target.closest('#stage'))swipeStart(e.clientX,e.clientY)});
-window.addEventListener('pointerup',e=>{if(e.pointerType==='mouse')swipeEnd(e.clientX,e.clientY)});
+window.addEventListener('pointerup',e=>dragEnd(e,false));
+window.addEventListener('pointercancel',e=>dragEnd(e,true));
 document.addEventListener('keydown',e=>{
   if($('#t-mushaf').hidden||$('#sheetRoot').children.length||!$('#fmenu').hidden)return;
   const tag=(e.target&&e.target.tagName)||'';
