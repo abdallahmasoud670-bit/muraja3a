@@ -217,6 +217,19 @@ body.reading .nextcue{margin:10px 8px 18px}
 .seg{display:flex;gap:6px;flex-wrap:wrap}.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .toast{position:fixed;inset-inline:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));margin:auto;width:max-content;max-width:calc(100% - 32px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:60;opacity:0;pointer-events:none;transition:opacity .25s}
 .toast.on{opacity:1}
+.mushaf .w{-webkit-touch-callout:none}
+.wmenu{position:fixed;z-index:70;min-width:220px;max-width:calc(100vw - 16px);padding:10px 10px 8px;border-radius:18px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:0 14px 34px rgba(20,16,60,.28);font-family:var(--ui);opacity:0;transform:translateY(6px) scale(.96);transform-origin:var(--ax,50%) 100%;transition:opacity .16s,transform .16s}
+.wmenu.on{opacity:1;transform:none}
+.wmenu::after{content:"";position:absolute;bottom:-7px;left:calc(var(--ax,50%) - 7px);width:14px;height:14px;background:var(--surface);border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg)}
+.wmh{font-size:.8rem;color:var(--muted);text-align:center;margin-bottom:6px;font-family:var(--quran),var(--ui)}
+.wmr{display:flex;gap:6px;justify-content:center}
+.wmb{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:58px;padding:8px 6px;border:0;border-radius:14px;background:transparent;font-size:.75rem;font-weight:600;color:var(--ink)}
+.wmb svg{width:38px;height:38px;padding:8px;border-radius:50%;color:#fff}
+.wm-taf svg{background:#2d6fd1}.wm-mis svg{background:#c9452f}.wm-bm svg{background:linear-gradient(135deg,#e8bf5f,#b07d12)}.wm-aud svg{background:#6a52d9}
+.wmb:hover,.wmb:focus-visible{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.wma{margin-top:8px;flex-wrap:wrap}.wma button{font-size:.8rem;padding:6px 10px;border-radius:999px}
+.wmenu.below::after{display:none}
+@media (prefers-reduced-motion:reduce){.wmenu{transition:none}}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 /* ===== new interface: night blue and purple with gold, glass cards ===== */
 body{background:radial-gradient(1100px 650px at 85% -10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%),radial-gradient(900px 700px at -10% 35%,var(--bg2),transparent 70%),var(--bg);background-attachment:fixed;min-height:100dvh}
@@ -596,6 +609,85 @@ async function tafsirText(s,code,a){
 
 /* ---- ayah sheet ---- */
 function closeSheet(){$('#sheetRoot').innerHTML=''}
+/* words on any mushaf page: tap = one more mistake on that word; long press (or right click) = a small menu above the finger */
+let LPF=false;
+function wordTap(w){
+  if(LPF){LPF=false;return}
+  const id=+w.dataset.id;if(!AY[id])return;
+  addMistake(id,w.dataset.w,+w.dataset.i+1);
+}
+const WM_IC={
+ taf:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/>',
+ mis:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><path d="M12 16.5v.5"/>',
+ bm:'<path d="M6 3h12v18l-6-4.5L6 21z"/>',
+ aud:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/>'
+};
+function closeWMenu(){const m=$('#wmenu');if(m)m.remove()}
+function openWMenu(w,x,y){
+  closeWMenu();
+  const id=+w.dataset.id,A=AY[id];if(!A)return;
+  const word=w.dataset.w,line=+w.dataset.i+1,bmOn=S.bm&&S.bm.aid===id;
+  const btn=(k,lab)=>`<button class="wmb wm-${k}" data-k="${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${WM_IC[k]}</svg><span>${lab}</span></button>`;
+  const m=document.createElement('div');m.id='wmenu';m.className='wmenu';m.setAttribute('role','menu');
+  m.innerHTML=`<div class="wmh">«${esc(word||A.t[0])}» · ${esc(sname(A.s))} ${AR(A.a)}</div><div class="wmr">${btn('taf','تفسير')}${btn('mis','سجّل غلط')}${btn('bm',bmOn?'شيل العلامة':'علامة')}${AUDIO?btn('aud','استماع'):''}</div>
+   ${AUDIO?`<div class="wmr wma" hidden><button data-a="one">▶ الآية دي</button><button data-a="on">⏩ من هنا وكمّل</button><button data-a="rep">🔁 كرّرها ×٣</button></div>`:''}`;
+  document.body.appendChild(m);
+  const place=()=>{const r=m.getBoundingClientRect(),vw=innerWidth;
+    let left=Math.min(vw-r.width-8,Math.max(8,x-r.width/2)),top=y-r.height-18;if(top<8)top=y+24;
+    m.style.left=left+'px';m.style.top=top+'px';m.classList.toggle('below',top>y);m.style.setProperty('--ax',(x-left)+'px')};
+  place();requestAnimationFrame(()=>m.classList.add('on'));
+  m.onclick=e=>{
+    const b=e.target.closest('button');if(!b)return;
+    const k=b.dataset.k,a=b.dataset.a;
+    if(k==='taf'){closeWMenu();openSheet(id,{line,word})}
+    else if(k==='mis'){closeWMenu();addMistake(id,word,line)}
+    else if(k==='bm'){closeWMenu();
+      if(bmOn){S.bm=null;toast('اتشالت العلامة')}else{S.bm={p:A.page,aid:id,d:TODAY()};toast('اتعلّمت سورة '+sname(A.s)+' آية '+AR(A.a)+' كمكان وقوفك')}
+      save();renderMushaf();renderToday();if(READ)applyReaderFit()}
+    else if(k==='aud'){const r=m.querySelector('.wma');r.hidden=!r.hidden;place()}
+    else if(a){closeWMenu();AU.until=0;
+      if(a==='on'){S.auto=true}
+      if(a==='rep'){S.rep=3}
+      save();playAyah(id)}
+  };
+}
+(()=>{
+  let lp=null;
+  const host=e=>e.target.closest&&e.target.closest('#stage .w,#tp .w,#astage .w,#mp .w');
+  document.addEventListener('pointerdown',e=>{
+    if(!(e.target.closest&&e.target.closest('#wmenu')))closeWMenu();
+    LPF=false;clearTimeout(lp&&lp.h);lp=null;
+    const w=host(e);if(!w||w.closest('.ln.hide')||(e.pointerType==='mouse'&&e.button!==0))return;
+    lp={x:e.clientX,y:e.clientY,id:e.pointerId,w,touch:e.pointerType==='touch'};
+    lp.h=setTimeout(()=>{if(!lp)return;LPF=true;if(lp.touch&&navigator.vibrate&&navigator.userActivation&&navigator.userActivation.hasBeenActive)try{navigator.vibrate(12)}catch(x){}openWMenu(lp.w,lp.x,lp.y);lp=null},480);
+  },true);
+  window.addEventListener('pointermove',e=>{if(lp&&e.pointerId===lp.id&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>10){clearTimeout(lp.h);lp=null}},true);
+  window.addEventListener('pointerup',()=>{if(lp){clearTimeout(lp.h);lp=null}},true);
+  window.addEventListener('pointercancel',()=>{if(lp){clearTimeout(lp.h);lp=null}},true);
+  document.addEventListener('contextmenu',e=>{const w=host(e);if(!w)return;e.preventDefault();if(w.closest('.ln.hide'))return;if(lp){clearTimeout(lp.h);lp=null}if($('#wmenu'))return;LPF=true;openWMenu(w,e.clientX,e.clientY)});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeWMenu()});
+  window.addEventListener('scroll',closeWMenu,{passive:true});
+})();
+/* one mistake on one word: word counter, page counter and the review list; toast offers undo */
+function addMistake(id,word,line){
+  const A=AY[id];if(!A)return;if(!word||word==='۞')word=A.t[0];
+    const wkey=id+'|'+word,wc0=S.wc[wkey]?{...S.wc[wkey]}:null,pc0=S.pc[A.page]?{...S.pc[A.page]}:null;
+    const wc=S.wc[wkey]||(S.wc[wkey]={n:0,p:A.page});wc.n++;bumpPage(A.page,'w');
+    const dup=S.mistakes.find(m=>m.aid===id&&m.word===word&&m.n<4),dup0=dup?{n:dup.n,due:dup.due}:null;
+    let made=null;
+    if(dup){dup.n=0;dup.due=TODAY()}else{made={id:Date.now(),aid:id,page:A.page,line:line||A.line,word,n:0,due:TODAY()};S.mistakes.unshift(made)}
+    const undo=()=>{
+      if(wc0)S.wc[wkey]=wc0;else delete S.wc[wkey];
+      if(pc0)S.pc[A.page]=pc0;else delete S.pc[A.page];
+      if(dup){dup.n=dup0.n;dup.due=dup0.due}
+      if(made)S.mistakes=S.mistakes.filter(m=>m!==made);
+      save();renderAll();toast('اتلغى التسجيل');
+    };
+    save();renderAll();
+    toast(dup?'اتسجّلت مرة كمان. ده الغلط رقم '+AR(wc.n)+' في الكلمة دي':'اتسجّل، هيرجعلك في التثبيت',{label:'تراجع',fn:undo});
+  AUDP=0;save();renderAll();
+  toast(dup||wc.n>1?'غلطة رقم '+AR(wc.n)+' في «'+word+'»':'اتسجّل غلط في «'+word+'»',{label:'تراجع',fn:undo});
+}
 function openSheet(id,ctx){
   ctx=ctx||{};const A=AY[id];if(!A)return;
   const open=S.mistakes.find(m=>m.aid===id&&m.n<4);
@@ -624,24 +716,7 @@ function openSheet(id,ctx){
     $('#ast').onclick=stopAudio;
     $('#asr').onchange=e=>{S.rc=e.target.value;save()};
   }
-  $('#mis').onclick=()=>{
-    const word=(ctx.word&&ctx.word!=='۞')?ctx.word:A.t[0];
-    const wkey=id+'|'+word,wc0=S.wc[wkey]?{...S.wc[wkey]}:null,pc0=S.pc[A.page]?{...S.pc[A.page]}:null;
-    const wc=S.wc[wkey]||(S.wc[wkey]={n:0,p:A.page});wc.n++;bumpPage(A.page,'w');
-    const dup=S.mistakes.find(m=>m.aid===id&&m.word===word&&m.n<4),dup0=dup?{n:dup.n,due:dup.due}:null;
-    let made=null;
-    if(dup){dup.n=0;dup.due=TODAY()}else{made={id:Date.now(),aid:id,page:A.page,line:ctx.line||A.line,word,n:0,due:TODAY()};S.mistakes.unshift(made)}
-    const undo=()=>{
-      if(wc0)S.wc[wkey]=wc0;else delete S.wc[wkey];
-      if(pc0)S.pc[A.page]=pc0;else delete S.pc[A.page];
-      if(dup){dup.n=dup0.n;dup.due=dup0.due}
-      if(made)S.mistakes=S.mistakes.filter(m=>m!==made);
-      save();renderAll();toast('اتلغى التسجيل');
-    };
-    save();renderAll();
-    toast(dup?'اتسجّلت مرة كمان. ده الغلط رقم '+AR(wc.n)+' في الكلمة دي':'اتسجّل، هيرجعلك في التثبيت',{label:'تراجع',fn:undo});
-    closeSheet();
-  };
+  $('#mis').onclick=()=>{addMistake(id,(ctx.word&&ctx.word!=='۞')?ctx.word:A.t[0],ctx.line);closeSheet()};
   let nt;$('#nt').oninput=e=>{clearTimeout(nt);nt=setTimeout(()=>{const v=e.target.value.trim();if(v)S.notes[id]=v;else delete S.notes[id];save();renderTad()},400)};
   async function show(c){
     $('#seg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===c));
@@ -660,7 +735,7 @@ function wireWords(el,opts){
     const w=e.target.closest('.w');if(!w)return;
     const ln=w.closest('.ln');
     if(opts&&opts.onLine&&ln.classList.contains('hide')){opts.onLine(+ln.dataset.i);return}
-    openSheet(+w.dataset.id,{line:+w.dataset.i+1,word:w.dataset.w});
+    wordTap(w);
   };
 }
 
@@ -794,7 +869,7 @@ function renderMushafOld(){
     el.innerHTML=`<div class="row"><button id="pv">السابقة</button><input id="pg" type="number" min="1" max="604" aria-label="رقم الصفحة"><button class="p" id="nx">التالية</button></div>
      <div class="row"><select id="su" aria-label="السورة"></select><select id="jz" aria-label="الجزء"></select></div>
      <div class="pagehead"><span id="m1"></span><span id="m2"></span>${zoomSel()}</div><div class="mwrap"><article class="mushaf" id="mp"></article></div>
-     <p class="muted">اضغط على أي كلمة للتفسير وتسجيل الخطأ. الكلمات اللي تحتها خط متعرّج هي مواضع أخطائك.</p>`;
+     <p class="muted">دوسة على الكلمة = غلطة (ودوسة تانية = غلطتين). دوسة مطوّلة = قايمة التفسير والعلامة والاستماع. الكلمات اللي تحتها خط متعرّج هي مواضع أخطائك.</p>`;
     $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])}</option>`).join('');
     $('#jz').innerHTML=Object.keys(D.j).map(j=>`<option value="${j}">الجزء ${AR(j)}</option>`).join('');
     $('#nx').onclick=()=>openPage(MP+1);$('#pv').onclick=()=>openPage(MP-1);
@@ -875,7 +950,7 @@ function renderMushaf(){
      <div class="nav4"><select id="jz" aria-label="الجزء"></select><select id="hz" aria-label="الحزب"></select><select id="rb" aria-label="الربع"></select><select id="su" aria-label="السورة"></select></div>
      <div class="stagewrap"><button class="edge nx" id="enx" aria-label="التالية">‹</button><button class="edge pv" id="epv" aria-label="السابقة">›</button><div class="stage" id="stage"></div><div class="nextcue" id="nextcue"></div></div>
      <div class="pchips" id="pchips"></div>
-     <p class="muted">الأسهم: ← للتالية و → للسابقة · المسطرة للتالية (Shift+المسطرة للسابقة) · سوايب يمين للتالية وسوايب شمال للسابقة · اضغط على أي كلمة للتفسير وتسجيل الخطأ. الخط المتعرّج تحت الكلمة موضع غلط مسجّل، والتظليل الأحمر معناه إن الغلط اتكرر فيها.</p>`;
+     <p class="muted">الأسهم: ← للتالية و → للسابقة · المسطرة للتالية (Shift+المسطرة للسابقة) · سوايب يمين للتالية وسوايب شمال للسابقة · دوسة على الكلمة = غلطة (ودوسة تانية = غلطتين). دوسة مطوّلة = قايمة التفسير والعلامة والاستماع. الخط المتعرّج تحت الكلمة موضع غلط مسجّل، والتظليل الأحمر معناه إن الغلط اتكرر فيها.</p>`;
     $('#jz').innerHTML=Object.keys(D.j).map(j=>`<option value="${j}">الجزء ${AR(j)}</option>`).join('');
     $('#hz').innerHTML=[...Array(60)].map((_,i)=>`<option value="${i+1}">الحزب ${AR(i+1)}</option>`).join('');
     $('#rb').innerHTML=[...Array(240)].map((_,i)=>`<option value="${i+1}">${rubLabel(i+1)}</option>`).join('');
@@ -898,7 +973,7 @@ function renderMushaf(){
       if(swiped){swiped=false;return}
       const hl=S.hideMode&&e.target.closest('.ln.hide');if(hl){revealLine(+hl.dataset.i);return}
       const w=e.target.closest('.w');if(!w)return;
-      openSheet(+w.dataset.id,{line:+w.dataset.i+1,word:w.dataset.w});
+      wordTap(w);
     };
     applyZoom();
   }
@@ -1310,7 +1385,7 @@ function renderAud(){
   const id=AUD.sel||1,A=AY[id],s=A.s;
   if(!el.dataset.init){el.dataset.init=1;AUDP=0;
     el.innerHTML='<div class="card"><div class="astw"><div class="stage" id="astage"></div></div></div><div id="actl"></div>';
-    $('#astage').onclick=e=>{const w=e.target.closest('.w');if(!w)return;AU.until=0;playAyah(+w.dataset.id)}}
+    $('#astage').onclick=e=>{const w=e.target.closest('.w');if(w)wordTap(w)}}
   $('#actl').innerHTML=`<div class="card"><h2>تلاوة</h2>
    <label class="muted" for="arc">القارئ</label>
    <select id="arc">${REC.map(r=>`<option value="${r.k}"${r.k===S.rc||(!S.rc&&r.k==='husary')?' selected':''}>${r.n}</option>`).join('')}</select>
