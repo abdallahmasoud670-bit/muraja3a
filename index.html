@@ -130,7 +130,7 @@ body.anim{overflow-x:hidden}
 .pchip{padding:2px 10px;border-radius:999px;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
 .pchip.warn{border-color:var(--st1);color:var(--st1);font-weight:600}
 .pchip.s4{border-color:#9fd3ff;color:#2a6fb0;background:linear-gradient(120deg,#f4fbff,#d6ecff 45%,#ffffff 55%,#cfe6ff)}.pchip.s3{border-color:var(--st3);color:var(--st3)}.pchip.s2{border-color:var(--st2)}.pchip.s1{border-color:var(--st1);color:var(--st1)}
-.w.rep{background:color-mix(in srgb,var(--st1) 24%,transparent);border-radius:6px;box-shadow:inset 0 -3px 0 color-mix(in srgb,var(--st1) 70%,transparent)}
+.w.rep{background:linear-gradient(to bottom,color-mix(in srgb,var(--st1) 12%,transparent) 0 52%,color-mix(in srgb,var(--st1) 26%,transparent) 52% 94%,transparent 94%);border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .nav4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 @media (min-width:600px){.nav4{grid-template-columns:repeat(4,1fr)}}
 .nav4 select{width:100%;min-width:0}
