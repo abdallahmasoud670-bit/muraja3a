@@ -384,7 +384,7 @@ function pageHTML(p,o){
     if(e===0)h+='<div class="ln blank"></div>';
     else if(typeof e==='string'){
       const c=e[0],s=+e.slice(1)||1;
-      if(c==='b')h+=s===1?'<div class="ln blank"></div>':`<div class="ln sura">سورة ${esc(sname(s))}</div>`;
+      if(c==='b')h+=`<div class="ln sura">سورة ${esc(sname(s))}</div>`;
       else if(c==='m')h+=`<div class="ln bsm">${esc(ayahText(1))}</div>`;
       else if(c==='B')h+=`<div class="ln sura">سورة ${esc(sname(s))}</div>`;
     }else h+=buildLine(e,i,o,mk,gl);
@@ -419,7 +419,7 @@ function fit(el){
   if(max<=1)el.querySelectorAll('.ln').forEach(l=>{max=Math.max(max,l.offsetWidth)});
   const isGl=el.classList.contains('gl'),gm=isGl?0:calcGMax();
   const fs=isGl?Math.max(12,Math.min(90,40*W/max)):Math.max(12,Math.min(64,40*W/max,gm?40*W/(gm*1.01):1e9));
-  if(isGl)el.style.setProperty('--lhpx',(W*0.1).toFixed(1)+'px');
+  if(isGl)el.style.setProperty('--lhpx',(W*0.115).toFixed(1)+'px');
   el.classList.remove('measure');el.style.fontSize=fs+'px';
   const Wf=el.clientWidth-4;
   el.querySelectorAll('.ln.last').forEach(l=>{
