@@ -262,7 +262,7 @@ body.reading .nextcue{margin:10px 8px 18px}
 .wmr{display:flex;gap:6px;justify-content:center}
 .wmb{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:58px;padding:8px 6px;border:0;border-radius:14px;background:transparent;font-size:.75rem;font-weight:600;color:var(--ink)}
 .wmb svg{width:38px;height:38px;padding:8px;border-radius:50%;color:#fff}
-.wm-taf svg{background:#2d6fd1}.wm-mis svg{background:#c9452f}.wm-bm svg{background:linear-gradient(135deg,#e8bf5f,#b07d12)}.wm-aud svg{background:#6a52d9}
+.wm-taf svg{background:#2d6fd1}.wm-mis svg{background:#c9452f}.wm-dec svg{background:#8a7d6b}.wm-bm svg{background:linear-gradient(135deg,#e8bf5f,#b07d12)}.wm-aud svg{background:#6a52d9}
 .wmb:hover,.wmb:focus-visible{background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .wma{margin-top:8px;flex-wrap:wrap}.wma button{font-size:.8rem;padding:6px 10px;border-radius:999px}
 .wmenu.below::after{display:none}
@@ -462,8 +462,9 @@ function cntText(id,word){
   return parts.join(' · ');
 }
 function decWord(key){
-  const w=S.wc[key];if(!w)return;const p=w.p;w.n--;if(w.n<=0)delete S.wc[key];
-  const c=S.pc[p];if(c&&c.w>0)c.w--;save();renderAll();toast('اتنقص مرة من العدّاد');
+  const w=S.wc[key];if(!w)return;const p=w.p;w.n--;
+  if(w.n<=0){delete S.wc[key];const i=key.indexOf('|'),aid=+key.slice(0,i),word=key.slice(i+1);S.mistakes=S.mistakes.filter(m=>!(m.aid===aid&&m.word===word&&m.n<4))}
+  const c=S.pc[p];if(c&&c.w>0)c.w--;AUDP=0;save();renderAll();toast(S.wc[key]?'اتنقص غلطة، فاضل '+AR(S.wc[key].n):'اتشال الغلط من الكلمة دي');
 }
 /* page-side facts: last ayah of a page, margin signs, next-page cue, page-edge thickness */
 const LA=[],LE=[];
@@ -673,6 +674,7 @@ const WM_IC={
  taf:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 12h5"/>',
  mis:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><path d="M12 16.5v.5"/>',
  bm:'<path d="M6 3h12v18l-6-4.5L6 21z"/>',
+ dec:'<path d="M20 20H9L4 15a2 2 0 0 1 0-2.8L13.2 3a2 2 0 0 1 2.8 0l4 4a2 2 0 0 1 0 2.8L11 19"/><path d="M8 11l6 6"/>',
  aud:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/>'
 };
 function closeWMenu(){const m=$('#wmenu');if(m)m.remove()}
@@ -682,7 +684,7 @@ function openWMenu(w,x,y){
   const word=w.dataset.w,line=+w.dataset.i+1,bmOn=S.bm&&S.bm.aid===id;
   const btn=(k,lab)=>`<button class="wmb wm-${k}" data-k="${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${WM_IC[k]}</svg><span>${lab}</span></button>`;
   const m=document.createElement('div');m.id='wmenu';m.className='wmenu';m.setAttribute('role','menu');
-  m.innerHTML=`<div class="wmh">«${esc(word||A.t[0])}» · ${esc(sname(A.s))} ${AR(A.a)}</div><div class="wmr">${btn('taf','تفسير')}${btn('mis','سجّل غلط')}${btn('bm',bmOn?'شيل العلامة':'علامة')}${AUDIO?btn('aud','استماع'):''}</div>
+  m.innerHTML=`<div class="wmh">«${esc(word||A.t[0])}» · ${esc(sname(A.s))} ${AR(A.a)}</div><div class="wmr">${btn('taf','تفسير')}${btn('mis','سجّل غلط')}${S.wc[id+'|'+word]?btn('dec','شيل غلطة'):''}${btn('bm',bmOn?'شيل العلامة':'علامة')}${AUDIO?btn('aud','استماع'):''}</div>
    ${AUDIO?`<div class="wmr wma" hidden><button data-a="one">▶ الآية دي</button><button data-a="on">⏩ من هنا وكمّل</button><button data-a="rep">🔁 كرّرها ×٣</button></div>`:''}`;
   document.body.appendChild(m);
   const place=()=>{const r=m.getBoundingClientRect(),vw=innerWidth;
@@ -694,6 +696,7 @@ function openWMenu(w,x,y){
     const k=b.dataset.k,a=b.dataset.a;
     if(k==='taf'){closeWMenu();openSheet(id,{line,word})}
     else if(k==='mis'){closeWMenu();addMistake(id,word,line)}
+    else if(k==='dec'){closeWMenu();decWord(id+'|'+word)}
     else if(k==='bm'){closeWMenu();
       if(bmOn){S.bm=null;toast('اتشالت العلامة')}else{S.bm={p:A.page,aid:id,d:TODAY()};toast('اتعلّمت سورة '+sname(A.s)+' آية '+AR(A.a)+' كمكان وقوفك')}
       save();renderMushaf();renderToday();if(READ)applyReaderFit()}
@@ -734,7 +737,7 @@ function addMistake(id,word,line){
       if(pc0)S.pc[A.page]=pc0;else delete S.pc[A.page];
       if(dup){dup.n=dup0.n;dup.due=dup0.due}
       if(made)S.mistakes=S.mistakes.filter(m=>m!==made);
-      save();renderAll();toast('اتلغى التسجيل');
+      AUDP=0;save();renderAll();toast('اتلغى التسجيل');
     };
     save();renderAll();
     toast(dup?'اتسجّلت مرة كمان. ده الغلط رقم '+AR(wc.n)+' في الكلمة دي':'اتسجّل، هيرجعلك في التثبيت',{label:'تراجع',fn:undo});
