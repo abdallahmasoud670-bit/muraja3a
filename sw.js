@@ -1,6 +1,6 @@
 /* app shell: network first so updates arrive. Page fonts, tafsir and the search text: cache first in mj-data.
    Recitation: from the reciter's cache when downloaded (with byte ranges for seeking), otherwise from the network. */
-const V='mj-app-v4',DATA='mj-data';
+const V='mj-app-v5',DATA='mj-data';
 self.addEventListener('install',e=>{self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{
   for(const k of await caches.keys()){

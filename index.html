@@ -405,6 +405,61 @@ body.reading .fab,body.reading .fmenu,body.reading .fback{display:none}
 .dlg .k2,.legend .k2{background:var(--st3);color:#fff;border-color:var(--st3)}
 .dlg .k1,.legend .k1{background:color-mix(in srgb,var(--st2) 55%,var(--surface));border-color:var(--st2)}
 .legend .k0{background:var(--st0)}
+/* tests: hidden passage words, text questions, the "حسبك" panel */
+.w.qo{visibility:hidden}
+.w.qh{color:transparent!important;background:var(--line)!important;border-radius:6px;user-select:none;-webkit-user-select:none}
+.qp{font-weight:500}
+.qq,.qa,.qf,.qcard{font-family:var(--quran)}
+.qq{font-size:1.25rem;color:var(--gold)}
+.qline{font-size:1.45rem;line-height:2.15}
+.qa .w{padding:0 1px}
+.qn{font-family:var(--ui);font-size:.75rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 7px;vertical-align:middle}
+.qbl{display:inline-block;min-width:3.5em;border-bottom:2px dashed var(--gold);color:var(--gold);text-align:center}
+.qsw,.qhi{background:color-mix(in srgb,var(--st2) 30%,transparent);border-radius:4px}
+.qpick .w{cursor:pointer;outline:1px dashed color-mix(in srgb,var(--muted) 40%,transparent);outline-offset:1px;border-radius:4px}
+.qpick .qsw{background:none}
+.qans{display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.qbad{opacity:.6}
+.qopts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.qopts button{min-height:46px}
+.qw4 button{font-size:1.35rem;line-height:1.6}
+.qopts button:disabled{opacity:1}
+.qopts .r3,.qtf .r3{background:var(--st3);color:#fff;border-color:var(--st3)}
+.qopts .r1{background:var(--st1);color:#fff;border-color:var(--st1)}
+.qcard0 .row .r3{background:var(--st3);color:#fff;border:0;font-weight:600}
+.qcard0 .row .r1{background:var(--st1);color:#fff;border:0;font-weight:600}
+.qcards{display:flex;flex-direction:column;gap:8px}
+.qcard{text-align:start;font-size:1.3rem;line-height:2;padding:8px 12px;border-radius:12px}
+.qok{color:var(--st3);font-weight:600}
+.qno{color:var(--st1);font-weight:600}
+.qdone{display:flex;flex-direction:column;gap:8px;align-items:stretch;border-top:1px solid var(--line);padding-top:10px}
+.hsb{font-family:var(--quran);font-size:2rem;color:var(--gold);text-align:center}
+.qprob button[aria-pressed="true"],.mact .tg[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.qtip{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--gold2) 12%,transparent);font-size:.92rem}
+.qnav{justify-content:center}.qnav button{min-width:180px;min-height:48px;border-radius:999px}
+.qtypes{border:1px solid var(--line);border-radius:12px;padding:8px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 12px}
+.qtypes legend{font-size:.85rem;color:var(--muted);padding:0 4px}
+.qtypes label{display:flex;gap:8px;align-items:center;min-height:36px}
+.qtypes input,.row input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
+/* mistakes page */
+.mstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.mstats div{display:flex;flex-direction:column;padding:6px 2px;border-radius:12px;background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.mstats b{font-size:1.4rem;color:var(--gold);line-height:1.3}.mstats span{font-size:.72rem;color:var(--muted);line-height:1.3}
+.jchart{display:flex;align-items:stretch;gap:2px;height:120px;padding-top:4px}
+.jb{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px;padding:0;border:0;background:none;border-radius:4px;min-height:0!important}
+.jb i{display:block;width:100%;border-radius:4px 4px 1px 1px;background:linear-gradient(to top,var(--accent),color-mix(in srgb,var(--accent) 55%,var(--st1)))}
+.jb small{font-size:.68rem;color:var(--muted);line-height:1;white-space:nowrap}
+.jb.on i{background:linear-gradient(to top,var(--gold),var(--gold2))}.jb.on small{color:var(--gold);font-weight:700}
+.mctl .seg button{padding:4px 11px;font-size:.82rem;min-height:34px}
+.mgrp summary{display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;font-weight:600;min-height:32px}
+.mgrp summary::-webkit-details-marker{display:none}
+.mgrp summary::before{content:"‹";color:var(--muted);transition:transform .2s}
+.mgrp[open] summary::before{transform:rotate(-90deg)}
+.mgrp summary span:first-child{flex:1}
+.cnt{font-size:.78rem;font-weight:500;color:var(--muted);background:color-mix(in srgb,var(--st1) 12%,transparent);padding:1px 10px;border-radius:999px}
+.mact{justify-content:flex-end}.mact button{padding:5px 10px;font-size:.82rem;min-height:36px}
+.lnk{padding:0 4px;min-height:0!important;color:var(--accent);text-decoration:underline;font-size:inherit}
+@media (max-width:520px){.item{flex-direction:column;align-items:stretch}.mact{justify-content:flex-start}.qopts{grid-template-columns:1fr 1fr}}
 </style>
 
 <canvas id="fx" aria-hidden="true" hidden></canvas>
@@ -570,7 +625,7 @@ function load(){
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const day=(k)=>S.days[k||TODAY()]||(S.days[k||TODAY()]={});
-const kept=k=>{const r=S.days[k];return !!r&&['c','s','t','q'].some(x=>r[x]&&(r[x].done))};
+const kept=k=>{const r=S.days[k];return !!r&&['c','s','t','q','m'].some(x=>r[x]&&(r[x].done))};
 function toast(t,act){
   const e=$('#toast');e.textContent='';const s=document.createElement('span');s.textContent=t;e.append(s);
   if(act){const b=document.createElement('button');b.textContent=act.label;b.onclick=()=>{act.fn();e.classList.remove('on')};e.append(b);e.style.pointerEvents='auto'}else e.style.pointerEvents='none';
@@ -608,9 +663,9 @@ function buildLine(e,i,o,mk,gl){
     if(isEndTok(tok)){const u=units[units.length-1];if(u&&u.id===id&&!u.end){u.text+=' '+tok;u.end=1}else units.push({text:' '+tok,id,end:1,w:''})}
     else units.push({text:tok,id,w:tok});
   });
-  const hid=o.hide&&o.hide.has(i);
+  const hid=o.hide&&o.hide.has(i),qz=o.qz;
   return `<div class="ln${e[2]?' last':''}${hid?' hide':''}" data-i="${i}">`+units.map(u=>{
-    const wk=S.wc[u.id+'|'+u.w];const cls='w'+(o.bmAid&&u.id===o.bmAid?' bmw':'')+(mk.has(u.id+'|'+u.w)?' mk':'')+(wk&&wk.n>=2?' rep':'')+(o.mark&&o.mark.has(u.id)?' hl':'');
+    const wk=S.wc[u.id+'|'+u.w];const cls='w'+(o.bmAid&&u.id===o.bmAid?' bmw':'')+(mk.has(u.id+'|'+u.w)?' mk':'')+(wk&&wk.n>=2?' rep':'')+(o.mark&&o.mark.has(u.id)?' hl':'')+(qz?(u.id<qz.from||u.id>qz.to?' qo':qz.hid.has(i)?' qh':''):'');
     return `<span class="${cls}" data-id="${u.id}" data-i="${i}" data-w="${esc(u.w)}">${u.text}</span>`}).join('')+'</div>';
 }
 function pageHTML(p,o){
@@ -749,25 +804,26 @@ function openWMenu(w,x,y){
   document.addEventListener('pointerdown',e=>{
     if(!(e.target.closest&&e.target.closest('#wmenu')))closeWMenu();
     LPF=false;clearTimeout(lp&&lp.h);lp=null;
-    const w=host(e);if(!w||w.closest('.ln.hide')||(e.pointerType==='mouse'&&e.button!==0))return;
+    const w=host(e);if(!w||w.closest('.ln.hide')||w.classList.contains('qh')||w.classList.contains('qo')||(e.pointerType==='mouse'&&e.button!==0))return;
     lp={x:e.clientX,y:e.clientY,id:e.pointerId,w,touch:e.pointerType==='touch'};
     lp.h=setTimeout(()=>{if(!lp)return;LPF=true;if(lp.touch&&navigator.vibrate&&navigator.userActivation&&navigator.userActivation.hasBeenActive)try{navigator.vibrate(12)}catch(x){}openWMenu(lp.w,lp.x,lp.y);lp=null},480);
   },true);
   window.addEventListener('pointermove',e=>{if(lp&&e.pointerId===lp.id&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>10){clearTimeout(lp.h);lp=null}},true);
   window.addEventListener('pointerup',()=>{if(lp){clearTimeout(lp.h);lp=null}},true);
   window.addEventListener('pointercancel',()=>{if(lp){clearTimeout(lp.h);lp=null}},true);
-  document.addEventListener('contextmenu',e=>{const w=host(e);if(!w)return;e.preventDefault();if(w.closest('.ln.hide'))return;if(lp){clearTimeout(lp.h);lp=null}if($('#wmenu'))return;LPF=true;openWMenu(w,e.clientX,e.clientY)});
+  document.addEventListener('contextmenu',e=>{const w=host(e);if(!w)return;e.preventDefault();if(w.closest('.ln.hide')||w.classList.contains('qh')||w.classList.contains('qo'))return;if(lp){clearTimeout(lp.h);lp=null}if($('#wmenu'))return;LPF=true;openWMenu(w,e.clientX,e.clientY)});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeWMenu()});
   window.addEventListener('scroll',closeWMenu,{passive:true});
 })();
 /* one mistake on one word: word counter, page counter and the review list; toast offers undo */
-function addMistake(id,word,line){
+function addMistake(id,word,line,extra){
   const A=AY[id];if(!A)return;if(!word||word==='۞')word=A.t[0];
     const wkey=id+'|'+word,wc0=S.wc[wkey]?{...S.wc[wkey]}:null,pc0=S.pc[A.page]?{...S.pc[A.page]}:null;
     const wc=S.wc[wkey]||(S.wc[wkey]={n:0,p:A.page});wc.n++;bumpPage(A.page,'w');
     const dup=S.mistakes.find(m=>m.aid===id&&m.word===word&&m.n<4),dup0=dup?{n:dup.n,due:dup.due}:null;
     let made=null;
-    if(dup){dup.n=0;dup.due=TODAY()}else{made={id:Date.now(),aid:id,page:A.page,line:line||A.line,word,n:0,due:TODAY()};S.mistakes.unshift(made)}
+    if(dup){dup.n=0;dup.due=TODAY();if(extra)Object.assign(dup,extra)}else{made=Object.assign({id:Date.now(),aid:id,page:A.page,line:line||A.line,word,n:0,due:TODAY()},extra||{});S.mistakes.unshift(made)}
+    if(MHOOK)MHOOK(id,word);
     const undo=()=>{
       if(wc0)S.wc[wkey]=wc0;else delete S.wc[wkey];
       if(pc0)S.pc[A.page]=pc0;else delete S.pc[A.page];
@@ -898,15 +954,15 @@ function renderToday(){
   };
   const items=tItems(),tdone=d.t&&d.t.done;
   const tl=items.length?items.map(i=>i.k==='m'?`<div class="item"><div>خطأ في صفحة ${AR(i.p)} · كلمة «${esc(i.w)}»</div><button data-open="${i.p}" data-aid="${i.aid}">افتح</button></div>`:`<div class="item"><div>صفحة ${AR(i.p)} · محتاجة تثبيت</div><button data-open="${i.p}">افتح</button></div>`).join(''):'<p class="muted">مفيش مواضع مستحقة النهارده. جلسة تثبيت خفيفة: افتح أي صفحة ضعيفة من خريطتك.</p>';
-  const qn=(d.q&&d.q.n)||0,qdone=qn>=3;
+  const qn=(d.q&&d.q.n)||0,qdone=qn>=3,mn=(d.m&&d.m.n)||0,mg=memGoal(),mdone=mn>=mg;
   const pos=Math.round(S.cursor/60*100);
   /* hero line: where the owner stopped */
   const bp=S.bm?S.bm.p:1,ba=AY[(S.bm&&S.bm.aid)||FA[bp]];
   $('#where').innerHTML=S.bm?`مكان وقوفك: <b>صفحة ${AR(bp)}</b> · سورة ${esc(sname(ba.s))} · آية ${AR(ba.a)}`:`لسه ما علّمتش مكان وقوفك. هتبدأ من <b>صفحة ١</b> · سورة ${esc(sname(ba.s))}`;
-  /* the ring: today's four sessions */
-  const segs=[d.c&&d.c.done,d.s&&d.s.done,d.t&&d.t.done,qn>=3],nd=segs.filter(Boolean).length,C=2*Math.PI*50,L=C/4;
+  /* the ring: today's five sessions */
+  const segs=[d.c&&d.c.done,d.s&&d.s.done,d.t&&d.t.done,qdone,mdone],nd=segs.filter(Boolean).length,NS=segs.length,C=2*Math.PI*50,L=C/NS;
   const arcs=cls=>segs.map((on,i)=>`<circle cx="60" cy="60" r="50" fill="none" stroke-width="11" stroke-linecap="round" class="${on?'on':'trk'}" stroke-dasharray="${(L-9).toFixed(2)} ${(C-L+9).toFixed(2)}" stroke-dashoffset="${(-i*L-4.5+C/4).toFixed(2)}"/>`).join('');
-  const ring=`<div class="ring3d${nd===4?' full':''}" role="img" aria-label="جلسات النهارده ${nd} من ٤ · ${streak()} يوم متواصل"><div class="rr">
+  const ring=`<div class="ring3d${nd===NS?' full':''}" role="img" aria-label="جلسات النهارده ${nd} من ${NS} ·${streak()} يوم متواصل"><div class="rr">
     <svg class="lay" viewBox="0 0 120 120" aria-hidden="true">${arcs()}</svg>
     <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rgold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b8"/><stop offset=".55" stop-color="#e3b04b"/><stop offset="1" stop-color="#a86f12"/></linearGradient></defs>${arcs()}</svg></div>
     <div class="rs"></div><div class="rc"><b id="streak">${AR(streak())}</b><small>يوم متواصل</small></div></div>`;
@@ -916,13 +972,15 @@ function renderToday(){
     <div class="row"><button id="aodT">التفسير</button><button id="aodD">اكتب تدبّرك</button>${AUDIO?`<button class="p" id="aodP">${la?'▶ كمّل التلاوة · '+esc(sname(AY[la].s))+' '+AR(AY[la].a):'▶ اسمع آية اليوم'}</button>`:''}</div></div>`;
   /* the shelf: 30 standing books coloured by strength */
   let shelf='';for(let j=1;j<=30;j++){const st=juzState(j),h=62+((j*37)%5)*4;shelf+=`<button class="vbook" data-j="${j}" data-s="${st.s}" style="--h:${h}px" aria-label="الجزء ${j}${['',' ناسيه',' بتردد',' ثابت',' ممتاز'][st.s]||' لم يُختبر'}">${st.s===4?'<i class="gl"></i>':''}${AR(j)}</button>`}
-  $('#homeBody').innerHTML=`<div class="card ringcard">${ring}<div class="ringtx"><h2>النهارده: ${AR(nd)} من ٤ جلسات</h2><p class="muted">${nd===4?'اليوم اكتمل. تقبّل الله منك.':esc(m.lines.join(' '))}</p></div></div>
+  $('#homeBody').innerHTML=`<div class="card ringcard">${ring}<div class="ringtx"><h2>النهارده: ${AR(nd)} من ${AR(NS)} جلسات</h2><p class="muted">${nd===NS?'اليوم اكتمل. تقبّل الله منك.':esc(m.lines.join(' '))}</p></div></div>
    ${mk('c','المواصلات','حوالي ٢٥ دقيقة')}
    ${mk('s','قبل النوم','حوالي ٢٥ دقيقة')}
    <div class="task ${tdone?'done':''}"><button class="chk" data-t="t" aria-label="تم" aria-pressed="${!!tdone}">${tdone?'✓':''}</button>
     <div class="body" style="flex:1"><span class="tag">تثبيت · ١٠ دقايق</span><span class="big">مواضع الضعف المستحقة</span>${tl}</div></div>
    <div class="task ${qdone?'done':''}"><span class="chk" style="background:${qdone?'var(--st3)':'none'};border-color:${qdone?'var(--st3)':'var(--accent)'}">${qdone?'✓':AR(qn)}</span>
     <div class="body"><span class="tag">اختبار مفاجئ · ٥ دقايق</span><span class="big">٣ صفحات عشوائية (${AR(Math.min(qn,3))} من ٣)</span><span class="muted">بيكشف نقاط الضعف المستخبية</span></div><button class="p" id="goTest">ابدأ</button></div>
+   <div class="task ${mdone?'done':''}"><span class="chk" style="background:${mdone?'var(--st3)':'none'};border-color:${mdone?'var(--st3)':'var(--accent)'}">${mdone?'✓':AR(mn)}</span>
+    <div class="body"><span class="tag">اختبار المحفوظ · ١٠ دقايق</span><span class="big">${AR(mg)} مواضع من اللي قبل علامتك (${AR(Math.min(mn,mg))} من ${AR(mg)})</span><span class="muted">${mdone?'خلصت، وزرار «كمان» بيجيب موضع جديد':'سمّع واكشف سطر سطر، وفي الآخر «حسبك»'}</span></div><button class="p" id="goMem">${mdone?'كمان':'ابدأ'}</button></div>
    <div class="card"><div class="row sp"><span>دورة المراجعة</span><span class="muted">${AR(pos)}٪ · ختمات: ${AR(Math.floor(S.sessions/60))}</span></div><div class="bar"><i style="width:${pos}%"></i></div>
    <p class="muted">كل جلسة ١٠ صفحات بترتيب المصحف. ٦٠ جلسة تعمل ختمة مراجعة.</p></div>
    ${aod}
@@ -932,7 +990,7 @@ function renderToday(){
   hb.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>toggle(b.dataset.t));
   hb.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPage(+b.dataset.open,b.dataset.aid?+b.dataset.aid:null));
   hb.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>openPage(JS[+b.dataset.j]));
-  $('#goTest').onclick=()=>{goTab('test')};
+  $('#goTest').onclick=()=>{goTab('test');if(!QZ&&!T){const g=$('#go');if(g)g.click()}};$('#goMem').onclick=startMem;
   $('#aodT').onclick=()=>openSheet(did);
   $('#aodD').onclick=()=>{openSheet(did);const n=$('#nt');if(n)n.focus()};
   if(AUDIO)$('#aodP').onclick=()=>{AU.until=0;playAyah(la||did)};
@@ -1288,10 +1346,10 @@ let READ=null;
 function renderRbar(){
   const b=$('#rbar');
   if(READ==='test'){
-    b.innerHTML=`<button id="rx">إغلاق</button><button id="rnl">اكشف السطر</button><button id="rall">اكشف الصفحة</button><span class="rate row" id="rrt" style="flex:1 1 100%;display:flex"><button class="r4" data-r="4">ممتاز</button><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></span>`;
+    b.innerHTML=`<button id="rx">إغلاق</button><button id="rnl">اكشف السطر</button><button id="rall">اكشف ${T?'الصفحة':'الموضع'}</button>${T?'<span class="rate row" id="rrt" style="flex:1 1 100%;display:flex"><button class="r4" data-r="4">ممتاز</button><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></span>':''}`;
     $('#rnl').onclick=()=>{const x=$('#nl');if(x)x.click()};
     $('#rall').onclick=()=>{const x=$('#all');if(x)x.click()};
-    $('#rrt').onclick=e=>{const r=e.target.dataset.r;if(!r)return;const x=document.querySelector('#rt [data-r="'+r+'"]');if(x)x.click()};
+    if($('#rrt'))$('#rrt').onclick=e=>{const r=e.target.dataset.r;if(!r)return;const x=document.querySelector('#rt [data-r="'+r+'"]');if(x)x.click()};
   }else{
     b.innerHTML=`<button id="rx">إغلاق</button><span class="rinfo" id="rinfo"></span>${AUDIO?'<button id="rpl">▶ تلاوة</button>':''}<button id="rbm"></button><button id="rhd" aria-pressed="false">إخفاء السطور</button><button id="rhnl" hidden>اكشف السطر</button><button id="rmg" class="g"></button><button id="rsnd" class="g"></button>`;
     $('#rmg').onclick=()=>{S.margin=!S.margin;save();renderMushaf();syncSnd();applyReaderFit()};
@@ -1425,10 +1483,10 @@ function setMedia(){
     navigator.mediaSession.setActionHandler('nexttrack',()=>stepAyah(1));
   }catch(e){}
 }
-function playAyah(id){
-  id=Math.min(6236,Math.max(1,id));
+function playAyah(id,keep){
+  id=Math.min(6236,Math.max(1,id));if(!keep){AU.upto=0;AU.frc=0}
   if(recOf().surah){playSurah(D.a[id-1][0]);return}
-  AU.mode='ayah';AU.id=id;AU.on=true;AUD.sel=id;AU.left=curRep()===0?1e9:curRep();S.lastAid=id;save();
+  AU.mode='ayah';AU.id=id;AU.on=true;AUD.sel=id;AU.left=AU.frc||(curRep()===0?1e9:curRep());S.lastAid=id;save();
   const a=audioEl();a.src=ayUrl(id);a.playbackRate=S.sp||1;a.play().catch(()=>{});audAuto(D.a[id-1][0]);
   if(id<6236){const n=new Audio();n.preload='auto';n.src=ayUrl(id+1)}
   setMedia();onAyahChange();syncPlayer();if(!$('#t-aud').hidden)renderAud();
@@ -1446,13 +1504,13 @@ function stepAyah(d){
   if(AU.mode==='surah'){playSurah(Math.min(114,Math.max(1,AU.s+d)));return}
   AU.until=0;playAyah(AU.id+d);
 }
-function stopAudio(){if(AU.a){AU.a.pause();AU.a.currentTime=0}AU.on=false;AU.playing=false;AU.until=0;markPlaying();syncPlayer();if(!$('#t-aud').hidden)renderAud()}
+function stopAudio(){if(AU.a){AU.a.pause();AU.a.currentTime=0}AU.on=false;AU.playing=false;AU.until=0;AU.upto=0;AU.frc=0;markPlaying();syncPlayer();if(!$('#t-aud').hidden)renderAud()}
 function toggleAudio(){const a=AU.a;if(!a||!a.src)return;if(a.paused)a.play().catch(()=>{});else a.pause()}
 function onEnded(){
   if(AU.mode==='surah'){AU.playing=false;syncPlayer();return}
   if(AU.left>1){AU.left--;const a=AU.a;a.currentTime=0;a.play().catch(()=>{});return}
-  const cont=AU.until?(AU.id<6236&&D.a[AU.id][0]===AU.until):(S.auto&&AU.id<6236);
-  if(cont)playAyah(AU.id+1);else{AU.playing=false;syncPlayer()}
+  const cont=AU.upto?AU.id<AU.upto:AU.until?(AU.id<6236&&D.a[AU.id][0]===AU.until):(S.auto&&AU.id<6236);
+  if(cont)playAyah(AU.id+1,true);else{AU.playing=false;syncPlayer()}
 }
 function markPlaying(){
   document.querySelectorAll('.w.playing').forEach(x=>x.classList.remove('playing'));
@@ -1550,23 +1608,376 @@ function audHL(id){
 }
 window.addEventListener('resize',()=>{if(AUDIO&&AUDP&&!$('#t-aud').hidden){const st=$('#astage');st.querySelectorAll('.mushaf').forEach(fit);audHL(AU.on&&AU.mode==='ayah'&&AU.id?AU.id:(AUD.sel||1))}});
 
-/* ---- test tab ---- */
-let T=null;
-function renderTest(){
-  const el=$('#t-test'),tested=Object.values(S.pages).filter(r=>r.r).length,qn=(day().q&&day().q.n)||0;
-  if(!T){
-    el.innerHTML=`<div class="card"><h2>اختبر نفسك</h2>
-     <p class="muted">هتشوف الصفحة بشكلها الحقيقي والسطور مخفية. افتح السطر بالضغط عليه بعد ما تتذكره. قيّم نفسك بصدق: النتيجة هي اللي بتحدد جدول التثبيت.</p>
-     <div class="row sp"><span>صفحات اتختبرت</span><span class="muted">${AR(tested)} من ٦٠٤ · النهارده ${AR(qn)}</span></div><div class="bar"><i style="width:${Math.round(tested/6.04)}%"></i></div>
-     <label class="row"><input type="checkbox" id="hf"> أخفي السطر الأول كمان (أعرف بداية الصفحة من رقمها بس)</label>
-     <button class="p" id="go">هات لي صفحة</button></div>`;
-    $('#go').onclick=()=>{const p=pickTestPage();T={p,hf:$('#hf').checked,hide:new Set()};D.p[p-1].forEach((e,i)=>{if(Array.isArray(e))T.hide.add(i)});
-      if(!T.hf){const f=D.p[p-1].findIndex(e=>Array.isArray(e));if(f>=0)T.hide.delete(f)}renderTest()};
-    syncRev();return;
+/* ---- test tab: one engine. A session is a scope (one ayah range) × question types × length × goal.
+   Modes: mem (اختبار المحفوظ, from the daily plan), smart (أخطائي), custom (any scope, until every ayah is covered),
+   list (the mistakes picked on the أخطائي page). Any mistake in any question goes through addMistake like the mushaf. ---- */
+let T=null;   // the old whole-page test
+let QZ=null;  // the running session
+const MADANI=new Set([2,3,4,5,8,9,13,22,24,33,47,48,49,55,57,58,59,60,61,62,63,64,65,66,76,98,99,110]);  // as printed in the Madinah mushaf
+/* the mushaf lines each ayah touches, as page*100+line (ascending) */
+const ALN=[];D.p.forEach((pg,pi)=>pg.forEach((e,li)=>{if(!Array.isArray(e))return;const k=(pi+1)*100+li;e[1].forEach(id=>{const a=ALN[id]||(ALN[id]=[]);if(a[a.length-1]!==k)a.push(k)})}));
+function lineSet(a,b){const s=new Set();for(let i=a;i<=b;i++)(ALN[i]||[]).forEach(k=>s.add(k));return [...s]}
+const RA=[];D.r.forEach((r,i)=>{if(!RA[r])RA[r]=i+1});
+const rubRange=(r1,r2)=>[RA[r1],r2<240?RA[r2+1]-1:6236];
+const surRange=s=>[ID_BY_KEY[s+':1'],ID_BY_KEY[s+':'+AYC[s]]];
+/* the bookmark is the first place not read yet: an ayah bookmark ends the memorised part at the ayah before it, a page bookmark at the page before it */
+const bmEnd=()=>S.bm?Math.max(0,(S.bm.aid||FA[S.bm.p])-1):0;
+const rnd=n=>Math.floor(Math.random()*n),pick=a=>a[rnd(a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+function scopeRange(sc){
+  const v=+sc.v||1,v2=+sc.v2||v;
+  if(sc.k==='bm'){const e=bmEnd();return e?[1,e]:null}
+  if(sc.k==='all')return [1,6236];
+  if(sc.k==='s')return surRange(Math.min(114,v));
+  if(sc.k==='j')return rubRange(v*8-7,v*8);
+  if(sc.k==='h')return rubRange(v*4-3,v*4);
+  if(sc.k==='r')return rubRange(v,v);
+  if(sc.k==='pg'){const a=Math.min(604,Math.max(1,Math.min(v,v2))),b=Math.min(604,Math.max(1,Math.max(v,v2)));return [FA[a],LA[b]]}
+  return null;
+}
+function scopeName(sc){
+  const v=+sc.v||1,v2=+sc.v2||v;
+  return {bm:'كل اللي قبل علامتك',all:'المصحف كله',s:'سورة '+sname(v),j:'الجزء '+AR(v),h:'الحزب '+AR(v),r:rubLabel(v)+' · الجزء '+AR(Math.ceil(v/8)),pg:'الصفحات '+AR(Math.min(v,v2))+'–'+AR(Math.max(v,v2))}[sc.k]||'';
+}
+const scopeKey=sc=>sc.k+(sc.k==='bm'||sc.k==='all'?'':':'+(+sc.v||1)+(sc.k==='pg'?'-'+(+sc.v2||sc.v):''));
+/* coverage: the ayat a scope has already been tested on, kept as ranges "1-7,12" */
+function covGet(key){const s=new Set();((S.cov&&S.cov[key])||'').split(',').forEach(x=>{if(!x)return;const [a,b]=x.split('-').map(Number);for(let i=a;i<=(b||a);i++)s.add(i)});return s}
+function covPut(key,set){const a=[...set].sort((x,y)=>x-y),o=[];for(let i=0;i<a.length;){let j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;o.push(a[i]===a[j]?a[i]:a[i]+'-'+a[j]);i=j+1}S.cov=S.cov||{};S.cov[key]=o.join(',')}
+function covCount(set,rg){let n=0;for(let i=rg[0];i<=rg[1];i++)if(set.has(i))n++;return n}
+const QT=[['cmp','أكمل من قوله تعالى إلى قوله'],['nxt','اقرأ الآية (أو الآيتين) بعدها'],['prv','اقرأ الآية اللي قبلها'],['sur','في أنهي سورة؟'],['bnd','بم بدأت أو خُتمت السورة'],['blk','املأ الفراغ'],['fix','صحّح الخطأ'],['ord','رتّب الآيات'],['tf','صح ولا غلط مع التصويب'],['edg','أول أو آخر آية في الجزء أو الربع'],['mk','مكية ولا مدنية وعدد آياتها'],['lfz','اذكر آية ورد فيها لفظ']];
+const QLEN={s:3,m:7.5,l:15},QLEN_L={s:'قصير (حوالي ٣ سطور)',m:'نص وجه',l:'وجه كامل'};
+const QGOAL_L={cov:'تغطية كاملة',rnd:'عشوائي',mis:'أخطائي الأول'};
+const memGoal=()=>S.memN||3;
+let MHOOK=null;   // the running question counts the mistakes recorded while it is open
+
+/* where to ask: weighted toward the ayat with the most, the most recent and the open mistakes, and their pages and surahs */
+function misWeights(a,b){
+  const w=new Map(),now=Date.now(),se={};
+  S.mistakes.forEach(m=>{if(m.n<4&&AY[m.aid])se[AY[m.aid].s]=(se[AY[m.aid].s]||0)+1});
+  const add=(aid,x)=>{if(aid>=a&&aid<=b&&AY[aid])w.set(aid,(w.get(aid)||0)+x)};
+  S.mistakes.forEach(m=>{if(!AY[m.aid])return;const age=Math.max(0,(now-m.id)/864e5),c=(S.wc[m.aid+'|'+m.word]||{n:1}).n;
+    add(m.aid,(m.n<4?2:.4)*(1+c)+.3*pageErr(m.page)+.1*(se[AY[m.aid].s]||0)+4*Math.exp(-age/10))});
+  for(const k in S.wc){const i=k.indexOf('|');add(+k.slice(0,i),.5*S.wc[k].n)}
+  return w;
+}
+function wpick(w){let t=0;w.forEach(x=>t+=x);let r=Math.random()*t;for(const [k,x] of w){r-=x;if(r<=0)return k}return [...w.keys()][0]}
+function pickTarget(){
+  const [a,b]=QZ.rg;
+  if(QZ.list){const un=QZ.list.filter(x=>!QZ.cov.has(x));return pick(un.length?un:QZ.list)}
+  if(QZ.goal==='mis'){const w=misWeights(a,b);if(w.size)return wpick(w)}
+  if(QZ.goal==='cov'){const un=[];for(let i=a;i<=b;i++)if(!QZ.cov.has(i))un.push(i);if(un.length)return pick(un)}
+  return a+rnd(b-a+1);
+}
+
+/* ---- question builders: each returns null when it does not fit the target ---- */
+function qMem(){
+  /* start: uniform over the ayat before the bookmark; length: ½–1 page, ending on an ayah end;
+     an open mistake within half a page after the end pulls the end over it, up to 1½ pages */
+  const [a,b]=QZ.rg;let from=a+rnd(b-a+1),to=from;const L=7.5+Math.random()*7.5;
+  let ls=lineSet(from,to);while(ls.length<L&&to<b){to++;ls=lineSet(from,to)}
+  while(ls.length<7.5&&from>a){from--;ls=lineSet(from,to)}
+  const open=new Set(S.mistakes.filter(m=>m.n<4).map(m=>m.aid));let ext=0;
+  for(let id=to+1;id<=b;id++){if(lineSet(from,id).length-ls.length>7.5)break;if(open.has(id))ext=id}
+  let grew=false;
+  if(ext){let t=to;while(t<ext&&lineSet(from,t+1).length<=22)t++;if(t>to){to=t;ls=lineSet(from,to);grew=true}}
+  return {k:'mem',from,to,ls,shown:1,grew};
+}
+function qCmp(t){
+  const [a,b]=QZ.rg;let L=QLEN[QZ.len]||7.5;const cap=QZ.mode!=='custom';if(cap)L=Math.min(L,7.5);
+  let from=t;
+  if(QZ.goal==='mis'||QZ.list){for(let i=0;i<2&&from>a&&AY[from-1].s===AY[t].s&&lineSet(from-1,t).length<=3;i++)from--}
+  let to=from,ls=lineSet(from,to);while(ls.length<L&&to<b){to++;ls=lineSet(from,to)}
+  if(cap)while(ls.length>7.5&&to>Math.max(from,t)){to--;ls=lineSet(from,to)}
+  return {k:'cmp',from,to,ls,shown:1};
+}
+function qNxt(t){const [a,b]=QZ.rg,n=Math.random()<.35?2:1;if(t-1<a||t+n-1>b||!AY[t+n-1]||AY[t-1].s!==AY[t].s||AY[t+n-1].s!==AY[t].s)return null;return {k:'nxt',id:t-1,ans:n===2?[t,t+1]:[t]}}
+function qPrv(t){const [,b]=QZ.rg;if(t+1>b||!AY[t+1]||AY[t+1].s!==AY[t].s)return null;return {k:'prv',id:t+1,ans:[t]}}
+let TXS=null;
+function txs(){if(!TXS){TXS=new Map();for(let i=1;i<=6236;i++){const x=NRM(ayahText(i));if(!TXS.has(x))TXS.set(x,new Set());TXS.get(x).add(AY[i].s)}}return TXS}
+function qSur(t){
+  const s=AY[t].s;if(AY[t].t.length<3||txs().get(NRM(ayahText(t))).size>1)return null;
+  const o=new Set([s]);for(const d of shuffle([1,-1,2,-2,3,-3]))if(o.size<3&&D.n[s+d])o.add(s+d);while(o.size<4)o.add(1+rnd(114));
+  return {k:'sur',id:t,opts:shuffle([...o]),ans:s};
+}
+function qBnd(t){
+  const [a,b]=QZ.rg,s=AY[t].s,[f,l]=surRange(s);if(f===l)return null;
+  const c=[f,l].filter(x=>x>=a&&x<=b);if(!c.length)return null;
+  const id=c.includes(t)?t:pick(c);return {k:'bnd',s,last:id===l,ans:[id]};
+}
+function qEdg(t){
+  const [a,b]=QZ.rg,r=D.r[t-1],u=Math.random()<.5?'r':'j',v=u==='r'?r:Math.ceil(r/8),rg=u==='r'?rubRange(v,v):rubRange(v*8-7,v*8);
+  const c=rg.filter(x=>x>=a&&x<=b);if(!c.length)return null;
+  const id=c.includes(t)?t:pick(c);return {k:'edg',u,v,last:id===rg[1]&&rg[0]!==rg[1],ans:[id]};
+}
+/* a wrong word for blanks and corrections: another word from nearby in the same surah, about as long, not the same word */
+function distract(id,k){
+  const w=AY[id].t[k],nw=NRM(w),s=AY[id].s,[sa,sb]=surRange(s),own=new Set(AY[id].t.map(NRM)),seen=new Set(),out=[];
+  for(const R of [40,400]){
+    for(let i=Math.max(sa,id-R);i<=Math.min(sb,id+R);i++)AY[i].t.forEach(x=>{const n=NRM(x);if(n&&!own.has(n)&&!seen.has(n)&&!x.includes('۩')&&Math.abs(n.length-nw.length)<=1){seen.add(n);out.push(x)}});
+    if(out.length>=6)break;
   }
+  return shuffle(out);
+}
+function wordIdx(id){const t=AY[id].t;if(t.length<4)return -1;const c=[];t.forEach((x,i)=>{if(NRM(x).length>=3&&!x.includes('۩'))c.push(i)});return c.length?pick(c):-1}
+function qBlk(t){const k=wordIdx(t);if(k<0)return null;const d=distract(t,k);if(d.length<3)return null;return {k:'blk',id:t,wk:k,opts:shuffle([AY[t].t[k],...d.slice(0,3)])}}
+function qFix(t){const k=wordIdx(t);if(k<0)return null;const d=distract(t,k);if(!d.length)return null;return {k:'fix',id:t,wk:k,bad:d[0]}}
+function qTf(t){const k=wordIdx(t);if(k<0)return null;const d=distract(t,k);if(!d.length)return null;return {k:'tf',id:t,wk:k,bad:d[0],alt:Math.random()<.5}}
+function qOrd(t){
+  const [a,b]=QZ.rg,n=3+rnd(2),s=AY[t].s;let f=t-rnd(n);
+  f=Math.max(f,a);if(f+n-1>b)f=b-n+1;
+  const ids=[];for(let i=f;i<f+n;i++){if(!AY[i]||AY[i].s!==s||i<a)return null;ids.push(i)}
+  if(!ids.includes(t)||ids.reduce((x,i)=>x+AY[i].t.length,0)>80)return null;
+  if(new Set(ids.map(i=>NRM(ayahText(i)))).size<n)return null;
+  let sh;do{sh=shuffle(ids)}while(sh.every((x,i)=>x===ids[i]));
+  return {k:'ord',ids,sh,pk:[]};
+}
+function qMk(t){const s=AY[t].s,c=AYC[s],o=new Set([c]);while(o.size<4){const x=c+(rnd(2)?1:-1)*(1+rnd(Math.max(3,Math.round(c*.15))));if(x>2)o.add(x)}return {k:'mk',s,id:ID_BY_KEY[s+':1'],md:MADANI.has(s),cnt:c,opts:shuffle([...o])}}
+function qLfz(t){
+  const s=AY[t].s,[sa,sb]=surRange(s),c=[];
+  AY[t].t.forEach(x=>{const n=NRM(x);if(n.length<4||x.includes('۩'))return;const ids=[];for(let i=sa;i<=sb;i++)if(AY[i].t.some(y=>NRM(y)===n))ids.push(i);if(ids.length<=2)c.push({w:x,ids})});
+  if(!c.length)return null;const x=pick(c);return {k:'lfz',s,w:x.w,ans:x.ids};
+}
+const QB={cmp:qCmp,nxt:qNxt,prv:qPrv,sur:qSur,bnd:qBnd,blk:qBlk,fix:qFix,ord:qOrd,tf:qTf,edg:qEdg,mk:qMk,lfz:qLfz};
+function covIds(q){return q.ls?[...Array(q.to-q.from+1)].map((_,i)=>q.from+i):q.ans&&q.k!=='sur'?q.ans:q.ids?q.ids:[q.t||q.id]}
+
+/* ---- the session ---- */
+function startQZ(o){
+  const rg=o.rg||scopeRange(o.sc);if(!rg){toast('علّم مكان وقوفك في المصحف الأول');return}
+  if(T){T=null;}
+  const key=o.key||null;
+  QZ=Object.assign({n:0,recent:[],types:QT.map(x=>x[0]),goal:'rnd',len:'m'},o,{rg,key,cov:key?covGet(key):new Set()});
+  MHOOK=(id,w)=>{if(QZ&&QZ.cur){QZ.cur.errs++;QZ.cur.mw.push(id+'|'+w)}};
+  if(TAB!=='test')goTab('test');
+  if(!NAV.has('qz'))NAV.push('qz',()=>endQZ(true));
+  nextQ();
+}
+function endQZ(nav){if(!QZ)return;QZ=null;MHOOK=null;if(!nav)NAV.drop('qz');if(READ)exitReader();renderTest()}
+function startMem(){if(!bmEnd()){toast('اختبار المحفوظ بيختار من اللي قبل علامتك. علّم مكان وقوفك في المصحف الأول');goTab('test');return}startQZ({mode:'mem',sc:{k:'bm'},types:['mem']})}
+function startSmart(){if(!S.mistakes.length&&!Object.keys(S.wc).length){toast('لسه ما سجّلتش أخطاء');return}startQZ({mode:'smart',rg:[1,6236],goal:'mis',len:'m'})}
+function startList(aids){aids=[...new Set(aids)].filter(x=>AY[x]);if(!aids.length){toast('مفيش أخطاء في الاختيار ده');return}startQZ({mode:'list',rg:[1,6236],list:aids,goal:'mis',len:'m'})}
+function startCustom(){const c=qcfg();if(!c.types.length){toast('اختار نوع سؤال واحد على الأقل');return}startQZ({mode:'custom',sc:c.sc,types:c.types,len:c.len,goal:c.goal,key:scopeKey(c.sc)})}
+function nextQ(){
+  let q=null;
+  if(QZ.mode==='mem')q=qMem();
+  else for(let i=0;i<14&&!q;i++){const t=pickTarget();if(i<6&&QZ.recent.includes(t))continue;q=QB[pick(QZ.types)](t);if(q)q.t=t}
+  if(!q){const t=pickTarget();q=qCmp(t);q.t=t}
+  Object.assign(q,{errs:0,mw:[],pr:{}});QZ.cur=q;QZ.recent=[q.t||q.from,...QZ.recent].slice(0,6);
+  if(READ)exitReader();
+  renderTest();window.scrollTo(0,0);
+}
+/* a question is finished once: coverage, the day's count for the memorised test */
+function finishQ(){
+  const q=QZ.cur;if(q.fin)return;q.fin=true;QZ.n++;
+  covIds(q).forEach(i=>QZ.cov.add(i));if(q.t)QZ.cov.add(q.t);
+  if(QZ.key)covPut(QZ.key,QZ.cov);
+  if(QZ.mode==='mem'){const d=day();d.m=d.m||{n:0};d.m.n++;if(d.m.n>=memGoal())d.m.done=true}
+  save();renderToday();
+}
+/* after the passage: the problems the owner names change what happens next */
+function applyProblems(){
+  const q=QZ.cur,pr=q.pr,pages=[...new Set((q.ls||[]).map(k=>Math.floor(k/100)))];
+  if(pr.sim)q.mw.forEach(k=>{const i=k.indexOf('|'),aid=+k.slice(0,i),w=k.slice(i+1);S.mistakes.forEach(m=>{if(m.aid===aid&&m.word===w)m.sim=true})});
+  if(pr.hes)pages.forEach(p=>{pageRate(p,2);S.pages[p].due=addDays(TODAY(),1)});
+  if(pr.none&&!q.errs)pages.forEach(p=>{if(!(S.pages[p]&&S.pages[p].r))pageRate(p,3)});
+  save();
+}
+const qzRev=()=>!!(QZ&&QZ.cur&&QZ.cur.ls&&!QZ.cur.done);
+function qzReveal(all){
+  const q=QZ&&QZ.cur;if(!q||!q.ls||q.done)return;
+  q.shown=all?q.ls.length:Math.min(q.ls.length,q.shown+1);q.pv=0;
+  if(q.shown>=q.ls.length){q.done=true;finishQ();if(READ)exitReader()}
+  renderTest();if(READ)applyReaderFit();
+}
+const qPages=q=>[...new Set(q.ls.map(k=>Math.floor(k/100)))];
+const qFrontPage=q=>q.pv||Math.floor(q.ls[Math.min(q.shown,q.ls.length-1)]/100);
+const firstWords=(id,n)=>AY[id].t.slice(0,n).join(' ');
+const lastWords=(id,n)=>AY[id].t.slice(-n).join(' ');
+/* an ayah as tappable words (a tap records a mistake once the answer is shown) */
+function qAy(id,o){
+  o=o||{};const mk=mistakeKeys(),A=AY[id];
+  return `<span class="qa">`+A.t.map((w,i)=>{let x=w,c='w qw';
+    if(o.blank===i){return `<span class="qbl">${o.fill?esc(o.fill):'……'}</span>`}
+    if(o.swap===i){x=o.bad;c+=' qsw'}
+    if(o.hi===i)c+=' qhi';
+    if(o.hiw&&NRM(w)===o.hiw)c+=' qhi';
+    if(mk.has(id+'|'+w)&&o.swap!==i)c+=' mk';
+    return `<span class="${c}" data-id="${id}" data-w="${esc(w)}" data-i="${A.line-1}" data-k="${i}">${esc(x)}</span>`}).join(' ')+` <span class="qn">${AR(A.a)}</span></span>`;
+}
+const where=id=>`سورة ${esc(sname(AY[id].s))} · آية ${AR(AY[id].a)} · صفحة ${AR(AY[id].page)}`;
+function renderQZ(el){
+  const q=QZ.cur,d=day(),qn=(d.m&&d.m.n)||0,g=memGoal();
+  const title={mem:'اختبار المحفوظ',smart:'اختبار أخطائي',list:'اختبار على الأخطاء اللي اخترتها',custom:'اختبار مخصص'}[QZ.mode];
+  let prog='';
+  if(QZ.mode==='mem')prog=`<div class="row sp"><span>النهارده</span><span class="muted">${AR(qn)} من ${AR(g)}${qn>=g?' · خلصت، وتقدر تكمّل':''}</span></div><div class="bar"><i style="width:${Math.min(100,Math.round(qn/g*100))}%"></i></div>`;
+  else if(QZ.list){const c=QZ.list.filter(x=>QZ.cov.has(x)).length;prog=`<div class="row sp"><span>غطّيت</span><span class="muted">${AR(c)} من ${AR(QZ.list.length)} موضع</span></div><div class="bar"><i style="width:${Math.round(c/QZ.list.length*100)}%"></i></div>`}
+  else if(QZ.key){const N=QZ.rg[1]-QZ.rg[0]+1,c=covCount(QZ.cov,QZ.rg);prog=`<div class="row sp"><span>${esc(scopeName(QZ.sc))}</span><span class="muted">غطّيت ${AR(c)} من ${AR(N)} آية · ${AR(Math.floor(c/N*100))}٪</span></div><div class="bar"><i style="width:${(c/N*100).toFixed(1)}%"></i></div>`}
+  else prog=`<p class="muted">سؤال رقم ${AR(QZ.n+(q.fin?0:1))} · كل سؤال نص وجه بالكتير، والأولوية للأكتر غلط والأحدث</p>`;
+  const full=QZ.key&&QZ.goal==='cov'&&covCount(QZ.cov,QZ.rg)>=QZ.rg[1]-QZ.rg[0]+1;
+  let body=q.ls?qzPassage(q):qzText(q);
+  const nxl=QZ.mode==='mem'&&qn>=g?'كمان':'السؤال التالي';
+  const ready=q.ls?q.done:q.fin;
+  el.innerHTML=`<div class="card qzh"><div class="row sp"><h2>${title}</h2><button id="qzEnd">إنهاء</button></div>${prog}
+    ${full?`<p class="qok">غطّيت النطاق كله. الأسئلة الجاية عشوائية، أو ابدأ التغطية من الأول.</p><div class="row"><button id="qzRst">ابدأ التغطية من الأول</button></div>`:''}</div>
+   ${body}
+   ${ready?`<div class="row qnav"><button class="p" id="qzNext">${nxl}</button></div>`:''}`;
+  $('#qzEnd').onclick=()=>endQZ();
+  const rs=$('#qzRst');if(rs)rs.onclick=()=>{QZ.cov=new Set();covPut(QZ.key,QZ.cov);save();renderTest()};
+  const nb=$('#qzNext');if(nb)nb.onclick=()=>{
+    if(q.ls)applyProblems();
+    else if(q.bad===true&&!q.errs){const id=(q.ans&&q.ans[0])||q.id||q.t;if(AY[id])addMistake(id,AY[id].t[0],AY[id].line,{q:q.k})}
+    nextQ()};
+  if(q.ls)wirePassage(q);else wireText(q);
+}
+function qzPassage(q){
+  const pages=qPages(q),p=qFrontPage(q),pi=pages.indexOf(p);
+  const head=q.k==='mem'?`<p>سمّع من أول الموضع، واكشف سطر سطر بعد ما تقوله.${q.grew?' <span class="muted">(الموضع اتمد علشان يغطي غلطة مسجّلة قريبة منه)</span>':''}</p>`
+    :`<p class="qp">أكمل من قوله تعالى: <span class="qq">﴿${esc(firstWords(q.from,4))}…﴾</span> إلى قوله تعالى: <span class="qq">﴿…${esc(lastWords(q.to,4))}﴾</span></p>`;
+  const P=[['none','ما غلطتش'],['word','غلطت في كلمة'],['sim','اتلخبطت مع متشابه'],['hes','ترددت أو وقفت']];
+  const tips=[];
+  if(q.pr.none)tips.push(q.errs?'مسجّل عليك '+AR(q.errs)+' غلطة في الموضع ده، فمش هتتحسب «من غير غلط».':'ما شاء الله. كمّل كده.');
+  if(q.pr.word)tips.push(q.errs?'الكلمة اتسجّلت في أخطائي، وهترجعلك في التثبيت بعد يوم و٣ و٧ و٣٠.':'دوس على الكلمة اللي غلطت فيها في الصفحة علشان تتسجّل.');
+  if(q.pr.sim)tips.push('هتتعلّم كمتشابه في أخطائي. علامة الزواوي هتظهر هنا لما معجم المتشابهات يدخل. دلوقتي اكتب الفرق اللي لخبطك في ملاحظة الآية.'+(q.errs?'':' دوس على الكلمة اللي اتلخبطت فيها الأول.'));
+  if(q.pr.hes)tips.push('اسمع الموضع ٣ مرات، والصفحات دي هترجعلك في مراجعة بكره.');
+  const done=q.done?`<div class="qdone"><b class="hsb">حسبك</b>
+     <p class="muted">دوس على أي كلمة غلطت فيها في الموضع (اتسجّل ${AR(q.errs)}). وبعدين قولّي حصل إيه:</p>
+     <div class="chips qprob">${P.map(x=>`<button data-pr="${x[0]}" aria-pressed="${!!q.pr[x[0]]}">${x[1]}</button>`).join('')}</div>
+     ${tips.length?`<div class="qtip">${tips.map(t=>`<p>${t}</p>`).join('')}<div class="row">${q.pr.hes&&AUDIO?'<button id="qL3">▶ اسمعه ٣ مرات</button>':''}${q.pr.sim?'<button id="qNt">اكتب الفرق</button>':''}</div></div>`:''}</div>`:'';
+  return `<div class="card"><div class="row sp"><span class="muted">${pages.length>1?`صفحة ${AR(p)} · ${AR(pi+1)} من ${AR(pages.length)} في الموضع`:`صفحة ${AR(p)}`}</span>
+     <span class="row">${pages.length>1?`<button class="ib" id="qpP" aria-label="صفحة الموضع اللي قبلها" ${pi?'':'disabled'}>${ic('prev')}</button><button class="ib" id="qpN" aria-label="صفحة الموضع اللي بعدها" ${pi<pages.length-1?'':'disabled'}>${ic('next')}</button>`:''}${zoomSel()}</span></div>
+    ${head}
+    <div class="stagewrap"><div id="tp" class="stage"></div></div>
+    ${q.done?'':`<div class="row"><button class="p" id="nl">اكشف السطر</button><button id="all">اكشف الموضع كله</button><button id="fsT" class="g">ملء الشاشة</button></div>`}
+    ${done}</div>`;
+}
+function wirePassage(q){
+  const tp=$('#tp'),p=qFrontPage(q);
+  const hid=new Set();q.ls.forEach((k,i)=>{if(i>=q.shown&&Math.floor(k/100)===p)hid.add(k%100)});
+  const draw=()=>{tp.innerHTML=leafHTML(p,{qz:{from:q.from,to:q.to,hid}});tp.querySelectorAll('.mushaf').forEach(fit);if(AUDIO)markPlaying();if(!glOK(p))ensureFont(p).then(ok=>{if(ok&&QZ&&QZ.cur===q&&qFrontPage(q)===p)draw()})};
+  applyZoom();draw();qPages(q).forEach(x=>ensureFont(x));
+  tp.onclick=e=>{const w=e.target.closest('.w');if(!w)return;
+    if(w.classList.contains('qh')){const i=q.ls.indexOf(p*100+ +w.dataset.i);if(i>=0){q.shown=i;qzReveal()}return}
+    if(w.classList.contains('qo'))return;wordTap(w)};
+  const pages=qPages(q),pi=pages.indexOf(p);
+  const pP=$('#qpP'),pN=$('#qpN');if(pP)pP.onclick=()=>{q.pv=pages[pi-1];renderTest()};if(pN)pN.onclick=()=>{q.pv=pages[pi+1];renderTest()};
+  const nl=$('#nl');if(nl){nl.onclick=()=>qzReveal();$('#all').onclick=()=>qzReveal(true);$('#fsT').onclick=()=>enterReader('test')}
+  document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{const k=b.dataset.pr;q.pr[k]=!q.pr[k];if(k==='none'&&q.pr.none)q.pr.word=q.pr.sim=q.pr.hes=false;else if(k!=='none')q.pr.none=false;renderTest()});
+  const l3=$('#qL3');if(l3)l3.onclick=()=>{AU.until=0;playAyah(q.from);AU.upto=q.to;AU.frc=3;AU.left=3};
+  const nt=$('#qNt');if(nt)nt.onclick=()=>{const k=q.mw[0];openSheet(k?+k.slice(0,k.indexOf('|')):q.from);const n=$('#nt');if(n)n.focus()};
+}
+/* text questions: what the question asks for stays hidden until answered or revealed */
+function qzText(q){
+  const A=AY[q.id||q.ans&&q.ans[0]];let h='',ans='';
+  const selfc=()=>q.rev?`<div class="qans">${q.ans.map(i=>`<p class="qline">${qAy(i,q.k==='lfz'?{hiw:NRM(q.w)}:{})}</p><p class="muted">${where(i)}</p>`).join('')}</div>
+     ${q.bad===undefined?`<div class="row"><button class="r3" data-g="1">قلتها صح</button><button class="r1" data-g="0">غلطت</button></div>`:q.bad?`<p class="qno">دوس على الكلمة اللي غلطت فيها علشان تتسجّل${q.errs?' (اتسجّل '+AR(q.errs)+')':'. لو ما دستش، هتتسجّل على أول الآية'}.</p>`:'<p class="qok">ما شاء الله</p>'}`
+    :`<div class="row"><button class="p" id="qRev">اكشف الإجابة</button></div>`;
+  if(q.k==='nxt'||q.k==='prv'){h=`<p class="qp">${q.k==='nxt'?(q.ans.length===2?'اقرأ الآيتين اللي بعد':'اقرأ الآية اللي بعد'):'اقرأ الآية اللي قبل'} قوله تعالى:</p><p class="qline">${qAy(q.id)}</p><p class="muted">سورة ${esc(sname(AY[q.id].s))}</p>`;ans=selfc()}
+  else if(q.k==='bnd'){h=`<p class="qp">بم ${q.last?'خُتمت':'بدأت'} سورة ${esc(sname(q.s))}؟ اقرأ ${q.last?'آخر':'أول'} آية فيها.</p>`;ans=selfc()}
+  else if(q.k==='edg'){h=`<p class="qp">اقرأ ${q.last?'آخر':'أول'} آية في ${q.u==='r'?esc(rubLabel(q.v))+' (الجزء '+AR(Math.ceil(q.v/8))+')':'الجزء '+AR(q.v)}.</p>`;ans=selfc()}
+  else if(q.k==='lfz'){h=`<p class="qp">اذكر آية من سورة ${esc(sname(q.s))} ورد فيها لفظ <span class="qq">«${esc(q.w)}»</span>.</p>${q.ans.length>1?'<p class="muted">اللفظ ده جه في آيتين في السورة، أي واحدة منهم تنفع.</p>':''}`;ans=selfc()}
+  else if(q.k==='sur'){
+    h=`<p class="qp">في أنهي سورة قوله تعالى:</p><p class="qline">${qAy(q.id)}</p>`;
+    ans=`<div class="qopts">${q.opts.map(s=>`<button data-o="${s}" class="${q.ch!==undefined?(s===q.ans?'r3':s===q.ch?'r1':''):''}"${q.ch!==undefined?' disabled':''}>سورة ${esc(sname(s))}</button>`).join('')}</div>${q.ch!==undefined?`<p class="${q.ch===q.ans?'qok':'qno'}">${q.ch===q.ans?'صح':'الإجابة: سورة '+esc(sname(q.ans))+' · اتسجّلت غلطة'} · آية ${AR(AY[q.id].a)}</p>`:''}`}
+  else if(q.k==='blk'){
+    const w=AY[q.id].t[q.wk];
+    h=`<p class="qp">املأ الفراغ:</p><p class="qline">${qAy(q.id,{blank:q.wk,fill:q.ch!==undefined?w:''})}</p>`;
+    ans=`<div class="qopts qw4">${q.opts.map((o,i)=>`<button data-o="${i}" class="qf ${q.ch!==undefined?(o===w?'r3':i===q.ch?'r1':''):''}"${q.ch!==undefined?' disabled':''}>${esc(o)}</button>`).join('')}</div>${q.ch!==undefined?`<p class="${q.opts[q.ch]===w?'qok':'qno'}">${q.opts[q.ch]===w?'صح':'اتسجّلت غلطة في «'+esc(w)+'»'} · ${where(q.id)}</p>`:''}`}
+  else if(q.k==='fix'||q.k==='tf'){
+    const swap=q.k==='fix'||q.alt;
+    if(q.k==='tf'&&q.ch===undefined){h=`<p class="qp">صح ولا غلط؟ ولو غلط صحّحه:</p><p class="qline">${qAy(q.id,swap?{swap:q.wk,bad:q.bad}:{})}</p>`;ans=`<div class="row"><button class="r3" data-tf="1">صح</button><button class="r1" data-tf="0">غلط</button></div>`}
+    else if(!q.rev){h=`<p class="qp">${q.k==='fix'?'في الآية دي كلمة غلط. دوس عليها:':'دوس على الكلمة الغلط علشان تصحّحها:'}</p><p class="qline qpick">${qAy(q.id,{swap:q.wk,bad:q.bad})}</p>`}
+    else{h=`<p class="qp">${q.k==='fix'?'صحّح الخطأ':'صح ولا غلط'}:</p><p class="qline">${qAy(q.id,{hi:swap?q.wk:-1})}</p><p class="muted">${where(q.id)}</p>`;
+      ans=`<p class="${q.ok?'qok':'qno'}">${q.ok?'صح':'اتسجّلت غلطة'}${swap?' · كان مكتوب «'+esc(q.bad)+'» والصح «'+esc(AY[q.id].t[q.wk])+'»':' · الآية كانت صح'}</p>`}}
+  else if(q.k==='ord'){
+    const left=q.sh.filter(i=>!q.pk.includes(i));
+    h=`<p class="qp">رتّب الآيات دي زي ما في المصحف: دوس عليها بالترتيب.</p>`;
+    ans=q.rev?`<div class="qans">${q.ids.map((i,n)=>`<p class="qline ${q.pk[n]===i?'':'qbad'}">${qAy(i)}</p>`).join('')}</div><p class="${q.ok?'qok':'qno'}">${q.ok?'ترتيب صح':'الترتيب الصح متعلّم فوق · اتسجّلت غلطة'} · ${where(q.ids[0])}</p>`
+      :`${q.pk.length?`<div class="qans">${q.pk.map((i,n)=>`<p class="qline"><b>${AR(n+1)}.</b> ${esc(ayahText(i))}</p>`).join('')}</div>`:''}<div class="qcards">${left.map(i=>`<button class="qcard" data-od="${i}">${esc(ayahText(i))}</button>`).join('')}</div>${q.pk.length?'<div class="row"><button id="qUn">رجّع آخر واحدة</button></div>':''}`}
+  else if(q.k==='mk'){
+    h=`<p class="qp">سورة ${esc(sname(q.s))}: مكية ولا مدنية؟</p>`;
+    ans=`<div class="qopts">${[['1','مدنية'],['0','مكية']].map(([v,l])=>`<button data-md="${v}" class="${q.c1!==undefined?((v==='1')===q.md?'r3':(v==='1')===q.c1?'r1':''):''}"${q.c1!==undefined?' disabled':''}>${l}</button>`).join('')}</div>`;
+    if(q.c1!==undefined)ans+=`<p class="qp">وعدد آياتها؟</p><div class="qopts">${q.opts.map(n=>`<button data-cn="${n}" class="${q.c2!==undefined?(n===q.cnt?'r3':n===q.c2?'r1':''):''}"${q.c2!==undefined?' disabled':''}>${AR(n)}</button>`).join('')}</div>`;
+    if(q.c2!==undefined)ans+=`<p class="${q.c1===q.md&&q.c2===q.cnt?'qok':'qno'}">${q.md?'مدنية':'مكية'} · ${AR(q.cnt)} آية${q.c1===q.md&&q.c2===q.cnt?'':' · اتسجّلت غلطة'}</p>`}
+  return `<div class="card qcard0">${h}${ans}</div>`;
+}
+function wireText(q){
+  const el=$('#t-test'),rec=(id,k,extra)=>addMistake(id,AY[id].t[k||0],AY[id].line,Object.assign({q:q.k},extra||{}));
+  const fin=()=>{finishQ();renderTest()};
+  const r=$('#qRev');if(r)r.onclick=()=>{q.rev=true;renderTest()};
+  el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{q.bad=b.dataset.g==='0';fin()});
+  /* taps on words: after a revealed answer they record mistakes; while picking the wrong word they answer */
+  el.querySelectorAll('.qcard0').forEach(c=>c.onclick=e=>{
+    const w=e.target.closest('.qw');if(!w)return;
+    if((q.k==='fix'||q.k==='tf')&&!q.rev&&(q.k==='fix'||q.ch!==undefined)){const k=+w.dataset.k;q.ok=k===q.wk;q.rev=true;if(!q.ok)rec(q.id,q.wk);finishQ();renderTest();return}
+    if(q.rev||q.fin){if(w.classList.contains('qsw'))return;wordTap(w)}
+  });
+  el.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{
+    if(q.k==='sur'){q.ch=+b.dataset.o;if(q.ch!==q.ans)rec(q.id,0)}
+    else{q.ch=+b.dataset.o;if(q.opts[q.ch]!==AY[q.id].t[q.wk])rec(q.id,q.wk)}
+    fin()});
+  el.querySelectorAll('[data-tf]').forEach(b=>b.onclick=()=>{q.ch=b.dataset.tf==='1';
+    if(q.ch===!q.alt){if(q.alt){renderTest();return}q.ok=true;q.rev=true;fin();return}
+    q.ok=false;q.rev=true;rec(q.id,q.alt?q.wk:0);fin()});
+  el.querySelectorAll('[data-od]').forEach(b=>b.onclick=()=>{q.pk.push(+b.dataset.od);
+    if(q.pk.length===q.ids.length){q.ok=q.pk.every((x,i)=>x===q.ids[i]);q.rev=true;if(!q.ok){const bad=q.ids.find((x,i)=>q.pk[i]!==x);rec(bad,0)}fin()}else renderTest()});
+  const un=$('#qUn');if(un)un.onclick=()=>{q.pk.pop();renderTest()};
+  el.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>{q.c1=b.dataset.md==='1';renderTest()});
+  el.querySelectorAll('[data-cn]').forEach(b=>b.onclick=()=>{q.c2=+b.dataset.cn;if(q.c1!==q.md||q.c2!==q.cnt)rec(q.id,0);fin()});
+}
+
+/* the custom test settings are kept between visits */
+function qcfg(){const c=S.qc||{};return {sc:c.sc||{k:S.bm?'bm':'s',v:1,v2:1},types:c.types||QT.map(x=>x[0]),len:c.len||'m',goal:c.goal||'cov'}}
+function renderTest(){
+  const el=$('#t-test');
+  if(QZ&&QZ.cur){renderQZ(el);syncRev();return}
+  if(T){renderPageTest(el);return}
+  const tested=Object.values(S.pages).filter(r=>r.r).length,qn=(day().m&&day().m.n)||0,sq=(day().q&&day().q.n)||0,g=memGoal(),be=bmEnd();
+  const open=S.mistakes.filter(m=>m.n<4).length,c=qcfg(),rg=scopeRange(c.sc),key=scopeKey(c.sc),cv=rg?covCount(covGet(key),rg):0,N=rg?rg[1]-rg[0]+1:0;
+  const vsel=()=>{const k=c.sc.k,v=+c.sc.v||1;
+    if(k==='s')return `<select id="qsv" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}"${+s===v?' selected':''}>${s}. ${esc(D.n[s])}</option>`).join('')}</select>`;
+    if(k==='j')return `<select id="qsv" aria-label="الجزء">${[...Array(30)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>الجزء ${AR(i+1)}</option>`).join('')}</select>`;
+    if(k==='h')return `<select id="qsv" aria-label="الحزب">${[...Array(60)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>الحزب ${AR(i+1)}</option>`).join('')}</select>`;
+    if(k==='r')return `<select id="qsv" aria-label="الربع">${[...Array(240)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>${rubLabel(i+1)} · ج${AR(Math.ceil((i+1)/8))}</option>`).join('')}</select>`;
+    if(k==='pg')return `<label class="row">من صفحة <input id="qsv" type="number" min="1" max="604" value="${v}"> إلى <input id="qsv2" type="number" min="1" max="604" value="${+c.sc.v2||v}"></label>`;
+    if(k==='bm')return `<span class="muted">${be?'من أول المصحف لحد '+where(be):'لسه ما علّمتش مكان وقوفك'}</span>`;
+    return '';};
+  el.innerHTML=`<div class="card"><div class="row sp"><h2>اختبار المحفوظ</h2><span class="muted">النهارده ${AR(qn)} من ${AR(g)}</span></div>
+     <p class="muted">موضع عشوائي من كل اللي قبل علامتك، طوله من نص وجه لوجه وبيقف على آخر آية، ولو فيه غلطة مسجّلة قريبة بعده بيتمد لحد ما يغطيها. أول الموضع ظاهر والباقي مخفي: سمّع واكشف سطر سطر.</p>
+     <div class="bar"><i style="width:${Math.min(100,Math.round(qn/g*100))}%"></i></div>
+     ${be?'':'<p class="qno">محتاج تعلّم مكان وقوفك في المصحف الأول (دوسة مطوّلة على آية ثم «علامة»، أو زرار العلامة فوق الصفحة).</p>'}
+     <div class="row"><button class="p" id="qMem">${qn>=g?'كمان موضع':'ابدأ'}</button><label class="row muted">مواضع كل يوم <select id="qMemN">${[1,2,3,4,5,6,8,10].map(n=>`<option value="${n}"${n===g?' selected':''}>${AR(n)}</option>`).join('')}</select></label></div></div>
+   <div class="card"><div class="row sp"><h2>اختبار أخطائي</h2><span class="muted">${AR(open)} غلطة مفتوحة</span></div>
+     <p class="muted">أسئلة سريعة متنوعة على الصفحات والسور والأيام اللي غلطت فيها أكتر وأحدث. كل سؤال نص وجه بالكتير.</p>
+     <div class="row"><button class="p" id="qSm">ابدأ</button></div></div>
+   <div class="card"><h2>اختبار مخصص</h2>
+     <div class="row"><select id="qsk" aria-label="النطاق">${[['bm','كل اللي قبل علامتك'],['s','سورة'],['j','جزء'],['h','حزب'],['r','ربع'],['pg','صفحات من–إلى'],['all','المصحف كله']].map(([k,l])=>`<option value="${k}"${k===c.sc.k?' selected':''}>${l}</option>`).join('')}</select>${vsel()}</div>
+     <fieldset class="qtypes"><legend>أنواع الأسئلة</legend>${QT.map(([k,l])=>`<label><input type="checkbox" value="${k}"${c.types.includes(k)?' checked':''}> ${l}</label>`).join('')}</fieldset>
+     <div class="row"><label class="row">الطول <select id="qln">${Object.keys(QLEN_L).map(k=>`<option value="${k}"${k===c.len?' selected':''}>${QLEN_L[k]}</option>`).join('')}</select></label>
+      <label class="row">الهدف <select id="qgl">${Object.keys(QGOAL_L).map(k=>`<option value="${k}"${k===c.goal?' selected':''}>${QGOAL_L[k]}</option>`).join('')}</select></label></div>
+     ${rg?`<div class="row sp"><span>التغطية: ${esc(scopeName(c.sc))}</span><span class="muted">${AR(cv)} من ${AR(N)} آية</span></div><div class="bar"><i style="width:${(cv/N*100).toFixed(1)}%"></i></div>`:''}
+     <p class="muted">الاختبار ما بيخلصش لوحده: كمّل لحد ما كل آية في النطاق تتغطى، والتغطية بتتحفظ وتكمّل بعدين.</p>
+     <div class="row"><button class="p" id="qCu"${rg?'':' disabled'}>ابدأ</button>${cv?'<button id="qCr">صفّر التغطية</button>':''}</div></div>
+   <div class="card"><div class="row sp"><h2>الاختبار المفاجئ · صفحة كاملة</h2><span class="muted">النهارده ${AR(Math.min(sq,3))} من ٣</span></div>
+     <p class="muted">هتشوف الصفحة بشكلها الحقيقي والسطور مخفية. قيّم نفسك بصدق: النتيجة هي اللي بتحدد جدول التثبيت.</p>
+     <div class="row sp"><span>صفحات اتختبرت</span><span class="muted">${AR(tested)} من ٦٠٤</span></div><div class="bar"><i style="width:${Math.round(tested/6.04)}%"></i></div>
+     <label class="row"><input type="checkbox" id="hf"> أخفي السطر الأول كمان (أعرف بداية الصفحة من رقمها بس)</label>
+     <button id="go">هات لي صفحة</button></div>`;
+  const setc=f=>{const x=qcfg();f(x);S.qc=x;save();renderTest()};
+  $('#qMem').onclick=startMem;$('#qSm').onclick=startSmart;$('#qCu').onclick=startCustom;
+  $('#qMemN').onchange=e=>{S.memN=+e.target.value;const d=day();if(d.m)d.m.done=d.m.n>=S.memN;save();renderToday();renderTest()};
+  $('#qsk').onchange=e=>setc(x=>{x.sc={k:e.target.value,v:e.target.value==='pg'?(S.bm?S.bm.p:1):1,v2:e.target.value==='pg'?(S.bm?S.bm.p:1):1}});
+  const sv=$('#qsv');if(sv)sv.onchange=e=>setc(x=>{x.sc=Object.assign({},x.sc,{v:+e.target.value||1})});
+  const sv2=$('#qsv2');if(sv2)sv2.onchange=e=>setc(x=>{x.sc=Object.assign({},x.sc,{v2:+e.target.value||1})});
+  el.querySelectorAll('.qtypes input').forEach(i=>i.onchange=()=>{const x=qcfg();x.types=[...el.querySelectorAll('.qtypes input:checked')].map(y=>y.value);S.qc=x;save()});
+  $('#qln').onchange=e=>setc(x=>{x.len=e.target.value});$('#qgl').onchange=e=>setc(x=>{x.goal=e.target.value});
+  const cr=$('#qCr');if(cr)cr.onclick=()=>{if(S.cov)delete S.cov[key];save();renderTest();toast('التغطية اتصفّرت')};
+  $('#go').onclick=()=>{const p=pickTestPage();T={p,hf:$('#hf').checked,hide:new Set()};D.p[p-1].forEach((e,i)=>{if(Array.isArray(e))T.hide.add(i)});
+    if(!T.hf){const f=D.p[p-1].findIndex(e=>Array.isArray(e));if(f>=0)T.hide.delete(f)}renderTest()};
+  syncRev();
+}
+function renderPageTest(el){
   el.innerHTML=`<div class="card"><div class="row sp"><h2>صفحة ${AR(T.p)}</h2><span class="muted">الجزء ${AR(juzOfPage(T.p))}</span></div>
    <div class="stagewrap"><div id="tp" class="stage"></div></div>
-   <div class="row"><button id="nl">اكشف السطر التالي</button><button id="all">اكشف الصفحة</button><button id="fsT" class="g">ملء الشاشة</button></div>
+   <div class="row"><button id="nl">اكشف السطر التالي</button><button id="all">اكشف الصفحة</button><button id="fsT" class="g">ملء الشاشة</button><button class="g" id="tX">رجوع</button></div>
    <div class="row rate" id="rt"><button class="r4" data-r="4">ممتاز</button><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></div></div>`;
   const tp=$('#tp');
   const draw=()=>{tp.innerHTML=leafHTML(T.p,{hide:T.hide});tp.querySelectorAll('.mushaf').forEach(fit);if(AUDIO)markPlaying();const pp=T.p;if(!glOK(pp))ensureFont(pp).then(ok=>{if(ok&&T&&T.p===pp)draw()})};
@@ -1574,29 +1985,63 @@ function renderTest(){
   draw();wireWords(tp,{onLine:i=>{T.hide.delete(i);draw()}});
   $('#nl').onclick=()=>{const n=[...T.hide].sort((a,b)=>a-b)[0];if(n!==undefined){T.hide.delete(n);draw()}};
   $('#all').onclick=()=>{T.hide.clear();draw()};
+  $('#tX').onclick=()=>{T=null;exitReader();renderTest()};
   $('#fsT').onclick=()=>enterReader('test');syncRev();
   $('#rt').onclick=e=>{const r=+e.target.dataset.r;if(!r)return;
     pageRate(T.p,r);const d=day();d.q=d.q||{n:0};d.q.n++;if(d.q.n>=3)d.q.done=true;save();
     toast(r===4?'ما شاء الله، ممتازة':r===3?'ما شاء الله، ثابتة':r===2?'هترجع لها بعد ٣ أيام':'هترجع لها بكره');T=null;exitReader();renderAll()};
 }
 
-/* ---- mistakes tab ---- */
+/* ---- mistakes tab: grouped, counted, charted, sorted and filtered; "اختبرني على دول" tests the shown ones ---- */
+const MV0={g:'s',o:'n',st:'open',sm:'all',j:0};
+const mv=()=>Object.assign({},MV0,S.mv||{});
+const mCnt=m=>(S.wc[m.aid+'|'+m.word]||{n:1}).n;
+const dayLab=k=>k===TODAY()?'النهارده':k===addDays(TODAY(),-1)?'إمبارح':AR(k.split('-').reverse().join('/'));
+const MG={s:['السورة',m=>AY[m.aid].s,k=>'سورة '+sname(k)],j:['الجزء',m=>Math.ceil(D.r[m.aid-1]/8),k=>'الجزء '+AR(k)],h:['الحزب',m=>Math.ceil(D.r[m.aid-1]/4),k=>'الحزب '+AR(k)],
+  p:['الصفحة',m=>m.page,k=>'صفحة '+AR(k)],d:['اليوم',m=>ymd(new Date(m.id)),dayLab],sim:['متشابه',m=>m.sim?1:0,k=>+k?'متشابهات':'مش متشابهات'],none:['من غير تجميع',()=>0,()=>'كل الأخطاء']};
+const MOPEN=new Set();
+function misFilter(v,noJ){return S.mistakes.filter(m=>AY[m.aid]&&(v.st==='all'||(v.st==='open'?m.n<4:m.n>=4))&&(v.sm==='all'||(v.sm==='sim'?!!m.sim:!m.sim))&&(noJ||!v.j||Math.ceil(D.r[m.aid-1]/8)===v.j))}
 function renderMis(){
-  const open=S.mistakes.filter(m=>m.n<4),fixed=S.mistakes.length-open.length;
+  const v=mv(),all=S.mistakes.filter(m=>AY[m.aid]),open=all.filter(m=>m.n<4),fixed=all.length-open.length;
+  const words=Object.values(S.wc).reduce((a,x)=>a+x.n,0),pages=Object.keys(S.pc).filter(p=>pageErr(+p)>0).length;
+  /* chart: the 30 juz, counted with the same filters (without the juz filter itself) */
+  const jc=Array(31).fill(0);misFilter(v,true).forEach(m=>{jc[Math.ceil(D.r[m.aid-1]/8)]+=mCnt(m)});const jm=Math.max(1,...jc);
+  const list=misFilter(v,false),sortF={n:(a,b)=>mCnt(b)-mCnt(a)||b.id-a.id,new:(a,b)=>b.id-a.id,mus:(a,b)=>a.aid-b.aid||a.id-b.id}[v.o];
+  const G=MG[v.g]||MG.s,groups=new Map();list.forEach(m=>{const k=G[1](m);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(m)});
+  const gs=[...groups.entries()].map(([k,a])=>({k,a:a.sort(sortF),n:a.reduce((x,m)=>x+mCnt(m),0),last:Math.max(...a.map(m=>m.id)),first:Math.min(...a.map(m=>m.aid))}));
+  gs.sort(v.g==='d'&&v.o!=='n'?(a,b)=>b.last-a.last:{n:(a,b)=>b.n-a.n||b.last-a.last,new:(a,b)=>b.last-a.last,mus:(a,b)=>a.first-b.first}[v.o]);
+  if(!gs.some(g=>MOPEN.has(v.g+':'+g.k))&&gs[0])MOPEN.add(v.g+':'+gs[0].k);
+  const seg=(id,opts,cur)=>`<div class="seg" id="${id}">${opts.map(([k,l])=>`<button data-v="${k}" aria-pressed="${String(k)===String(cur)}">${l}</button>`).join('')}</div>`;
+  const item=m=>{const c=mCnt(m),op=m.n<4;return `<div class="item"><div><b>«${esc(m.word)}»</b> <span class="muted">${where(m.aid)} · سطر ${AR(m.line)}</span>${m.sim?' <span class="pchip">متشابه</span>':''}${m.q?' <span class="pchip">من اختبار</span>':''}
+    <div class="dots">${[0,1,2,3].map(i=>`<i class="${i<m.n?'on':''}"></i>`).join('')}</div><div class="muted">${op?(m.due<=TODAY()?'مستحق النهارده':'الموعد '+m.due):'اتثبّت'} · اتسجّل ${dayLab(ymd(new Date(m.id)))}</div></div>
+    <div class="row mact"><span class="pchip ${c>=2?'warn':''}">${AR(c)} مرة</span><button data-o="${m.id}">افتح</button>${op?`<button data-ok="${m.id}">راجعتها</button>`:''}<button class="tg" data-sim="${m.id}" aria-pressed="${!!m.sim}">متشابه</button><button class="g" data-del="${m.id}" aria-label="حذف">✕</button></div></div>`};
   const repW=Object.keys(S.wc).map(k=>{const i=k.indexOf('|');return {aid:+k.slice(0,i),w:k.slice(i+1),n:S.wc[k].n,p:S.wc[k].p}}).filter(x=>x.n>=2&&AY[x.aid]).sort((a,b)=>b.n-a.n).slice(0,12);
   const repP=Object.keys(S.pc).map(Number).map(p=>({p,n:pageErr(p)})).filter(x=>x.n>=2).sort((a,b)=>b.n-a.n).slice(0,8);
-  const repCard=(repW.length||repP.length)?`<div class="card"><h2>مواضع الغلط المتكررة</h2>
+  const repCard=(repW.length||repP.length)?`<details class="card mgrp"><summary><h2 style="display:inline">مواضع الغلط المتكررة</h2></summary>
    ${repW.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">سورة ${esc(sname(AY[x.aid].s))} آية ${AR(AY[x.aid].a)} · صفحة ${AR(x.p)}</span></div><div class="row"><span class="pchip warn">${AR(x.n)} مرة</span><button data-rp="${x.p}" data-aid="${x.aid}">افتح</button></div></div>`).join('')}
-   ${repP.map(x=>`<div class="item"><div>صفحة ${AR(x.p)} كلها</div><div class="row"><span class="pchip warn">${AR(x.n)} مرة غلط</span><button data-rp="${x.p}">افتح</button></div></div>`).join('')}</div>`:'';
-  $('#t-mis').innerHTML=`<div class="card"><h2>تحت التثبيت (${AR(open.length)})</h2>
-   ${open.length?open.map(m=>`<div class="item"><div><b>«${esc(m.word)}»</b> <span class="muted">سورة ${esc(sname(AY[m.aid].s))} آية ${AR(AY[m.aid].a)} · صفحة ${AR(m.page)} سطر ${AR(m.line)}</span>
-    <div class="dots">${[0,1,2,3].map(i=>`<i class="${i<m.n?'on':''}"></i>`).join('')}</div><div class="muted">${m.due<=TODAY()?'مستحق النهارده':'الموعد '+m.due}</div></div>
-    <div class="row"><button data-o="${m.id}">افتح</button><button data-ok="${m.id}">راجعتها</button><button class="g" data-del="${m.id}" aria-label="حذف">✕</button></div></div>`).join(''):'<p class="muted">مفيش أخطاء مسجّلة. من صفحة المصحف اضغط على الكلمة اللي بتغلط فيها وسجّلها.</p>'}
-   ${fixed?`<p class="muted">اتثبّت ${AR(fixed)} موضع بعد ٤ مراجعات (بعد يوم، ٣، ٧، ٣٠).</p>`:''}</div>${repCard}`;
-  const el=$('#t-mis');
+   ${repP.map(x=>`<div class="item"><div>صفحة ${AR(x.p)} كلها</div><div class="row"><span class="pchip warn">${AR(x.n)} مرة غلط</span><button data-rp="${x.p}">افتح</button></div></div>`).join('')}</details>`:'';
+  $('#t-mis').innerHTML=`<div class="card"><h2>أخطائي</h2>
+    <div class="mstats"><div><b>${AR(open.length)}</b><span>تحت التثبيت</span></div><div><b>${AR(fixed)}</b><span>اتثبّت</span></div><div><b>${AR(words)}</b><span>مرة غلط في كلمات</span></div><div><b>${AR(pages)}</b><span>صفحة فيها غلط</span></div></div>
+    <div class="jchart" role="group" aria-label="الأخطاء في كل جزء">${jc.slice(1).map((n,i)=>`<button class="jb${v.j===i+1?' on':''}" data-j="${i+1}" aria-label="الجزء ${i+1}: ${n} غلطة" aria-pressed="${v.j===i+1}"><i style="height:${n?Math.max(6,Math.round(n/jm*100)):0}%"></i><small>${i===0||(i+1)%5===0||v.j===i+1?AR(i+1):'&nbsp;'}</small></button>`).join('')}</div>
+    <p class="muted">${v.j?`مفلتر على الجزء ${AR(v.j)} · <button class="g lnk" id="mjX">شيل الفلتر</button>`:'دوس على عمود الجزء علشان تشوف أخطاءه بس.'}</p></div>
+   <div class="card mctl">
+    <div class="row"><span class="muted">تجميع حسب</span>${seg('mg',[['s','السورة'],['j','الجزء'],['h','الحزب'],['p','الصفحة'],['d','اليوم'],['sim','متشابه'],['none','من غير']],v.g)}</div>
+    <div class="row"><span class="muted">الترتيب</span>${seg('mo',[['n','الأكتر غلط'],['new','الأحدث'],['mus','ترتيب المصحف']],v.o)}</div>
+    <div class="row"><span class="muted">الحالة</span>${seg('mst',[['open','مفتوح'],['fixed','اتثبّت'],['all','الكل']],v.st)}${seg('msm',[['all','الكل'],['sim','متشابه'],['non','غيره']],v.sm)}</div>
+    <div class="row sp"><span>${AR(list.length)} موضع في ${AR(gs.length)} مجموعة</span><button class="p" id="mTest"${list.length?'':' disabled'}>اختبرني على دول</button></div></div>
+   ${gs.length?gs.map(g=>`<details class="card mgrp" data-g="${esc(v.g+':'+g.k)}"${MOPEN.has(v.g+':'+g.k)?' open':''}><summary><span>${esc(G[2](g.k))}</span><span class="cnt">${AR(g.a.length)} موضع · ${AR(g.n)} مرة</span></summary>${g.a.map(item).join('')}</details>`).join('')
+     :`<div class="card"><p class="muted">${S.mistakes.length?'مفيش أخطاء بالفلاتر دي.':'مفيش أخطاء مسجّلة. من صفحة المصحف اضغط على الكلمة اللي بتغلط فيها وسجّلها، أو اختبر نفسك.'}</p></div>`}
+   ${fixed&&v.st==='open'?`<p class="muted">اتثبّت ${AR(fixed)} موضع بعد ٤ مراجعات (بعد يوم، ٣، ٧، ٣٠). اختار «اتثبّت» علشان تشوفهم.</p>`:''}${repCard}`;
+  const el=$('#t-mis'),setv=f=>{const x=mv();f(x);S.mv=x;save();renderMis()};
+  [['#mg','g'],['#mo','o'],['#mst','st'],['#msm','sm']].forEach(([q,k])=>el.querySelector(q).onclick=e=>{const b=e.target.closest('button');if(b)setv(x=>{x[k]=b.dataset.v})});
+  el.querySelectorAll('.jb').forEach(b=>b.onclick=()=>setv(x=>{x.j=x.j===+b.dataset.j?0:+b.dataset.j}));
+  const jx=$('#mjX');if(jx)jx.onclick=()=>setv(x=>{x.j=0});
+  el.querySelectorAll('details[data-g]').forEach(d=>d.ontoggle=()=>{if(d.open)MOPEN.add(d.dataset.g);else MOPEN.delete(d.dataset.g)});
+  $('#mTest').onclick=()=>startList(list.map(m=>m.aid));
   el.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>openPage(+b.dataset.rp,b.dataset.aid?+b.dataset.aid:null));
   el.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{const m=S.mistakes.find(x=>x.id==b.dataset.o);openPage(m.page,m.aid)});
   el.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const m=S.mistakes.find(x=>x.id==b.dataset.ok);if(m){m.n++;m.due=addDays(TODAY(),MIS_IV[Math.min(m.n,3)]);save();renderAll();toast(m.n>=4?'اتثبّت بإذن الله':'اتسجّلت مراجعة')}});
+  el.querySelectorAll('[data-sim]').forEach(b=>b.onclick=()=>{const m=S.mistakes.find(x=>x.id==b.dataset.sim);if(m){if(m.sim)delete m.sim;else m.sim=true;save();renderMis()}});
   el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{S.mistakes=S.mistakes.filter(x=>x.id!=b.dataset.del);save();renderAll()});
 }
 
@@ -1899,7 +2344,7 @@ function fltResolve(k,quiet){
   }
   fltSet(k,pos);fltPlace(k);
   const el=FLT[k].el;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');
-  if(!quiet){try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}toast('الزرارين كانوا هيركبوا على بعض، فبعدت ده جنب التاني')}
+  if(!quiet){try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}}
 }
 function makeFloat(k,el,o){
   FLT[k]={el,def:o.def};
@@ -1941,7 +2386,7 @@ function fltReset(){delete S.fl;save();fltPlaceAll();toast('الزرارين ر�
     onLong:()=>{const c=revCtx();if(c==='test'){const x=$('#all');if(x)x.click()}else if(c==='mushaf')revealAll()}});
 })();
 function revCtx(){
-  if(READ==='test'||(!READ&&TAB==='test'&&T))return 'test';
+  if(READ==='test'||(!READ&&TAB==='test'&&(T||qzRev())))return 'test';
   if(S.hideMode&&(READ==='mushaf'||(!READ&&TAB==='mushaf')))return 'mushaf';
   return null;
 }
