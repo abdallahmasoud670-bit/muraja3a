@@ -516,7 +516,10 @@ const AR=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 const isEndTok=t=>/^[٠-٩]+$/.test(t);
 const JS=[];for(const k in D.j)JS[+k]=D.j[k];
 const juzOfPage=p=>{let j=1;for(let i=1;i<=30;i++)if(p>=JS[i])j=i;return j};
-const sname=s=>D.n[s]||('سورة '+s);
+/* every surah name carries مكية/مدنية, as printed in the Madinah mushaf (28 madani; matches quran.com and Tanzil) */
+const MADANI=new Set([2,3,4,5,8,9,13,22,24,33,47,48,49,55,57,58,59,60,61,62,63,64,65,66,76,98,99,110]);
+const stype=s=>MADANI.has(+s)?'مدنية':'مكية';
+const sname=s=>D.n[s]?D.n[s]+' ('+stype(s)+')':('سورة '+s);
 
 /* ---- index of ayat ---- */
 const AY={};
@@ -1020,7 +1023,7 @@ function renderMushafOld(){
      <div class="row"><select id="su" aria-label="السورة"></select><select id="jz" aria-label="الجزء"></select></div>
      <div class="pagehead"><span id="m1"></span><span id="m2"></span>${zoomSel()}</div><div class="mwrap"><article class="mushaf" id="mp"></article></div>
      <p class="muted">دوسة على الكلمة = غلطة (ودوسة تانية = غلطتين). دوسة مطوّلة = قايمة التفسير والعلامة والاستماع. الكلمات اللي تحتها خط متعرّج هي مواضع أخطائك.</p>`;
-    $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])}</option>`).join('');
+    $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('');
     $('#jz').innerHTML=Object.keys(D.j).map(j=>`<option value="${j}">الجزء ${AR(j)}</option>`).join('');
     $('#nx').onclick=()=>openPage(MP+1);$('#pv').onclick=()=>openPage(MP-1);
     $('#pg').onchange=e=>openPage(+e.target.value||1);
@@ -1116,7 +1119,7 @@ function renderMushaf(){
     $('#jz').innerHTML=Object.keys(D.j).map(j=>`<option value="${j}">الجزء ${AR(j)}</option>`).join('');
     $('#hz').innerHTML=[...Array(60)].map((_,i)=>`<option value="${i+1}">الحزب ${AR(i+1)}</option>`).join('');
     $('#rb').innerHTML=[...Array(240)].map((_,i)=>`<option value="${i+1}">${rubLabel(i+1)}</option>`).join('');
-    $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])}</option>`).join('');
+    $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('');
     $('#nx').onclick=$('#enx').onclick=()=>navigate(MP+1);
     $('#pv').onclick=$('#epv').onclick=()=>navigate(MP-1);
     $('#pg').onchange=e=>navigate(+e.target.value||1);
@@ -1552,7 +1555,7 @@ function renderAud(){
     $('#astage').onclick=e=>{const w=e.target.closest('.w');if(w)wordTap(w)}}
   const playing=AU.on&&AU.mode==='ayah'&&AU.id===id&&AU.playing;
   $('#actl').innerHTML=`<div class="card player">
-   <div class="pl-pick"><select id="asu" aria-label="السورة">${Object.keys(D.n).map(k=>`<option value="${k}"${+k===s?' selected':''}>${k}. ${esc(D.n[k])}</option>`).join('')}</select>
+   <div class="pl-pick"><select id="asu" aria-label="السورة">${Object.keys(D.n).map(k=>`<option value="${k}"${+k===s?' selected':''}>${k}. ${esc(D.n[k])} · ${stype(k)}</option>`).join('')}</select>
     <select id="aay" aria-label="الآية">${[...Array(AYC[s])].map((_,i)=>`<option value="${i+1}"${i+1===A.a?' selected':''}>آية ${AR(i+1)}</option>`).join('')}</select></div>
    <div class="pl-ctl"><button class="ib" id="astop" aria-label="إيقاف" title="إيقاف">${ic('stop')}</button><button class="ib" id="aprev" aria-label="الآية السابقة" title="السابقة">${ic('skipp')}</button>
     <button class="playb" id="aplay" aria-label="${AU.playing?'إيقاف مؤقت':'تشغيل'}">${ic(AU.playing?'pause':'play')}</button>
@@ -1613,7 +1616,6 @@ window.addEventListener('resize',()=>{if(AUDIO&&AUDP&&!$('#t-aud').hidden){const
    list (the mistakes picked on the أخطائي page). Any mistake in any question goes through addMistake like the mushaf. ---- */
 let T=null;   // the old whole-page test
 let QZ=null;  // the running session
-const MADANI=new Set([2,3,4,5,8,9,13,22,24,33,47,48,49,55,57,58,59,60,61,62,63,64,65,66,76,98,99,110]);  // as printed in the Madinah mushaf
 /* the mushaf lines each ayah touches, as page*100+line (ascending) */
 const ALN=[];D.p.forEach((pg,pi)=>pg.forEach((e,li)=>{if(!Array.isArray(e))return;const k=(pi+1)*100+li;e[1].forEach(id=>{const a=ALN[id]||(ALN[id]=[]);if(a[a.length-1]!==k)a.push(k)})}));
 function lineSet(a,b){const s=new Set();for(let i=a;i<=b;i++)(ALN[i]||[]).forEach(k=>s.add(k));return [...s]}
@@ -1644,7 +1646,7 @@ const scopeKey=sc=>sc.k+(sc.k==='bm'||sc.k==='all'?'':':'+(+sc.v||1)+(sc.k==='pg
 function covGet(key){const s=new Set();((S.cov&&S.cov[key])||'').split(',').forEach(x=>{if(!x)return;const [a,b]=x.split('-').map(Number);for(let i=a;i<=(b||a);i++)s.add(i)});return s}
 function covPut(key,set){const a=[...set].sort((x,y)=>x-y),o=[];for(let i=0;i<a.length;){let j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;o.push(a[i]===a[j]?a[i]:a[i]+'-'+a[j]);i=j+1}S.cov=S.cov||{};S.cov[key]=o.join(',')}
 function covCount(set,rg){let n=0;for(let i=rg[0];i<=rg[1];i++)if(set.has(i))n++;return n}
-const QT=[['cmp','أكمل من قوله تعالى إلى قوله'],['nxt','اقرأ الآية (أو الآيتين) بعدها'],['prv','اقرأ الآية اللي قبلها'],['sur','في أنهي سورة؟'],['bnd','بم بدأت أو خُتمت السورة'],['blk','املأ الفراغ'],['fix','صحّح الخطأ'],['ord','رتّب الآيات'],['tf','صح ولا غلط مع التصويب'],['edg','أول أو آخر آية في الجزء أو الربع'],['mk','مكية ولا مدنية وعدد آياتها'],['lfz','اذكر آية ورد فيها لفظ']];
+const QT=[['cmp','أكمل من قوله تعالى إلى قوله'],['nxt','اقرأ الآية (أو الآيتين) بعدها'],['prv','اقرأ الآية اللي قبلها'],['sur','في أنهي سورة؟'],['bnd','بم بدأت أو خُتمت السورة'],['blk','املأ الفراغ'],['fix','صحّح الخطأ'],['ord','رتّب الآيات'],['tf','صح ولا غلط مع التصويب'],['edg','أول أو آخر آية في الجزء أو الربع'],['lfz','اذكر آية ورد فيها لفظ']];
 const QLEN={s:3,m:7.5,l:15},QLEN_L={s:'قصير (حوالي ٣ سطور)',m:'نص وجه',l:'وجه كامل'};
 const QGOAL_L={cov:'تغطية كاملة',rnd:'عشوائي',mis:'أخطائي الأول'};
 const memGoal=()=>S.memN||3;
@@ -1731,13 +1733,12 @@ function qOrd(t){
   let sh;do{sh=shuffle(ids)}while(sh.every((x,i)=>x===ids[i]));
   return {k:'ord',ids,sh,pk:[]};
 }
-function qMk(t){const s=AY[t].s,c=AYC[s],o=new Set([c]);while(o.size<4){const x=c+(rnd(2)?1:-1)*(1+rnd(Math.max(3,Math.round(c*.15))));if(x>2)o.add(x)}return {k:'mk',s,id:ID_BY_KEY[s+':1'],md:MADANI.has(s),cnt:c,opts:shuffle([...o])}}
 function qLfz(t){
   const s=AY[t].s,[sa,sb]=surRange(s),c=[];
   AY[t].t.forEach(x=>{const n=NRM(x);if(n.length<4||x.includes('۩'))return;const ids=[];for(let i=sa;i<=sb;i++)if(AY[i].t.some(y=>NRM(y)===n))ids.push(i);if(ids.length<=2)c.push({w:x,ids})});
   if(!c.length)return null;const x=pick(c);return {k:'lfz',s,w:x.w,ans:x.ids};
 }
-const QB={cmp:qCmp,nxt:qNxt,prv:qPrv,sur:qSur,bnd:qBnd,blk:qBlk,fix:qFix,ord:qOrd,tf:qTf,edg:qEdg,mk:qMk,lfz:qLfz};
+const QB={cmp:qCmp,nxt:qNxt,prv:qPrv,sur:qSur,bnd:qBnd,blk:qBlk,fix:qFix,ord:qOrd,tf:qTf,edg:qEdg,lfz:qLfz};
 function covIds(q){return q.ls?[...Array(q.to-q.from+1)].map((_,i)=>q.from+i):q.ans&&q.k!=='sur'?q.ans:q.ids?q.ids:[q.t||q.id]}
 
 /* ---- the session ---- */
@@ -1892,11 +1893,6 @@ function qzText(q){
     h=`<p class="qp">رتّب الآيات دي زي ما في المصحف: دوس عليها بالترتيب.</p>`;
     ans=q.rev?`<div class="qans">${q.ids.map((i,n)=>`<p class="qline ${q.pk[n]===i?'':'qbad'}">${qAy(i)}</p>`).join('')}</div><p class="${q.ok?'qok':'qno'}">${q.ok?'ترتيب صح':'الترتيب الصح متعلّم فوق · اتسجّلت غلطة'} · ${where(q.ids[0])}</p>`
       :`${q.pk.length?`<div class="qans">${q.pk.map((i,n)=>`<p class="qline"><b>${AR(n+1)}.</b> ${esc(ayahText(i))}</p>`).join('')}</div>`:''}<div class="qcards">${left.map(i=>`<button class="qcard" data-od="${i}">${esc(ayahText(i))}</button>`).join('')}</div>${q.pk.length?'<div class="row"><button id="qUn">رجّع آخر واحدة</button></div>':''}`}
-  else if(q.k==='mk'){
-    h=`<p class="qp">سورة ${esc(sname(q.s))}: مكية ولا مدنية؟</p>`;
-    ans=`<div class="qopts">${[['1','مدنية'],['0','مكية']].map(([v,l])=>`<button data-md="${v}" class="${q.c1!==undefined?((v==='1')===q.md?'r3':(v==='1')===q.c1?'r1':''):''}"${q.c1!==undefined?' disabled':''}>${l}</button>`).join('')}</div>`;
-    if(q.c1!==undefined)ans+=`<p class="qp">وعدد آياتها؟</p><div class="qopts">${q.opts.map(n=>`<button data-cn="${n}" class="${q.c2!==undefined?(n===q.cnt?'r3':n===q.c2?'r1':''):''}"${q.c2!==undefined?' disabled':''}>${AR(n)}</button>`).join('')}</div>`;
-    if(q.c2!==undefined)ans+=`<p class="${q.c1===q.md&&q.c2===q.cnt?'qok':'qno'}">${q.md?'مدنية':'مكية'} · ${AR(q.cnt)} آية${q.c1===q.md&&q.c2===q.cnt?'':' · اتسجّلت غلطة'}</p>`}
   return `<div class="card qcard0">${h}${ans}</div>`;
 }
 function wireText(q){
@@ -1920,12 +1916,10 @@ function wireText(q){
   el.querySelectorAll('[data-od]').forEach(b=>b.onclick=()=>{q.pk.push(+b.dataset.od);
     if(q.pk.length===q.ids.length){q.ok=q.pk.every((x,i)=>x===q.ids[i]);q.rev=true;if(!q.ok){const bad=q.ids.find((x,i)=>q.pk[i]!==x);rec(bad,0)}fin()}else renderTest()});
   const un=$('#qUn');if(un)un.onclick=()=>{q.pk.pop();renderTest()};
-  el.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>{q.c1=b.dataset.md==='1';renderTest()});
-  el.querySelectorAll('[data-cn]').forEach(b=>b.onclick=()=>{q.c2=+b.dataset.cn;if(q.c1!==q.md||q.c2!==q.cnt)rec(q.id,0);fin()});
 }
 
 /* the custom test settings are kept between visits */
-function qcfg(){const c=S.qc||{};return {sc:c.sc||{k:S.bm?'bm':'s',v:1,v2:1},types:c.types||QT.map(x=>x[0]),len:c.len||'m',goal:c.goal||'cov'}}
+function qcfg(){const c=S.qc||{};return {sc:c.sc||{k:S.bm?'bm':'s',v:1,v2:1},types:(c.types||QT.map(x=>x[0])).filter(k=>QB[k]),len:c.len||'m',goal:c.goal||'cov'}}
 function renderTest(){
   const el=$('#t-test');
   if(QZ&&QZ.cur){renderQZ(el);syncRev();return}
@@ -1933,7 +1927,7 @@ function renderTest(){
   const tested=Object.values(S.pages).filter(r=>r.r).length,qn=(day().m&&day().m.n)||0,sq=(day().q&&day().q.n)||0,g=memGoal(),be=bmEnd();
   const open=S.mistakes.filter(m=>m.n<4).length,c=qcfg(),rg=scopeRange(c.sc),key=scopeKey(c.sc),cv=rg?covCount(covGet(key),rg):0,N=rg?rg[1]-rg[0]+1:0;
   const vsel=()=>{const k=c.sc.k,v=+c.sc.v||1;
-    if(k==='s')return `<select id="qsv" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}"${+s===v?' selected':''}>${s}. ${esc(D.n[s])}</option>`).join('')}</select>`;
+    if(k==='s')return `<select id="qsv" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}"${+s===v?' selected':''}>${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('')}</select>`;
     if(k==='j')return `<select id="qsv" aria-label="الجزء">${[...Array(30)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>الجزء ${AR(i+1)}</option>`).join('')}</select>`;
     if(k==='h')return `<select id="qsv" aria-label="الحزب">${[...Array(60)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>الحزب ${AR(i+1)}</option>`).join('')}</select>`;
     if(k==='r')return `<select id="qsv" aria-label="الربع">${[...Array(240)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>${rubLabel(i+1)} · ج${AR(Math.ceil((i+1)/8))}</option>`).join('')}</select>`;
@@ -2444,7 +2438,7 @@ function openJump(){
    <div class="nav4"><select id="jjz" aria-label="الجزء">${Object.keys(D.j).map(j=>`<option value="${j}">الجزء ${AR(j)}</option>`).join('')}</select>
     <select id="jhz" aria-label="الحزب">${[...Array(60)].map((_,i)=>`<option value="${i+1}">الحزب ${AR(i+1)}</option>`).join('')}</select>
     <select id="jrb" aria-label="الربع">${[...Array(240)].map((_,i)=>`<option value="${i+1}">${rubLabel(i+1)}</option>`).join('')}</select>
-    <select id="jsu" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])}</option>`).join('')}</select></div>
+    <select id="jsu" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('')}</select></div>
    <div class="row"><label for="jpg">صفحة</label><input id="jpg" type="number" min="1" max="604" value="${MP}"><button class="p" id="jgo">روح</button></div></div>`;
   $('#jjz').value=Math.ceil(r/8);$('#jhz').value=Math.ceil(r/4);$('#jrb').value=r;$('#jsu').value=AY[FA[MP]].s;
   const go=p=>{closeSheet();openPage(p)};
