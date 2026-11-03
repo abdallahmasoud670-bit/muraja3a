@@ -460,6 +460,34 @@ body.reading .fab,body.reading .fmenu,body.reading .fback{display:none}
 .mact{justify-content:flex-end}.mact button{padding:5px 10px;font-size:.82rem;min-height:36px}
 .lnk{padding:0 4px;min-height:0!important;color:var(--accent);text-decoration:underline;font-size:inherit}
 @media (max-width:520px){.item{flex-direction:column;align-items:stretch}.mact{justify-content:flex-start}.qopts{grid-template-columns:1fr 1fr}}
+/* the Zawawi dictionary: margin sign, the places side by side (shared words, the words that differ), the author's sign */
+.mkr.zw{color:var(--accent)}
+.mkr.zw::before{content:"";position:absolute;inset:-7px -2px}
+.mkr.zw .sym{width:17px;height:17px;font-family:var(--ui);font-size:10px;font-weight:700;border-width:1.2px;background:color-mix(in srgb,var(--accent) 12%,var(--paper))}
+body.reading .mkr.zw .sym{width:15px;height:15px;font-size:9px}
+.zq{font-family:var(--quran);color:var(--gold);font-size:1.1em;line-height:1.9}
+.zt{font-size:1.05rem;line-height:2}
+.zmeta{font-size:.8rem;color:var(--muted)}
+.zcmp{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.zpl{display:flex;flex-direction:column;align-items:stretch;gap:2px;width:100%;text-align:start;padding:8px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line);cursor:pointer}
+.zpl.cur{border-color:var(--gold2);box-shadow:0 0 0 1px var(--gold2) inset}
+.zph{display:flex;gap:6px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.zph b{color:var(--ink);font-weight:600}
+.zv{font-family:var(--quran);font-size:1.3rem;line-height:2.1}
+.zv .zm{opacity:.45}
+.zv .za{color:var(--accent)}
+.zv .zu{background:color-mix(in srgb,var(--st2) 40%,transparent);color:var(--ink);border-radius:5px;padding:0 2px}
+.zg{font-weight:600;color:var(--gold);margin:8px 0 2px}
+.zx{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--gold2) 12%,transparent);line-height:1.9;font-size:.95rem}
+.zx p{margin:0 0 6px}.zx p:last-child{margin:0}
+.zx h4{margin:0 0 4px;font-size:.9rem;color:var(--gold)}
+details.zx summary{cursor:pointer;font-weight:600;color:var(--gold)}
+.zmini{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-top:1px dashed var(--line)}
+.zday .zcmp{margin:6px 0}
+.zlet{display:flex;flex-wrap:wrap;gap:5px}.zlet button{padding:3px 10px;font-size:.85rem;min-height:34px}
+.zlet button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.sr .zq{font-size:1.05em}
+.qtypes .zsep{grid-column:1/-1;font-size:.85rem;color:var(--gold);font-weight:600;margin-top:4px}
 </style>
 
 <canvas id="fx" aria-hidden="true" hidden></canvas>
@@ -520,6 +548,8 @@ const juzOfPage=p=>{let j=1;for(let i=1;i<=30;i++)if(p>=JS[i])j=i;return j};
 const MADANI=new Set([2,3,4,5,8,9,13,22,24,33,47,48,49,55,57,58,59,60,61,62,63,64,65,66,76,98,99,110]);
 const stype=s=>MADANI.has(+s)?'مدنية':'مكية';
 const sname=s=>D.n[s]?D.n[s]+' ('+stype(s)+')':('سورة '+s);
+/* the Zawawi dictionary, filled by loadZW(): ZW the file, ZA ayah id -> the places that include it, ZID entry id -> entry, ZBN book number -> entry */
+let ZW=null;const ZA=new Map(),ZID={},ZBN={};
 
 /* ---- index of ayat ---- */
 const AY={};
@@ -588,17 +618,29 @@ function pageMarks(p){
     });
   });
   (RSP[p]||[]).forEach(x=>m.push({li:x.line-1,...rubMark(x.r)}));
+  /* a small sign on every line where an ayah with similar verses (Zawawi) begins */
+  if(ZW)lines.forEach((e,li)=>{if(!Array.isArray(e))return;const ids=[...new Set(e[1])].filter(id=>AY[id].page===p&&AY[id].line===li+1&&ZA.has(id));if(ids.length)m.push({li,k:'zw',ids})});
   return m;
 }
 function placeMarks(leaf){
   const box=leaf&&leaf.querySelector('.margin');if(!box)return;box.innerHTML='';
   if(!leaf.classList.contains('wm'))return;
-  const p=+leaf.dataset.p;let lastTop=-99;
-  pageMarks(p).map(m=>{const ln=leaf.querySelector(`.ln[data-i="${m.li}"]`);return ln?{m,top:ln.offsetTop+ln.offsetHeight/2-14}:null}).filter(Boolean).sort((a,b)=>a.top-b.top).forEach(x=>{
-    let top=Math.max(0,x.top);if(top-lastTop<42)top=lastTop+42;lastTop=top;
+  const p=+leaf.dataset.p;let lastTop=-99;const boxes=[],zw=[];
+  pageMarks(p).map(m=>{const ln=leaf.querySelector(`.ln[data-i="${m.li}"]`);return ln?{m,ln,top:ln.offsetTop+ln.offsetHeight/2-14}:null}).filter(Boolean).sort((a,b)=>a.top-b.top).forEach(x=>{
+    if(x.m.k==='zw'){zw.push(x);return}
+    let top=Math.max(0,x.top);if(top-lastTop<42)top=lastTop+42;lastTop=top;boxes.push([top,top+40]);
     const d=document.createElement('div');d.className='mkr '+x.m.k;d.title=x.m.tip;
     d.innerHTML=`<span class="sym">${x.m.sym}</span><small>${x.m.t1}${x.m.t2?' '+x.m.t2:''}</small>`;
     d.style.top=top+'px';d.onclick=()=>toast(x.m.tip);box.appendChild(d);
+  });
+  /* similar-verse signs: under any sign on the same height; never on a hidden line (it would show the hidden ayah) */
+  let lz=-99;
+  zw.forEach(x=>{
+    if(x.ln.classList.contains('hide')||x.ln.querySelector('.qh,.qo'))return;
+    let top=Math.max(0,x.top+5);if(top-lz<20)top=lz+20;
+    for(const [a,b] of boxes)if(top+18>a&&top<b)top=b+2;lz=top;
+    const d=document.createElement('div');d.className='mkr zw';d.title='متشابهات (معجم الزواوي)';d.setAttribute('role','button');d.setAttribute('aria-label','متشابهات الآية');
+    d.innerHTML='<span class="sym">م</span>';d.style.top=top+'px';d.onclick=ev=>{ev.stopPropagation();zOpenAyat(x.m.ids)};box.appendChild(d);
   });
 }
 function cueData(p){
@@ -625,14 +667,16 @@ function load(){
     try{const o=JSON.parse(localStorage.getItem('muraja3a-v1'));if(o&&o.days){S.cursor=o.cursor||0;S.sessions=o.sessions||0;S.days={};
       for(const k in o.days){const r=o.days[k],n={};['c','s','t'].forEach(x=>{if(r[x]&&r[x].done)n[x]={done:true,unit:r[x].unit,items:[]}});S.days[k]=n}}}catch(e){}}
   S.cursor=S.cursor||0;S.sessions=S.sessions||0;S.days=S.days||{};S.pages=S.pages||{};S.mistakes=S.mistakes||[];S.notes=S.notes||{};S.verified=S.verified||{};S.theme=S.theme||'auto';S.pc=S.pc||{};S.wc=S.wc||{};if(S.sound===undefined)S.sound=true;if(S.margin===undefined)S.margin=true;
+  /* custom-test types saved before phase 3: the similar-verse questions are added once */
+  if(S.qc&&Array.isArray(S.qc.types)&&!S.qc.zv){S.qc.types=S.qc.types.concat(['zwd','zws','zwf','zwc','zwr']);S.qc.zv=1}
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const day=(k)=>S.days[k||TODAY()]||(S.days[k||TODAY()]={});
 const kept=k=>{const r=S.days[k];return !!r&&['c','s','t','q','m'].some(x=>r[x]&&(r[x].done))};
 function toast(t,act){
   const e=$('#toast');e.textContent='';const s=document.createElement('span');s.textContent=t;e.append(s);
-  if(act){const b=document.createElement('button');b.textContent=act.label;b.onclick=()=>{act.fn();e.classList.remove('on')};e.append(b);e.style.pointerEvents='auto'}else e.style.pointerEvents='none';
-  e.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove('on'),act?7000:2400);
+  if(act){(Array.isArray(act)?act:[act]).forEach(a=>{const b=document.createElement('button');b.textContent=a.label;b.onclick=()=>{a.fn();e.classList.remove('on')};e.append(b)});e.style.pointerEvents='auto'}else e.style.pointerEvents='none';
+  e.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>e.classList.remove('on'),act?(Array.isArray(act)?9000:7000):2400);
 }
 function streak(){let n=0,d=TODAY();if(!kept(d))d=addDays(d,-1);while(kept(d)){n++;d=addDays(d,-1)}return n}
 function missedDays(){let n=0,d=TODAY();if(kept(d))return 0;if(!Object.keys(S.days).some(kept))return 0;d=addDays(d,-1);while(!kept(d)&&n<400){n++;d=addDays(d,-1);if(n>=60)break}return n+1}
@@ -821,6 +865,9 @@ function openWMenu(w,x,y){
 /* one mistake on one word: word counter, page counter and the review list; toast offers undo */
 function addMistake(id,word,line,extra){
   const A=AY[id];if(!A)return;if(!word||word==='۞')word=A.t[0];
+    /* a word inside a Zawawi similar phrase: the entry is kept on the mistake (sim = entry id) and named in the toast */
+    const zp=extra&&extra.sim!==undefined?(ZID[extra.sim]?null:zwFor(id,word)):zwFor(id,word);
+    if(zp)extra=Object.assign({},extra||{},{sim:zp.e.id});
     const wkey=id+'|'+word,wc0=S.wc[wkey]?{...S.wc[wkey]}:null,pc0=S.pc[A.page]?{...S.pc[A.page]}:null;
     const wc=S.wc[wkey]||(S.wc[wkey]={n:0,p:A.page});wc.n++;bumpPage(A.page,'w');
     const dup=S.mistakes.find(m=>m.aid===id&&m.word===word&&m.n<4),dup0=dup?{n:dup.n,due:dup.due}:null;
@@ -837,7 +884,10 @@ function addMistake(id,word,line,extra){
     save();renderAll();
     toast(dup?'اتسجّلت مرة كمان. ده الغلط رقم '+AR(wc.n)+' في الكلمة دي':'اتسجّل، هيرجعلك في التثبيت',{label:'تراجع',fn:undo});
   AUDP=0;save();renderAll();
-  toast(dup||wc.n>1?'غلطة رقم '+AR(wc.n)+' في «'+word+'»':'اتسجّل غلط في «'+word+'»',{label:'تراجع',fn:undo});
+  const msg=dup||wc.n>1?'غلطة رقم '+AR(wc.n)+' في «'+word+'»':'اتسجّل غلط في «'+word+'»';
+  if(zp){const o=zp.e.P.filter(x=>x!==zp).slice(0,2).map(zLab).join(' و');
+    toast(msg+(o?' · غالبًا اتلخبطت مع '+o:''),[{label:'البند',fn:()=>zOpen(zp.e.id,{aid:id})},{label:'تراجع',fn:undo}])}
+  else toast(msg,{label:'تراجع',fn:undo});
 }
 function openSheet(id,ctx){
   ctx=ctx||{};const A=AY[id];if(!A)return;
@@ -846,7 +896,7 @@ function openSheet(id,ctx){
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="تفاصيل الآية">
    <div class="row sp"><h3>سورة ${esc(sname(A.s))} · آية ${AR(A.a)} · صفحة ${AR(A.page)}</h3><button class="g" id="x">إغلاق</button></div>
    <p class="ayat">${esc(ayahText(id))}</p><p class="muted" id="cnts">${esc(cntText(id,ctx.word))}</p>
-   <div class="row"><button class="p" id="mis">سجّل خطأ هنا</button><button id="sgo">افتح الصفحة</button><button id="sbm">${S.bm&&S.bm.aid===id?'شيل علامة الآية':'علّم هنا (مكان وقوفي)'}</button></div>
+   <div class="row"><button class="p" id="mis">سجّل خطأ هنا</button><button id="sgo">افتح الصفحة</button><button id="sbm">${S.bm&&S.bm.aid===id?'شيل علامة الآية':'علّم هنا (مكان وقوفي)'}</button>${ZA.has(id)?'<button id="szw">متشابهات الآية (الزواوي)</button>':''}</div>
    ${AUDIO?`<div class="row" id="arow"><button class="p" id="ap">▶ اسمع الآية</button><button id="apv" aria-label="السابقة">⏮</button><button id="anx" aria-label="التالية">⏭</button><button id="ast" aria-label="إيقاف">⏹</button><select id="asr" aria-label="القارئ">${REC.map(r=>`<option value="${r.k}"${r.k===S.rc?' selected':''}>${r.n}</option>`).join('')}</select></div>`:''}
    <div class="row">${open?'<span class="muted">فيها خطأ مسجّل</span>':''}</div>
    <div class="seg" id="seg">${TAF.map(t=>`<button data-c="${t[0]}" aria-pressed="${t[0]===code}">${t[1]}</button>`).join('')}</div>
@@ -855,6 +905,7 @@ function openSheet(id,ctx){
   </div>`;
   $('#sbk').onclick=$('#x').onclick=closeSheet;
   $('#sgo').onclick=()=>{closeSheet();openPage(A.page,id)};
+  const szw=$('#szw');if(szw)szw.onclick=()=>zOpenAyat([id]);
   $('#sbm').onclick=()=>{
     if(S.bm&&S.bm.aid===id){S.bm=null;toast('اتشالت العلامة')}
     else{S.bm={p:A.page,aid:id,d:TODAY()};toast('اتعلّمت سورة '+sname(A.s)+' آية '+AR(A.a)+' كمكان وقوفك')}
@@ -987,6 +1038,7 @@ function renderToday(){
    <div class="card"><div class="row sp"><span>دورة المراجعة</span><span class="muted">${AR(pos)}٪ · ختمات: ${AR(Math.floor(S.sessions/60))}</span></div><div class="bar"><i style="width:${pos}%"></i></div>
    <p class="muted">كل جلسة ١٠ صفحات بترتيب المصحف. ٦٠ جلسة تعمل ختمة مراجعة.</p></div>
    ${aod}
+   <div class="card zday" id="zday"></div>
    <div class="card"><div class="row sp"><h2>رفّ الأجزاء</h2><span class="muted">اضغط على جزء يفتح</span></div><div class="shelf">${shelf}</div><div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز</span><span><i style="background:var(--st3)"></i>ثابت</span><span><i style="background:var(--st2)"></i>بتردد</span><span><i style="background:var(--st1)"></i>ناسيه</span><span><i style="background:var(--st0)"></i>لم يُختبر</span></div>
     </div>`;
   const hb=$('#homeBody');
@@ -997,6 +1049,7 @@ function renderToday(){
   $('#aodT').onclick=()=>openSheet(did);
   $('#aodD').onclick=()=>{openSheet(did);const n=$('#nt');if(n)n.focus()};
   if(AUDIO)$('#aodP').onclick=()=>{AU.until=0;playAyah(la||did)};
+  renderZDay();
 }
 function toggle(t){
   const d=day(),r=d[t];
@@ -1646,7 +1699,9 @@ const scopeKey=sc=>sc.k+(sc.k==='bm'||sc.k==='all'?'':':'+(+sc.v||1)+(sc.k==='pg
 function covGet(key){const s=new Set();((S.cov&&S.cov[key])||'').split(',').forEach(x=>{if(!x)return;const [a,b]=x.split('-').map(Number);for(let i=a;i<=(b||a);i++)s.add(i)});return s}
 function covPut(key,set){const a=[...set].sort((x,y)=>x-y),o=[];for(let i=0;i<a.length;){let j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;o.push(a[i]===a[j]?a[i]:a[i]+'-'+a[j]);i=j+1}S.cov=S.cov||{};S.cov[key]=o.join(',')}
 function covCount(set,rg){let n=0;for(let i=rg[0];i<=rg[1];i++)if(set.has(i))n++;return n}
-const QT=[['cmp','أكمل من قوله تعالى إلى قوله'],['nxt','اقرأ الآية (أو الآيتين) بعدها'],['prv','اقرأ الآية اللي قبلها'],['sur','في أنهي سورة؟'],['bnd','بم بدأت أو خُتمت السورة'],['blk','املأ الفراغ'],['fix','صحّح الخطأ'],['ord','رتّب الآيات'],['tf','صح ولا غلط مع التصويب'],['edg','أول أو آخر آية في الجزء أو الربع'],['lfz','اذكر آية ورد فيها لفظ']];
+const QT=[['cmp','أكمل من قوله تعالى إلى قوله'],['nxt','اقرأ الآية (أو الآيتين) بعدها'],['prv','اقرأ الآية اللي قبلها'],['sur','في أنهي سورة؟'],['bnd','بم بدأت أو خُتمت السورة'],['blk','املأ الفراغ'],['fix','صحّح الخطأ'],['ord','رتّب الآيات'],['tf','صح ولا غلط مع التصويب'],['edg','أول أو آخر آية في الجزء أو الربع'],['lfz','اذكر آية ورد فيها لفظ'],
+  ['zwd','متشابهات: فرّق بين الموضعين'],['zws','متشابهات: أنهي سورة جت بالصيغة دي'],['zwf','متشابهات: اختار الصيغة الصح للموضع'],['zwc','متشابهات: كام مرة اتذكر اللفظ وفين'],['zwr','متشابهات: شبيه الآية دي فين (السؤال المقلوب)']];
+const ZWT=['zwd','zws','zwf','zwc','zwr'];
 const QLEN={s:3,m:7.5,l:15},QLEN_L={s:'قصير (حوالي ٣ سطور)',m:'نص وجه',l:'وجه كامل'};
 const QGOAL_L={cov:'تغطية كاملة',rnd:'عشوائي',mis:'أخطائي الأول'};
 const memGoal=()=>S.memN||3;
@@ -1738,7 +1793,7 @@ function qLfz(t){
   AY[t].t.forEach(x=>{const n=NRM(x);if(n.length<4||x.includes('۩'))return;const ids=[];for(let i=sa;i<=sb;i++)if(AY[i].t.some(y=>NRM(y)===n))ids.push(i);if(ids.length<=2)c.push({w:x,ids})});
   if(!c.length)return null;const x=pick(c);return {k:'lfz',s,w:x.w,ans:x.ids};
 }
-const QB={cmp:qCmp,nxt:qNxt,prv:qPrv,sur:qSur,bnd:qBnd,blk:qBlk,fix:qFix,ord:qOrd,tf:qTf,edg:qEdg,lfz:qLfz};
+const QB={cmp:qCmp,nxt:qNxt,prv:qPrv,sur:qSur,bnd:qBnd,blk:qBlk,fix:qFix,ord:qOrd,tf:qTf,edg:qEdg,lfz:qLfz,zwd:qZwd,zws:qZws,zwf:qZwf,zwc:qZwc,zwr:qZwr};
 function covIds(q){return q.ls?[...Array(q.to-q.from+1)].map((_,i)=>q.from+i):q.ans&&q.k!=='sur'?q.ans:q.ids?q.ids:[q.t||q.id]}
 
 /* ---- the session ---- */
@@ -1760,7 +1815,7 @@ function startCustom(){const c=qcfg();if(!c.types.length){toast('اختار نو
 function nextQ(){
   let q=null;
   if(QZ.mode==='mem')q=qMem();
-  else for(let i=0;i<14&&!q;i++){const t=pickTarget();if(i<6&&QZ.recent.includes(t))continue;q=QB[pick(QZ.types)](t);if(q)q.t=t}
+  else for(let i=0;i<(QZ.mode==='zw'?30:14)&&!q;i++){const k=pick(QZ.types),z=ZWT.includes(k),t=z?zwTarget():pickTarget();if(!t||(i<6&&QZ.recent.includes(t)))continue;q=QB[k](t);if(q)q.t=t}
   if(!q){const t=pickTarget();q=qCmp(t);q.t=t}
   Object.assign(q,{errs:0,mw:[],pr:{}});QZ.cur=q;QZ.recent=[q.t||q.from,...QZ.recent].slice(0,6);
   if(READ)exitReader();
@@ -1777,7 +1832,7 @@ function finishQ(){
 /* after the passage: the problems the owner names change what happens next */
 function applyProblems(){
   const q=QZ.cur,pr=q.pr,pages=[...new Set((q.ls||[]).map(k=>Math.floor(k/100)))];
-  if(pr.sim)q.mw.forEach(k=>{const i=k.indexOf('|'),aid=+k.slice(0,i),w=k.slice(i+1);S.mistakes.forEach(m=>{if(m.aid===aid&&m.word===w)m.sim=true})});
+  if(pr.sim)q.mw.forEach(k=>{const i=k.indexOf('|'),aid=+k.slice(0,i),w=k.slice(i+1),zp=zwFor(aid,w);S.mistakes.forEach(m=>{if(m.aid===aid&&m.word===w)m.sim=zp?zp.e.id:(m.sim||true)})});
   if(pr.hes)pages.forEach(p=>{pageRate(p,2);S.pages[p].due=addDays(TODAY(),1)});
   if(pr.none&&!q.errs)pages.forEach(p=>{if(!(S.pages[p]&&S.pages[p].r))pageRate(p,3)});
   save();
@@ -1807,13 +1862,15 @@ function qAy(id,o){
 const where=id=>`سورة ${esc(sname(AY[id].s))} · آية ${AR(AY[id].a)} · صفحة ${AR(AY[id].page)}`;
 function renderQZ(el){
   const q=QZ.cur,d=day(),qn=(d.m&&d.m.n)||0,g=memGoal();
-  const title={mem:'اختبار المحفوظ',smart:'اختبار أخطائي',list:'اختبار على الأخطاء اللي اخترتها',custom:'اختبار مخصص'}[QZ.mode];
-  let prog='';
-  if(QZ.mode==='mem')prog=`<div class="row sp"><span>النهارده</span><span class="muted">${AR(qn)} من ${AR(g)}${qn>=g?' · خلصت، وتقدر تكمّل':''}</span></div><div class="bar"><i style="width:${Math.min(100,Math.round(qn/g*100))}%"></i></div>`;
+  const title={mem:'اختبار المحفوظ',smart:'اختبار أخطائي',list:'اختبار على الأخطاء اللي اخترتها',custom:'اختبار مخصص',zw:'اختبار المتشابهات'}[QZ.mode];
+  let prog='',zfull=false;
+  if(QZ.mode==='zw'&&!QZ.zent){const T=zwTargets(),c=T.filter(x=>QZ.cov.has(x)).length;zfull=T.length>0&&c>=T.length;prog=`<div class="row sp"><span>متشابهات قبل علامتك</span><span class="muted">غطّيت ${AR(c)} من ${AR(T.length)} موضع</span></div><div class="bar"><i style="width:${T.length?(c/T.length*100).toFixed(1):0}%"></i></div>`}
+  else if(QZ.mode==='zw'){const e=ZID[QZ.zent];prog=`<p class="muted">${e?esc(zNum(e))+' · ':''}كل الأنواع على البند ده</p>`}
+  else if(QZ.mode==='mem')prog=`<div class="row sp"><span>النهارده</span><span class="muted">${AR(qn)} من ${AR(g)}${qn>=g?' · خلصت، وتقدر تكمّل':''}</span></div><div class="bar"><i style="width:${Math.min(100,Math.round(qn/g*100))}%"></i></div>`;
   else if(QZ.list){const c=QZ.list.filter(x=>QZ.cov.has(x)).length;prog=`<div class="row sp"><span>غطّيت</span><span class="muted">${AR(c)} من ${AR(QZ.list.length)} موضع</span></div><div class="bar"><i style="width:${Math.round(c/QZ.list.length*100)}%"></i></div>`}
   else if(QZ.key){const N=QZ.rg[1]-QZ.rg[0]+1,c=covCount(QZ.cov,QZ.rg);prog=`<div class="row sp"><span>${esc(scopeName(QZ.sc))}</span><span class="muted">غطّيت ${AR(c)} من ${AR(N)} آية · ${AR(Math.floor(c/N*100))}٪</span></div><div class="bar"><i style="width:${(c/N*100).toFixed(1)}%"></i></div>`}
   else prog=`<p class="muted">سؤال رقم ${AR(QZ.n+(q.fin?0:1))} · كل سؤال نص وجه بالكتير، والأولوية للأكتر غلط والأحدث</p>`;
-  const full=QZ.key&&QZ.goal==='cov'&&covCount(QZ.cov,QZ.rg)>=QZ.rg[1]-QZ.rg[0]+1;
+  const full=QZ.mode==='zw'?zfull:QZ.key&&QZ.goal==='cov'&&covCount(QZ.cov,QZ.rg)>=QZ.rg[1]-QZ.rg[0]+1;
   let body=q.ls?qzPassage(q):qzText(q);
   const nxl=QZ.mode==='mem'&&qn>=g?'كمان':'السؤال التالي';
   const ready=q.ls?q.done:q.fin;
@@ -1825,6 +1882,7 @@ function renderQZ(el){
   const rs=$('#qzRst');if(rs)rs.onclick=()=>{QZ.cov=new Set();covPut(QZ.key,QZ.cov);save();renderTest()};
   const nb=$('#qzNext');if(nb)nb.onclick=()=>{
     if(q.ls)applyProblems();
+    else if(q.zw){if(q.bad===true&&!q.errs)zwRec(q)}
     else if(q.bad===true&&!q.errs){const id=(q.ans&&q.ans[0])||q.id||q.t;if(AY[id])addMistake(id,AY[id].t[0],AY[id].line,{q:q.k})}
     nextQ()};
   if(q.ls)wirePassage(q);else wireText(q);
@@ -1837,12 +1895,12 @@ function qzPassage(q){
   const tips=[];
   if(q.pr.none)tips.push(q.errs?'مسجّل عليك '+AR(q.errs)+' غلطة في الموضع ده، فمش هتتحسب «من غير غلط».':'ما شاء الله. كمّل كده.');
   if(q.pr.word)tips.push(q.errs?'الكلمة اتسجّلت في أخطائي، وهترجعلك في التثبيت بعد يوم و٣ و٧ و٣٠.':'دوس على الكلمة اللي غلطت فيها في الصفحة علشان تتسجّل.');
-  if(q.pr.sim)tips.push('هتتعلّم كمتشابه في أخطائي. علامة الزواوي هتظهر هنا لما معجم المتشابهات يدخل. دلوقتي اكتب الفرق اللي لخبطك في ملاحظة الآية.'+(q.errs?'':' دوس على الكلمة اللي اتلخبطت فيها الأول.'));
+  if(q.pr.sim)tips.push('هتتعلّم كمتشابه في أخطائي، وعلامة الزواوي تحت.'+(q.errs?'':' دوس على الكلمة اللي اتلخبطت فيها الأول، علشان يطلع البند بتاعها بالظبط.'));
   if(q.pr.hes)tips.push('اسمع الموضع ٣ مرات، والصفحات دي هترجعلك في مراجعة بكره.');
   const done=q.done?`<div class="qdone"><b class="hsb">حسبك</b>
      <p class="muted">دوس على أي كلمة غلطت فيها في الموضع (اتسجّل ${AR(q.errs)}). وبعدين قولّي حصل إيه:</p>
      <div class="chips qprob">${P.map(x=>`<button data-pr="${x[0]}" aria-pressed="${!!q.pr[x[0]]}">${x[1]}</button>`).join('')}</div>
-     ${tips.length?`<div class="qtip">${tips.map(t=>`<p>${t}</p>`).join('')}<div class="row">${q.pr.hes&&AUDIO?'<button id="qL3">▶ اسمعه ٣ مرات</button>':''}${q.pr.sim?'<button id="qNt">اكتب الفرق</button>':''}</div></div>`:''}</div>`:'';
+     ${tips.length?`<div class="qtip">${tips.map(t=>`<p>${t}</p>`).join('')}${q.pr.sim?zSimBlock(q):''}<div class="row">${q.pr.hes&&AUDIO?'<button id="qL3">▶ اسمعه ٣ مرات</button>':''}${q.pr.sim?'<button id="qNt">اكتب الفرق</button>':''}</div></div>`:''}</div>`:'';
   return `<div class="card"><div class="row sp"><span class="muted">${pages.length>1?`صفحة ${AR(p)} · ${AR(pi+1)} من ${AR(pages.length)} في الموضع`:`صفحة ${AR(p)}`}</span>
      <span class="row">${pages.length>1?`<button class="ib" id="qpP" aria-label="صفحة الموضع اللي قبلها" ${pi?'':'disabled'}>${ic('prev')}</button><button class="ib" id="qpN" aria-label="صفحة الموضع اللي بعدها" ${pi<pages.length-1?'':'disabled'}>${ic('next')}</button>`:''}${zoomSel()}</span></div>
     ${head}
@@ -1867,6 +1925,7 @@ function wirePassage(q){
 }
 /* text questions: what the question asks for stays hidden until answered or revealed */
 function qzText(q){
+  if(q.zw)return `<div class="card qcard0">${zwText(q)}</div>`;
   const A=AY[q.id||q.ans&&q.ans[0]];let h='',ans='';
   const selfc=()=>q.rev?`<div class="qans">${q.ans.map(i=>`<p class="qline">${qAy(i,q.k==='lfz'?{hiw:NRM(q.w)}:{})}</p><p class="muted">${where(i)}</p>`).join('')}</div>
      ${q.bad===undefined?`<div class="row"><button class="r3" data-g="1">قلتها صح</button><button class="r1" data-g="0">غلطت</button></div>`:q.bad?`<p class="qno">دوس على الكلمة اللي غلطت فيها علشان تتسجّل${q.errs?' (اتسجّل '+AR(q.errs)+')':'. لو ما دستش، هتتسجّل على أول الآية'}.</p>`:'<p class="qok">ما شاء الله</p>'}`
@@ -1916,6 +1975,11 @@ function wireText(q){
   el.querySelectorAll('[data-od]').forEach(b=>b.onclick=()=>{q.pk.push(+b.dataset.od);
     if(q.pk.length===q.ids.length){q.ok=q.pk.every((x,i)=>x===q.ids[i]);q.rev=true;if(!q.ok){const bad=q.ids.find((x,i)=>q.pk[i]!==x);rec(bad,0)}fin()}else renderTest()});
   const un=$('#qUn');if(un)un.onclick=()=>{q.pk.pop();renderTest()};
+  /* similar-verse questions: one choice; a wrong one is a mistake on the word that differs, linked to the entry */
+  el.querySelectorAll('[data-zc]').forEach(b=>b.onclick=()=>{q.ch=+b.dataset.zc;
+    if(q.ch!==q.za){q.bad=true;zwRec(q);fin();return}
+    if(q.k==='zwc'){renderTest();return}
+    q.bad=false;fin()});
 }
 
 /* the custom test settings are kept between visits */
@@ -1942,9 +2006,13 @@ function renderTest(){
    <div class="card"><div class="row sp"><h2>اختبار أخطائي</h2><span class="muted">${AR(open)} غلطة مفتوحة</span></div>
      <p class="muted">أسئلة سريعة متنوعة على الصفحات والسور والأيام اللي غلطت فيها أكتر وأحدث. كل سؤال نص وجه بالكتير.</p>
      <div class="row"><button class="p" id="qSm">ابدأ</button></div></div>
+   <div class="card"><div class="row sp"><h2>اختبار المتشابهات</h2><span class="muted">معجم الزواوي</span></div>
+     <p class="muted">أسئلة على المتشابهات اللي قبل علامتك (والشبيه ممكن يكون بعدها): فرّق بين الموضعين، أنهي سورة جت بالصيغة دي، اختار الصيغة الصح، كام مرة اتذكر اللفظ وفين، وشبيه الآية فين. بعد أي غلطة بتظهر علامة الزواوي.</p>
+     ${be?'':'<p class="qno">محتاج تعلّم مكان وقوفك في المصحف الأول.</p>'}
+     <div class="row"><button class="p" id="qZw"${be?'':' disabled'}>ابدأ</button><button id="qZd">تصفّح المعجم</button></div></div>
    <div class="card"><h2>اختبار مخصص</h2>
      <div class="row"><select id="qsk" aria-label="النطاق">${[['bm','كل اللي قبل علامتك'],['s','سورة'],['j','جزء'],['h','حزب'],['r','ربع'],['pg','صفحات من–إلى'],['all','المصحف كله']].map(([k,l])=>`<option value="${k}"${k===c.sc.k?' selected':''}>${l}</option>`).join('')}</select>${vsel()}</div>
-     <fieldset class="qtypes"><legend>أنواع الأسئلة</legend>${QT.map(([k,l])=>`<label><input type="checkbox" value="${k}"${c.types.includes(k)?' checked':''}> ${l}</label>`).join('')}</fieldset>
+     <fieldset class="qtypes"><legend>أنواع الأسئلة</legend>${QT.map(([k,l])=>`${k==='zwd'?'<span class="zsep">أسئلة المتشابهات (معجم الزواوي): المتشابه من اللي قبل علامتك، وشبيهه ممكن يكون بعدها</span>':''}<label><input type="checkbox" value="${k}"${c.types.includes(k)?' checked':''}> ${l}</label>`).join('')}</fieldset>
      <div class="row"><label class="row">الطول <select id="qln">${Object.keys(QLEN_L).map(k=>`<option value="${k}"${k===c.len?' selected':''}>${QLEN_L[k]}</option>`).join('')}</select></label>
       <label class="row">الهدف <select id="qgl">${Object.keys(QGOAL_L).map(k=>`<option value="${k}"${k===c.goal?' selected':''}>${QGOAL_L[k]}</option>`).join('')}</select></label></div>
      ${rg?`<div class="row sp"><span>التغطية: ${esc(scopeName(c.sc))}</span><span class="muted">${AR(cv)} من ${AR(N)} آية</span></div><div class="bar"><i style="width:${(cv/N*100).toFixed(1)}%"></i></div>`:''}
@@ -1957,6 +2025,7 @@ function renderTest(){
      <button id="go">هات لي صفحة</button></div>`;
   const setc=f=>{const x=qcfg();f(x);S.qc=x;save();renderTest()};
   $('#qMem').onclick=startMem;$('#qSm').onclick=startSmart;$('#qCu').onclick=startCustom;
+  $('#qZw').onclick=()=>startZw();$('#qZd').onclick=()=>openZDict();if(!ZW)loadZW().catch(()=>{});
   $('#qMemN').onchange=e=>{S.memN=+e.target.value;const d=day();if(d.m)d.m.done=d.m.n>=S.memN;save();renderToday();renderTest()};
   $('#qsk').onchange=e=>setc(x=>{x.sc={k:e.target.value,v:e.target.value==='pg'?(S.bm?S.bm.p:1):1,v2:e.target.value==='pg'?(S.bm?S.bm.p:1):1}});
   const sv=$('#qsv');if(sv)sv.onchange=e=>setc(x=>{x.sc=Object.assign({},x.sc,{v:+e.target.value||1})});
@@ -1992,10 +2061,11 @@ const mv=()=>Object.assign({},MV0,S.mv||{});
 const mCnt=m=>(S.wc[m.aid+'|'+m.word]||{n:1}).n;
 const dayLab=k=>k===TODAY()?'النهارده':k===addDays(TODAY(),-1)?'إمبارح':AR(k.split('-').reverse().join('/'));
 const MG={s:['السورة',m=>AY[m.aid].s,k=>'سورة '+sname(k)],j:['الجزء',m=>Math.ceil(D.r[m.aid-1]/8),k=>'الجزء '+AR(k)],h:['الحزب',m=>Math.ceil(D.r[m.aid-1]/4),k=>'الحزب '+AR(k)],
-  p:['الصفحة',m=>m.page,k=>'صفحة '+AR(k)],d:['اليوم',m=>ymd(new Date(m.id)),dayLab],sim:['متشابه',m=>m.sim?1:0,k=>+k?'متشابهات':'مش متشابهات'],none:['من غير تجميع',()=>0,()=>'كل الأخطاء']};
+  p:['الصفحة',m=>m.page,k=>'صفحة '+AR(k)],d:['اليوم',m=>ymd(new Date(m.id)),dayLab],sim:['متشابه',m=>zSimKey(m),k=>+k===0?'مش متشابهات':+k===-1?'متشابهات (من غير بند في معجم الزواوي)':ZID[k]?(x=>'المتشابه: '+zNum(ZID[k])+' · '+(x.length>70?x.slice(0,70)+'…':x))(zPlain(ZID[k].t||ZID[k].h).replace(/\.{3,}/g,'…')):'متشابهات · بند '+AR(k)],none:['من غير تجميع',()=>0,()=>'كل الأخطاء']};
 const MOPEN=new Set();
 function misFilter(v,noJ){return S.mistakes.filter(m=>AY[m.aid]&&(v.st==='all'||(v.st==='open'?m.n<4:m.n>=4))&&(v.sm==='all'||(v.sm==='sim'?!!m.sim:!m.sim))&&(noJ||!v.j||Math.ceil(D.r[m.aid-1]/8)===v.j))}
 function renderMis(){
+  if(!ZW&&S.mistakes.some(m=>m.sim))loadZW().catch(()=>{});
   const v=mv(),all=S.mistakes.filter(m=>AY[m.aid]),open=all.filter(m=>m.n<4),fixed=all.length-open.length;
   const words=Object.values(S.wc).reduce((a,x)=>a+x.n,0),pages=Object.keys(S.pc).filter(p=>pageErr(+p)>0).length;
   /* chart: the 30 juz, counted with the same filters (without the juz filter itself) */
@@ -2006,7 +2076,7 @@ function renderMis(){
   gs.sort(v.g==='d'&&v.o!=='n'?(a,b)=>b.last-a.last:{n:(a,b)=>b.n-a.n||b.last-a.last,new:(a,b)=>b.last-a.last,mus:(a,b)=>a.first-b.first}[v.o]);
   if(!gs.some(g=>MOPEN.has(v.g+':'+g.k))&&gs[0])MOPEN.add(v.g+':'+gs[0].k);
   const seg=(id,opts,cur)=>`<div class="seg" id="${id}">${opts.map(([k,l])=>`<button data-v="${k}" aria-pressed="${String(k)===String(cur)}">${l}</button>`).join('')}</div>`;
-  const item=m=>{const c=mCnt(m),op=m.n<4;return `<div class="item"><div><b>«${esc(m.word)}»</b> <span class="muted">${where(m.aid)} · سطر ${AR(m.line)}</span>${m.sim?' <span class="pchip">متشابه</span>':''}${m.q?' <span class="pchip">من اختبار</span>':''}
+  const item=m=>{const c=mCnt(m),op=m.n<4;return `<div class="item"><div><b>«${esc(m.word)}»</b> <span class="muted">${where(m.aid)} · سطر ${AR(m.line)}</span>${m.sim?(ZID[m.sim]?` <button class="pchip" data-zo="${m.sim}">متشابه · ${esc(zNum(ZID[m.sim]))}</button>`:' <span class="pchip">متشابه</span>'):''}${m.q?' <span class="pchip">من اختبار</span>':''}
     <div class="dots">${[0,1,2,3].map(i=>`<i class="${i<m.n?'on':''}"></i>`).join('')}</div><div class="muted">${op?(m.due<=TODAY()?'مستحق النهارده':'الموعد '+m.due):'اتثبّت'} · اتسجّل ${dayLab(ymd(new Date(m.id)))}</div></div>
     <div class="row mact"><span class="pchip ${c>=2?'warn':''}">${AR(c)} مرة</span><button data-o="${m.id}">افتح</button>${op?`<button data-ok="${m.id}">راجعتها</button>`:''}<button class="tg" data-sim="${m.id}" aria-pressed="${!!m.sim}">متشابه</button><button class="g" data-del="${m.id}" aria-label="حذف">✕</button></div></div>`};
   const repW=Object.keys(S.wc).map(k=>{const i=k.indexOf('|');return {aid:+k.slice(0,i),w:k.slice(i+1),n:S.wc[k].n,p:S.wc[k].p}}).filter(x=>x.n>=2&&AY[x.aid]).sort((a,b)=>b.n-a.n).slice(0,12);
@@ -2023,7 +2093,7 @@ function renderMis(){
     <div class="row"><span class="muted">الترتيب</span>${seg('mo',[['n','الأكتر غلط'],['new','الأحدث'],['mus','ترتيب المصحف']],v.o)}</div>
     <div class="row"><span class="muted">الحالة</span>${seg('mst',[['open','مفتوح'],['fixed','اتثبّت'],['all','الكل']],v.st)}${seg('msm',[['all','الكل'],['sim','متشابه'],['non','غيره']],v.sm)}</div>
     <div class="row sp"><span>${AR(list.length)} موضع في ${AR(gs.length)} مجموعة</span><button class="p" id="mTest"${list.length?'':' disabled'}>اختبرني على دول</button></div></div>
-   ${gs.length?gs.map(g=>`<details class="card mgrp" data-g="${esc(v.g+':'+g.k)}"${MOPEN.has(v.g+':'+g.k)?' open':''}><summary><span>${esc(G[2](g.k))}</span><span class="cnt">${AR(g.a.length)} موضع · ${AR(g.n)} مرة</span></summary>${g.a.map(item).join('')}</details>`).join('')
+   ${gs.length?gs.map(g=>`<details class="card mgrp" data-g="${esc(v.g+':'+g.k)}"${MOPEN.has(v.g+':'+g.k)?' open':''}><summary><span>${esc(G[2](g.k))}</span><span class="cnt">${AR(g.a.length)} موضع · ${AR(g.n)} مرة</span></summary>${v.g==='sim'&&ZID[g.k]?`<div class="row"><button data-zo="${g.k}">افتح البند: المواضع وعلامة الزواوي</button></div>`:''}${g.a.map(item).join('')}</details>`).join('')
      :`<div class="card"><p class="muted">${S.mistakes.length?'مفيش أخطاء بالفلاتر دي.':'مفيش أخطاء مسجّلة. من صفحة المصحف اضغط على الكلمة اللي بتغلط فيها وسجّلها، أو اختبر نفسك.'}</p></div>`}
    ${fixed&&v.st==='open'?`<p class="muted">اتثبّت ${AR(fixed)} موضع بعد ٤ مراجعات (بعد يوم، ٣، ٧، ٣٠). اختار «اتثبّت» علشان تشوفهم.</p>`:''}${repCard}`;
   const el=$('#t-mis'),setv=f=>{const x=mv();f(x);S.mv=x;save();renderMis()};
@@ -2254,7 +2324,8 @@ const IC={
  jump:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
  theme:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
- dl:'<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/>'
+ dl:'<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/>',
+ zw:'<path d="M4 9c2.7-2.4 5.3-2.4 8 0s5.3 2.4 8 0"/><path d="M4 15c2.7-2.4 5.3-2.4 8 0s5.3 2.4 8 0"/>'
 };
 /* ---- the phone's back button: every sheet, menu, reader and tab change is one step in the history.
    Back closes the newest one; with nothing open it goes home, and on the home screen it asks for a second press to leave.
@@ -2386,7 +2457,7 @@ function revCtx(){
 }
 function syncRev(){const b=$('#rev');if(!b)return;const c=revCtx(),was=!b.hidden;b.hidden=!c;if(c&&!was){fltPlace('rev');fltResolve('rev',true)}}
 
-const FI=[['search','بحث',''],['today','الرئيسية','t'],['mushaf','المصحف','t']].concat(AUDIO?[['aud','تلاوة','t']]:[]).concat([['test','اختبرني','t'],['mis','أخطائي','t'],['tad','تدبّري','t'],['me','حالتي','t'],['bm','روح للعلامة',''],['jump','انتقال','']]).concat(AUDIO?[['dl','بدون نت','']]:[]).concat([['theme','الوضع','']]);
+const FI=[['search','بحث',''],['today','الرئيسية','t'],['mushaf','المصحف','t']].concat(AUDIO?[['aud','تلاوة','t']]:[]).concat([['test','اختبرني','t'],['zw','المتشابهات',''],['mis','أخطائي','t'],['tad','تدبّري','t'],['me','حالتي','t'],['bm','روح للعلامة',''],['jump','انتقال','']]).concat(AUDIO?[['dl','بدون نت','']]:[]).concat([['theme','الوضع','']]);
 const FAB=(()=>{
   const fab=$('#fab'),menu=$('#fmenu'),back=$('#fback');
   fab.className='fab';
@@ -2398,7 +2469,7 @@ const FAB=(()=>{
        almost a full circle in the middle of the screen */
     const W=innerWidth,H=innerHeight,nx=Math.min(cx,W-cx)<110,ny=Math.min(cy,H-cy)<110,sx=cx>W/2?-1:1,sy=cy>H/2?-1:1;
     let base,spread,rings,R;
-    if(nx&&ny){base=Math.atan2(sy,sx)*180/Math.PI;spread=80;rings=items.length>10?[3,4,5]:items.length>9?[3,3,4]:[3,3,3];R=[120,196,274]}
+    if(nx&&ny){base=Math.atan2(sy,sx)*180/Math.PI;spread=80;rings=items.length>12?[3,4,6]:items.length>10?[3,4,5]:items.length>9?[3,3,4]:[3,3,3];R=[120,196,274]}
     else if(nx||ny){base=nx?(sx>0?0:180):(sy>0?90:-90);spread=170;rings=[5,items.length-5];R=[112,190]}
     else{base=sy>0?90:-90;spread=360;rings=[5,items.length-5];R=[100,172]}
     let k=0;
@@ -2422,6 +2493,7 @@ const FAB=(()=>{
     else if(k==='jump')openJump();
     else if(k==='search')openSearch();
     else if(k==='dl')openDL();
+    else if(k==='zw')openZDict();
     else if(k==='theme'){cycleTheme();fab.focus()}});
   menu.addEventListener('keydown',e=>{const i=items.indexOf(document.activeElement);let n=-1;
     if(e.key==='ArrowDown'||e.key==='ArrowLeft')n=(i+1)%items.length;else if(e.key==='ArrowUp'||e.key==='ArrowRight')n=(i-1+items.length)%items.length;
@@ -2455,7 +2527,7 @@ function openJump(){
 /* ---- offline: page fonts, tafsir and the search text in one cache; each reciter's audio in its own cache (sw.js serves them) ---- */
 const DATA_C='mj-data',audC=r=>'mj-aud-'+r.k;
 const hasCaches=()=>AUDIO&&'caches' in window;
-const coreUrls=()=>[...new Set((D.f||[]).filter(Boolean))].map(n=>FURL(String(n).padStart(2,'0'))).concat([...Array(114)].map((_,i)=>'t/'+(i+1)+'.json'),['s.json']);
+const coreUrls=()=>[...new Set((D.f||[]).filter(Boolean))].map(n=>FURL(String(n).padStart(2,'0'))).concat([...Array(114)].map((_,i)=>'t/'+(i+1)+'.json'),['s.json',ZV]);
 let PERS=false;
 function persistOnce(){if(PERS)return;PERS=true;try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
 async function cacheMiss(c,urls){const out=[];for(const u of urls)if(!(await c.match(u)))out.push(u);return out}
@@ -2466,7 +2538,7 @@ async function coreDownload(){
   const c=await caches.open(DATA_C),miss=await cacheMiss(c,coreUrls());CORE.n=miss.length;CORE.done=0;CORE.fail=0;dlNotify();
   await pool(miss,4,async u=>{try{const x=await fetch(u);if(!x.ok)throw 0;await c.put(u,x)}catch(e){CORE.fail++}CORE.done++;dlNotify()});
   CORE.busy=false;dlNotify();
-  toast(CORE.fail?'اتنزّل '+AR(CORE.done-CORE.fail)+' وفشل '+AR(CORE.fail)+'. اتأكد من النت وجرّب تاني':'المصحف والتفاسير والبحث جاهزين من غير نت');
+  toast(CORE.fail?'اتنزّل '+AR(CORE.done-CORE.fail)+' وفشل '+AR(CORE.fail)+'. اتأكد من النت وجرّب تاني':'المصحف والتفاسير والبحث والمتشابهات جاهزين من غير نت');
 }
 /* recitation: one job = one surah of one reciter; ayah reciters are one file per ayah, Luhaidan one file per surah */
 const recUrls=(r,s)=>r.surah?[r.surah+pad3(s)+'.mp3']:[...Array(AYC[s])].map((_,i)=>'https://everyayah.com/data/'+r.sf+'/'+pad3(s)+pad3(i+1)+'.mp3');
@@ -2503,7 +2575,7 @@ async function openDL(){
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="بدون نت">
    <div class="row sp"><h3>بدون نت</h3><button class="g" id="x">إغلاق</button></div>
    <p class="muted" id="dlst"></p>
-   <div class="card dlc"><h2>المصحف والتفاسير والبحث</h2><p class="muted">خطوط صفحات المصحف كلها، والتفاسير الثلاثة، ونص البحث. مرة واحدة وخلاص.</p>
+   <div class="card dlc"><h2>المصحف والتفاسير والبحث</h2><p class="muted">خطوط صفحات المصحف كلها، والتفاسير الثلاثة، ونص البحث، ومعجم المتشابهات. مرة واحدة وخلاص.</p>
     <div class="bar"><i id="dlcb"></i></div><div class="row sp"><span class="muted" id="dlct"></span><button class="p" id="dlcg">نزّل</button></div></div>
    <div class="card dlc"><h2>التلاوة</h2>
     <label class="chipsel">${ic('mic')}<select id="dlr" aria-label="القارئ">${REC.map(r=>`<option value="${r.k}"${r.k===rk?' selected':''}>${r.n}</option>`).join('')}</select></label>
@@ -2575,7 +2647,7 @@ function hiText(t,qn,toks){
   return h;
 }
 function searchAll(q){
-  const raw=LATN(q).trim(),out={pl:[],su:[],ay:[],nt:[],mi:[]};if(!raw)return out;
+  const raw=LATN(q).trim(),out={pl:[],su:[],ay:[],nt:[],mi:[],zw:[]};if(!raw)return out;
   const qn=NRM(raw.replace(/^سور[ةه]\s+/,'')),toks=qn.split(' ').filter(Boolean);
   const pl=(lab,p,aid)=>out.pl.push({lab,p,aid});
   let m=/^(\d{1,3})\s*[:：\/\-.]\s*(\d{1,3})$/.exec(raw);
@@ -2607,14 +2679,15 @@ function searchAll(q){
     Object.keys(S.notes).forEach(k=>{if(AY[k]&&NRM(S.notes[k]).includes(qn))out.nt.push(+k)});
     S.mistakes.forEach(x=>{if(AY[x.aid]&&(NRM(x.word).includes(qn)||NRM(sname(AY[x.aid].s)).includes(qn)))out.mi.push(x)});
   }
+  out.zw=zSearch(raw,qn);
   return out;
 }
-const SFILT=[['all','الكل'],['ay','آيات'],['su','سور'],['pl','مواضع'],['nt','ملاحظاتي'],['mi','أخطائي']];
+const SFILT=[['all','الكل'],['ay','آيات'],['su','سور'],['pl','مواضع'],['zw','المتشابهات'],['nt','ملاحظاتي'],['mi','أخطائي']];
 function openSearch(q0){
   let f=S.sf||'all',more=40,q=q0||'';
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet tall srch" role="dialog" aria-label="بحث">
    <div class="srhd"><div class="row sp"><h3>بحث</h3><button class="g" id="x">إغلاق</button></div>
-    <label class="srbox">${ic('search')}<input id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="جزء من آية، اسم سورة، رقم صفحة أو ٢:٢٥٥" aria-label="ابحث"></label>
+    <label class="srbox">${ic('search')}<input id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="جزء من آية، اسم سورة، رقم صفحة، ٢:٢٥٥ أو «بند ١٣٨»" aria-label="ابحث"></label>
     <div class="seg" id="sfl">${SFILT.map(x=>`<button data-f="${x[0]}" aria-pressed="${x[0]===f}">${x[1]}</button>`).join('')}</div></div>
    <div id="sres" class="sres" aria-live="polite"></div>
    <p class="hint">البحث في الآيات بيتجاهل التشكيل وأشكال الهمزة والتاء المربوطة، ومحتاج حرفين على الأقل. نص البحث من مشروع <a href="https://tanzil.net" target="_blank" rel="noopener">تنزيل</a>، والمصحف نفسه بنص مجمع الملك فهد.</p></div>`;
@@ -2634,20 +2707,280 @@ function openSearch(q0){
     sec('su','سور',R.su.length,R.su.map(x=>item('سورة '+sname(x.s),'رقم '+AR(x.s)+' · '+AR(AYC[x.s])+' آية · صفحة '+AR(x.p),x.p,x.id)).join(''));
     const lim=f==='ay'?more*3:more;
     sec('ay',R.approx?'آيات (بحث تقريبي)':'آيات',R.ay.length,R.ay.slice(0,lim).map(id=>{const a=D.a[id-1];return item('','سورة '+sname(a[0])+' · آية '+AR(a[1])+' · صفحة '+AR(a[2]),a[2],id,hiText(SQ.t[id-1],qn,toks))}).join('')+(R.ay.length>lim?'<button class="g srmore" id="srmore">اعرض أكتر</button>':''));
+    sec('zw','المتشابهات (معجم الزواوي)',R.zw.length,R.zw.slice(0,f==='zw'?200:12).map(e=>`<button class="sr" data-zo="${e.id}"><span class="srt">${zQ(e.t||e.h)}</span><span class="srm">${esc(zNum(e)+' · '+AR(e.P.length)+' موضع · صفحة '+AR(e.bp)+' في الكتاب')}</span></button>`).join('')+(f!=='zw'&&R.zw.length>12?'<button class="g srmore" data-f2="zw">كل نتايج المعجم</button>':''));
     sec('nt','ملاحظاتي',R.nt.length,R.nt.map(id=>item(S.notes[id],'سورة '+sname(AY[id].s)+' · آية '+AR(AY[id].a),AY[id].page,id)).join(''));
     sec('mi','أخطائي',R.mi.length,R.mi.map(x=>item('«'+x.word+'»','سورة '+sname(AY[x.aid].s)+' · آية '+AR(AY[x.aid].a)+' · صفحة '+AR(x.page)+(x.n<4?'':' · اتثبّتت'),x.page,x.aid)).join(''));
     el.innerHTML=parts.join('')||(!SQ&&f!=='su'&&f!=='pl'?'<p class="muted">جاري تحميل نص البحث…</p>':'<p class="muted">مفيش نتايج. جرّب كلمة تانية أو جزء أقصر.</p>');
     const mb=$('#srmore');if(mb)mb.onclick=()=>{more+=60;draw()};
   }
   $('#sres').onclick=e=>{const c=e.target.closest('[data-q]');if(c){q=c.dataset.q;inp.value=q;draw();return}
+    const zf=e.target.closest('[data-f2]');if(zf){const b=$('#sfl [data-f="zw"]');if(b)b.click();return}
+    if(e.target.closest('[data-zo]')){if(q.trim()){S.srh=[q.trim()].concat((S.srh||[]).filter(x=>x!==q.trim())).slice(0,8);save()}return}
     const b=e.target.closest('.sr');if(b)go({p:+b.dataset.p,aid:+b.dataset.aid||null})};
   let tm=0;inp.oninput=()=>{clearTimeout(tm);tm=setTimeout(()=>{q=inp.value;more=40;draw()},140)};
   inp.onkeydown=e=>{if(e.key==='Enter'){const b=$('#sres .sr');if(b)b.click()}};
   $('#sfl').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;f=S.sf=b.dataset.f;save();$('#sfl').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));more=40;draw()};
   draw();setTimeout(()=>inp.focus(),60);
+  if(!ZW)loadZW().then(draw).catch(()=>{});
   if(!SQ)loadSQ().then(draw).catch(()=>{const el=$('#sres');if(el)el.insertAdjacentHTML('afterbegin','<p class="muted">نص البحث في الآيات مش متاح دلوقتي (محتاج نت أول مرة، أو نزّله من «بدون نت»).</p>')});
 }
 addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!$('#sheetRoot').firstChild){e.preventDefault();openSearch()}});
+
+/* ---- the Zawawi dictionary of similar verses (معجم المتشابهات لألفاظ القرآن الكريم، يحيى عبد الفتاح الزواوي).
+   z.json (phase 3a extraction) gives the places (surah:ayah) and the author's sign; the verse text always comes from the site's
+   King Fahd data. Loaded on first need; sw.js keeps it with the other data. ---- */
+const ZV='z.json?v=1';
+let ZWP=null;
+function zKey(k){const m=/^(\d+):(\d+)(?:-(\d+))?$/.exec(k);if(!m)return null;const a=ID_BY_KEY[m[1]+':'+m[2]],b=m[3]?ID_BY_KEY[m[1]+':'+m[3]]:a;if(!a||!b||b<a||b-a>12)return null;const r=[];for(let i=a;i<=b;i++)r.push(i);return r}
+function loadZW(){
+  if(ZW)return Promise.resolve(ZW);
+  if(!ZWP)ZWP=fetch(ZV).then(r=>{if(!r.ok)throw new Error('z.json '+r.status);return r.json()}).then(j=>{
+    j.e.forEach(e=>{ZID[e.id]=e;if(e.n)ZBN[e.n]=e;e.P=[];
+      e.m.forEach(m=>{const ids=zKey(m.k);if(!ids)return;const p={e,ids,k:m.k,g:m.g||'',u:!!m.u,br:m.br||''};e.P.push(p);ids.forEach(id=>{const a=ZA.get(id);if(a)a.push(p);else ZA.set(id,[p])})})});
+    ZW=j;zwReady();return j}).catch(e=>{ZWP=null;throw e});
+  return ZWP;
+}
+function zNeed(fn){if(ZW){fn();return}toast('جاري تحميل معجم المتشابهات…');loadZW().then(fn).catch(()=>toast('معجم المتشابهات محتاج نت أول مرة (أو نزّله من «بدون نت»)'))}
+function zwReady(){document.querySelectorAll('.leaf').forEach(placeMarks);renderZDay();renderMis();if(TAB==='test'&&QZ&&QZ.cur&&QZ.cur.pr&&QZ.cur.pr.sim)renderTest()}
+/* labels and the book's text: Quran quoted inside [[ ]] is drawn in the mushaf font */
+const zHasL=s=>/[ء-ي]/.test(String(s||''));
+const zPlain=s=>String(s||'').replace(/\[\[|\]\]|[~\[\]"]/g,'').replace(/\s+/g,' ').trim();
+const zNum=e=>e.n?'البند '+AR(e.n):'بند من غير رقم'+(e.after?' (بعد البند '+AR(e.after)+')':'');
+function zLab(p){const a=AY[p.ids[0]],b=AY[p.ids[p.ids.length-1]];return 'سورة '+D.n[a.s]+' '+AR(a.a)+(p.ids.length>1?'–'+AR(b.a):'')}
+function zKL(k){const ids=zKey(k);return ids?zLab({ids}):AR(k)}
+function zQ(s){return String(s||'').split(/\[\[([\s\S]*?)\]\]/).map((x,i)=>i%2?`<span class="zq">${esc(x.replace(/[~\[\]\u0000]/g,'').replace(/\s+/g,' ').trim())}</span>`:esc(x.replace(/[\[\]]/g,''))).join('')}
+/* the PDF's hard line breaks become spaces; a numbered point, a dash or a line after ":" starts a new paragraph */
+function zPara(x){
+  const L=String(x||'').split('\n');let o='';
+  L.forEach((l,i)=>{if(i)o+=(/^\s*(\d+\s*[-–]|[-–•]|[ء-ي]\s*[-–]\s)/.test(l)||/:\s*-?\s*$/.test(L[i-1]))?'\u0000':' ';o+=l});
+  return zQ(o).split('\u0000').map(p=>p.trim()).filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+}
+function zSign(e,open){
+  const x=(e.x||'').trim();
+  if(!x)return '<div class="zx"><p class="muted">الكتاب ما كتبش علامة أو شرح للبند ده.</p></div>';
+  return `<details class="zx"${open?' open':''}><summary>علامة الزواوي</summary>${zPara(x)}</details>`;
+}
+/* the places of one entry compared word by word (normalised): the longest run each place shares with another place,
+   a window of 3 words around it, the words in that window no other place has, and the span that holds both */
+function lcsub(a,b){let best=0,end=-1,prev=new Uint16Array(b.length+1);for(let i=1;i<=a.length;i++){const cur=new Uint16Array(b.length+1);for(let j=1;j<=b.length;j++)if(a[i-1]&&a[i-1]===b[j-1]){cur[j]=prev[j-1]+1;if(cur[j]>best){best=cur[j];end=i-1}}prev=cur}return [best,end]}
+function zInfo(e){
+  if(e.Z)return e.Z;
+  const Z=e.P.map(p=>{const w=[];p.ids.forEach(id=>AY[id].t.forEach((t,k)=>w.push({t,id,k})));return {p,w,n:w.map(x=>NRM(x.t))}});
+  Z.forEach(A=>{let b=[0,-1];Z.forEach(B=>{if(B===A)return;const r=lcsub(A.n,B.n);if(r[0]>b[0])b=r});
+    A.alo=b[0]?b[1]-b[0]+1:-1;A.ahi=b[0]?b[1]:-1;
+    A.wlo=A.alo<0?0:Math.max(0,A.alo-3);A.whi=A.alo<0?A.w.length-1:Math.min(A.w.length-1,A.ahi+3)});
+  Z.forEach(A=>{const o=new Set();Z.forEach(B=>{if(B!==A)for(let j=B.wlo;j<=B.whi;j++)o.add(B.n[j])});
+    A.uq=new Set();if(A.alo>=0)for(let j=A.wlo;j<=A.whi;j++)if(A.n[j]&&!o.has(A.n[j]))A.uq.add(j);
+    const u=[...A.uq];A.lo=Math.min(A.alo,...u);A.hi=Math.max(A.ahi,...u);A.sp=A.alo<0?'':A.n.slice(A.lo,A.hi+1).join(' ')});
+  return e.Z=Z;
+}
+const zA=p=>zInfo(p.e).find(x=>x.p===p);
+/* words of A that the window of B does not have */
+function zPair(A,B){
+  const ra=lcsub(A.n,B.n),rb=lcsub(B.n,A.n);if(ra[0]<2)return new Set();
+  const al=ra[1]-ra[0]+1,bl=rb[1]-rb[0]+1,o=new Set(B.n.slice(Math.max(0,bl-2),rb[1]+3)),s=new Set();
+  for(let j=Math.max(0,al-2);j<=Math.min(A.n.length-1,ra[1]+2);j++)if((j<al||j>ra[1])&&A.n[j]&&!o.has(A.n[j]))s.add(j);
+  return s}
+/* the entry whose similar phrase holds this word: the likeliest mix-up for a mistake there */
+function zwFor(id,word){
+  if(!ZW||!word)return null;const ps=ZA.get(id);if(!ps)return null;let best=null;
+  ps.forEach(p=>{if(p.e.P.length<2)return;const A=zA(p);if(!A||A.alo<0)return;
+    A.w.forEach((x,k)=>{if(x.id!==id||x.t!==word)return;
+      const d=k<A.lo?A.lo-k:k>A.hi?k-A.hi:0;if(d>2)return;
+      const sc=(k>=A.alo&&k<=A.ahi?-1000:A.uq.has(k)?-500:d*100)-(A.ahi-A.alo);if(!best||sc<best.sc)best={sc,p}})});
+  return best&&best.p;
+}
+const zSimKey=m=>!m.sim?0:ZID[m.sim]?m.sim:(()=>{const p=zwFor(m.aid,m.word);return p?p.e.id:-1})();
+/* one place: shared words in the accent colour, the words only this place has marked, the rest faded; cut around the similar part */
+function zPlaceH(A,o){
+  o=o||{};const n=A.w.length,mk=mistakeKeys(),U=o.uq||A.uq;
+  let a=0,b=n-1;if(o.cut&&A.alo>=0){a=Math.max(0,A.wlo-o.cut);b=Math.min(n-1,A.whi+o.cut)}
+  let h=a>0?'… ':'';
+  for(let j=a;j<=b;j++){const x=A.w[j];
+    if(o.blank&&U.has(j))h+='<span class="qbl">……</span> ';
+    else if(o.blankSpan&&j>=A.lo&&j<=A.hi){if(j===A.lo)h+='<span class="qbl">……</span> '}
+    else{const c=o.plain||A.alo<0?'':j>=A.alo&&j<=A.ahi?'za':U.has(j)?'zu':j<A.wlo||j>A.whi?'zm':'';
+      h+=`<span class="w qw ${c}${mk.has(x.id+'|'+x.t)?' mk':''}" data-id="${x.id}" data-w="${esc(x.t)}" data-i="${AY[x.id].line-1}">${esc(x.t)}</span> `}
+    if(j<b&&A.w[j+1].id!==x.id)h+=`<span class="qn">${AR(AY[x.id].a)}</span> `}
+  return h+(b<n-1?'…':`<span class="qn">${AR(AY[A.w[n-1].id].a)}</span>`);
+}
+const zSpanTxt=A=>A.w.slice(A.lo,A.hi+1).map(x=>x.t).join(' ');
+function zCard(A,o){o=o||{};const p=A.p,a=AY[p.ids[0]];
+  return `<div class="zpl${o.cur?' cur':''}"${o.go?` data-zgo="${p.ids[0]}" role="button" tabindex="0"`:''}><div class="zph"><b>${esc(zLab(p))}</b><span>${esc(stype(a.s))} · صفحة ${AR(a.page)}</span>${p.br?`<span>(الكتاب كاتب ${esc(zKL(p.br))}، واتصحّح من الآية المنقولة)</span>`:''}${p.u?'<span>(رقم الموضع مكتوب من غير نص الآية)</span>':''}</div><div class="zv">${zPlaceH(A,o)}</div></div>`}
+function zCmp(e,o){
+  o=o||{};const Z=zInfo(e),list=o.only?Z.filter(A=>o.only.includes(A.p)):Z,max=o.max||999,gs=[];
+  list.slice(0,max).forEach(A=>{const g=o.only?'':A.p.g;let G=gs[gs.length-1];if(!G||G.g!==g)gs.push(G={g,a:[]});G.a.push(A)});
+  return gs.map(G=>{const gt=G.g&&(e.g||[]).find(x=>x.k===G.g);
+    return (G.g?`<div class="zg">${esc(G.g)}${gt?' · '+zQ(gt.t):''}</div>`:'')+`<div class="zcmp">${G.a.map(A=>zCard(A,{cur:o.cur&&A.p.ids.includes(o.cur),go:o.go,cut:o.cut===undefined?8:o.cut})).join('')}</div>`}).join('')
+    +(list.length>max?`<p class="muted">و${AR(list.length-max)} مواضع كمان في البند</p>`:'');
+}
+/* the dictionary sheet: entries open inside it, with its own «رجوع»; the phone's back button closes it */
+let ZST=[],ZCUR=null;
+function zSheet(fn){if(!$('#sheetRoot .zsh'))ZST=[];else if(ZCUR)ZST.push(ZCUR);ZCUR=fn;zDraw(fn)}
+function zDraw(fn){
+  const r=fn();
+  $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet zsh${r.tall?' tall':''}" role="dialog" aria-label="${esc(r.label)}">
+   <div class="row sp"><h3>${r.title}</h3><span class="row">${ZST.length?'<button id="zbk">رجوع</button>':''}<button class="g" id="x">إغلاق</button></span></div>${r.body}</div>`;
+  $('#sbk').onclick=$('#x').onclick=closeSheet;
+  const b=$('#zbk');if(b)b.onclick=()=>{ZCUR=ZST.pop();zDraw(ZCUR)};
+  if(r.wire)r.wire();
+}
+function zOpen(id,o){zNeed(()=>{const e=ZID[id];if(e)zSheet(()=>zEntryV(e,o||{}))})}
+function zEntryV(e,o){
+  const n=e.P.length,refs=(e.see||[]).filter(k=>ZBN[k]),back=e.n?ZW.x.filter(r=>r.to.includes(e.n)).slice(0,8):[];
+  const body=`<p class="zt">${zQ(e.t||e.h)}</p>
+   <p class="zmeta">${zHasL(e.h)&&e.t?zQ(e.h)+' · ':''}${AR(n)} ${n===1?'موضع':'مواضع'}${e.c&&e.c!==n?' (الكتاب كاتب '+AR(e.c)+')':''} · صفحة ${AR(e.bp)} في الكتاب (المجلد ${AR(e.pp[0])}، صفحة ${AR(e.pp[1])} في الـ PDF) · ${esc(e.l)}</p>
+   ${n?zCmp(e,{cur:o.aid,go:true}):'<p class="muted">البند ده ما فيهوش مواضع اتقرت من الكتاب.</p>'}
+   ${n>1?'<p class="hint">الكلام المشترك بلون، واللي بيفرّق الموضع عن غيره متعلّم عليه، والباقي باهت. دوس على أي موضع يفتحه في المصحف.</p>':''}
+   ${zSign(e,true)}
+   ${refs.length?`<div class="row"><span class="muted">انظر كمان:</span>${refs.map(k=>`<button data-zo="${ZBN[k].id}">البند ${AR(k)}</button>`).join('')}</div>`:''}
+   ${back.length?`<p class="zmeta">بيتحال له في الكتاب من: ${back.map(r=>zQ(r.h)).join(' · ')}</p>`:''}
+   ${n>1?`<div class="row"><button class="p" data-zq="${e.id}">اختبرني على البند ده</button></div>`:''}
+   <p class="hint">المصدر: معجم المتشابهات لألفاظ القرآن الكريم، يحيى عبد الفتاح الزواوي. نص الآيات من مصحف المدينة (مجمع الملك فهد).</p>`;
+  return {title:esc(zNum(e)),label:zNum(e),body};
+}
+function zRow(e){return `<button class="sr" data-zo="${e.id}"><span class="srt">${zQ(e.t||e.h)}</span><span class="srm">${esc(zNum(e)+' · '+AR(e.P.length)+' موضع'+(e.P.length?' · '+e.P.slice(0,3).map(zLab).join('، ')+(e.P.length>3?'…':''):''))}</span></button>`}
+function zOpenAyat(ids){zNeed(()=>{
+  const es=[];ids.forEach(id=>(ZA.get(id)||[]).forEach(p=>{if(!es.includes(p.e))es.push(p.e)}));if(!es.length)return;
+  if(es.length===1){zSheet(()=>zEntryV(es[0],{aid:ids[0]}));return}
+  zSheet(()=>({title:'متشابهات '+(ids.length===1?esc(zLab({ids:[ids[0]]})):'السطر ده'),label:'متشابهات',
+    body:`<p class="muted">${ids.length>1?'الآيات اللي بتبدأ في السطر: '+ids.map(i=>esc(zLab({ids:[i]}))).join(' · ')+'. ':''}${AR(es.length)} بند في معجم الزواوي. دوس على بند تشوف مواضعه وعلامته.</p>${es.map(zRow).join('')}`}))})}
+document.addEventListener('click',e=>{
+  const z=e.target.closest('[data-zo]');if(z){e.preventDefault();zOpen(+z.dataset.zo,{aid:+z.dataset.aid||0});return}
+  const g=e.target.closest('[data-zgo]');if(g){const id=+g.dataset.zgo;closeSheet();openPage(AY[id].page,id);return}
+  const q=e.target.closest('[data-zq]');if(q){closeSheet();startZw(+q.dataset.zq)}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.zgo)e.target.click()});
+/* search in the dictionary: «بند ١٣٨», a number, or words of the heading (index cross-references lead to their entries) */
+function zSearch(raw,qn){
+  if(!ZW||!raw)return [];const out=[],seen=new Set(),add=e=>{if(e&&!seen.has(e.id)){seen.add(e.id);out.push(e)}};
+  const m=/^(?:ال)?بند\s*(\d+)$/.exec(raw)||(/^\d+$/.test(raw)?[0,raw]:null);if(m)add(ZBN[+m[1]]);
+  const q=NRM(raw.replace(/^(?:ال)?بند\s*/,''));
+  if(q.length>=2&&!/^\d+$/.test(q)){
+    ZW.e.forEach(e=>{if(!e.sx)e.sx=NRM(zPlain(e.h)+' '+zPlain(e.t));if(e.sx.includes(q))add(e)});
+    ZW.x.forEach(r=>{if(!r.sx)r.sx=NRM(zPlain(r.h)+' '+zPlain(r.t));if(r.sx.includes(q))r.to.forEach(k=>add(ZBN[k]))});
+  }
+  return out;
+}
+/* browse in the book's order: its letter chapters, or a filter over the whole dictionary */
+let ZDL=null;
+function openZDict(){zNeed(()=>{
+  let qf='';const lets=[...new Set(ZW.e.map(e=>e.l))];if(!ZDL)ZDL=lets[0];
+  zSheet(()=>({tall:true,title:'معجم المتشابهات',label:'معجم المتشابهات للزواوي',
+    body:`<p class="zmeta">يحيى عبد الفتاح الزواوي، بترتيب الكتاب: ${AR(ZW.e.length)} بند و${AR(ZW.x.length)} إحالة.</p>
+     <label class="srbox">${ic('search')}<input id="zdq" type="search" autocomplete="off" placeholder="دوّر في المعجم: لفظ أو رقم بند" aria-label="دوّر في المعجم"></label>
+     <div class="zlet" id="zdl">${lets.map(l=>`<button data-l="${esc(l)}" aria-pressed="${l===ZDL}">${esc(l.replace(/^ال/,''))}</button>`).join('')}</div><div id="zdr" class="sres"></div>`,
+    wire:()=>{
+      const inp=$('#zdq');inp.value=qf;
+      const draw=()=>{const r=qf.trim()?zSearch(LATN(qf).trim()):ZW.e.filter(e=>e.l===ZDL);
+        $('#zdr').innerHTML=(qf.trim()?`<p class="muted">${AR(r.length)} بند</p>`:`<h4>${esc(ZDL)} <span class="muted">(${AR(r.length)})</span></h4>`)+r.slice(0,300).map(zRow).join('');
+        $('#zdl').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(!qf.trim()&&b.dataset.l===ZDL)))};
+      $('#zdl').onclick=e=>{const b=e.target.closest('[data-l]');if(!b)return;ZDL=b.dataset.l;qf='';inp.value='';draw();$('#zdr').scrollIntoView({block:'nearest'})};
+      let tm=0;inp.oninput=()=>{clearTimeout(tm);tm=setTimeout(()=>{qf=inp.value;draw()},160)};
+      draw();
+    }}));
+})}
+/* the home card: one entry a day, from the entries with a place before the bookmark */
+let ZDC=null;
+const zOk=p=>!p.u&&p.e.P.filter(x=>!x.u).length>=2;
+function renderZDay(){
+  const el=$('#zday');if(!el)return;
+  if(!ZW){el.innerHTML='<h2>متشابهة اليوم</h2><p class="muted">جاري تحميل معجم المتشابهات…</p>';
+    loadZW().catch(()=>{const x=$('#zday');if(x)x.innerHTML='<h2>متشابهة اليوم</h2><p class="muted">معجم المتشابهات محتاج نت أول مرة، أو نزّله من «بدون نت».</p>'});return}
+  const be=bmEnd(),inb=p=>zOk(p)&&(!be||p.ids[p.ids.length-1]<=be);
+  if(!ZDC||ZDC.be!==be)ZDC={be,c:ZW.e.filter(e=>e.P.some(inb))};
+  if(!ZDC.c.length){el.innerHTML='<h2>متشابهة اليوم</h2><p class="muted">مفيش بند في المعجم قبل علامتك لسه.</p>';return}
+  const e=ZDC.c[(diffDays(TODAY(),'2024-01-01')*7919)%ZDC.c.length],a=e.P.find(inb),b=e.P.find(p=>p!==a&&!p.u);
+  el.innerHTML=`<div class="row sp"><h2>متشابهة اليوم</h2><span class="muted">${esc(zNum(e))} · ${AR(e.P.length)} مواضع</span></div>
+   <p class="zt">${zQ(e.t||e.h)}</p>${zCmp(e,{only:[a,b].filter(Boolean),go:true,cut:4})}
+   ${e.P.length>2?`<p class="muted">و${AR(e.P.length-2)} كمان في البند</p>`:''}${be?'':'<p class="muted">علّم مكان وقوفك علشان المتشابهة تتختار من محفوظك.</p>'}
+   <div class="row"><button class="p" data-zo="${e.id}" data-aid="${a.ids[0]}">البند وعلامة الزواوي</button><button data-zq="${e.id}">اختبرني عليها</button><button id="zdD">تصفّح المعجم</button></div>`;
+  $('#zdD').onclick=openZDict;
+}
+/* after «حسبك», «اتلخبطت مع متشابه»: the entries of the words tapped, with the author's sign */
+function zSimBlock(q){
+  if(!ZW){loadZW().then(()=>{if(QZ&&QZ.cur===q)renderTest()}).catch(()=>{});return '<p class="muted">جاري تحميل معجم المتشابهات…</p>'}
+  const es=[];let note='';
+  q.mw.forEach(k=>{const i=k.indexOf('|'),p=zwFor(+k.slice(0,i),k.slice(i+1));if(p&&!es.includes(p.e))es.push(p.e)});
+  if(!es.length)q.mw.forEach(k=>(ZA.get(+k.slice(0,k.indexOf('|')))||[]).forEach(p=>{if(es.length<3&&p.e.P.length>1&&!es.includes(p.e)){es.push(p.e);note='الكلمة نفسها مش جوه الجزء المتشابه، بس الآية ليها البنود دي:'}}));
+  if(!es.length)return q.mw.length?'<p class="muted">مفيش بند في معجم الزواوي على الآية دي.</p>':'';
+  return (note?`<p class="muted">${note}</p>`:'')+es.slice(0,3).map(e=>`<div class="zmini"><b>${esc(zNum(e))}</b><span class="zt">${zQ(e.t||e.h)}</span>${zCmp(e,{max:3,cut:4})}${zSign(e,true)}<div class="row"><button data-zo="${e.id}">افتح البند كله</button></div></div>`).join('');
+}
+/* ---- similar-verse questions. The target place starts before the bookmark (its similar places may come after it);
+   places marked u (range read without the verse text) are never asked about. ---- */
+function zTargetsIn(a,b,ent){const out=new Set();if(!ZW)return [];(ent?[ent]:ZW.e).forEach(e=>e.P.forEach(p=>{if(zOk(p)&&p.ids[0]>=a&&p.ids[p.ids.length-1]<=b)out.add(p.ids[0])}));return [...out].sort((x,y)=>x-y)}
+function zwTargets(){const [a,b]=QZ.rg,be=bmEnd(),lim=be?Math.min(b,be):b,key=a+'-'+lim+'-'+(QZ.zent||0)+'-'+(ZW?1:0);
+  if(!QZ.zt||QZ.zt.key!==key)QZ.zt={key,a:zTargetsIn(a,lim,QZ.zent&&ZID[QZ.zent])};return QZ.zt.a}
+function zwTarget(){
+  const T=zwTargets();if(!T.length)return 0;
+  if(QZ.list){const st=new Set(T),l=QZ.list.filter(x=>st.has(x));if(!l.length)return 0;const un=l.filter(x=>!QZ.cov.has(x));return pick(un.length?un:l)}
+  if(QZ.goal==='mis'){const st=new Set(T),w=misWeights(QZ.rg[0],QZ.rg[1]);for(const k of [...w.keys()])if(!st.has(k))w.delete(k);if(w.size&&Math.random()<.8)return wpick(w)}
+  if(QZ.goal==='cov'){const un=T.filter(x=>!QZ.cov.has(x));if(un.length)return pick(un)}
+  return pick(T);
+}
+const zpAt=t=>(ZA.get(t)||[]).filter(p=>p.ids[0]===t&&zOk(p)&&(!QZ.zent||p.e.id===QZ.zent));
+function zPick(t,need){for(const p of shuffle(zpAt(t))){const Z=zInfo(p.e),A=Z.find(x=>x.p===p);if(A.alo<0)continue;const r=need(A,Z.filter(x=>x!==A&&!x.p.u&&x.alo>=0),p.e);if(r)return Object.assign({zw:1,id:t,e:p.e.id,pa:p},r)}return null}
+const zSur=A=>AY[A.p.ids[0]].s;
+function qZwd(t){return zPick(t,A=>{for(const B of shuffle(zInfo(A.p.e).filter(x=>x!==A&&!x.p.u&&x.alo>=0))){const ua=zPair(A,B),ub=zPair(B,A);if(ua.size&&ub.size)return {k:'zwd',pb:B.p,ua,ub}}return null})}
+function qZws(t){return zPick(t,(A,O)=>{if(!A.uq.size)return null;const s=zSur(A);if(O.some(x=>zSur(x)!==s&&x.sp===A.sp))return null;
+  const ss=[...new Set(O.map(zSur))].filter(x=>x!==s);if(!ss.length)return null;return {k:'zws',zo:shuffle([s,...shuffle(ss).slice(0,3)]),za:s}})}
+function qZwf(t){return zPick(t,(A,O)=>{if(!A.uq.size||!A.sp)return null;const seen=new Map([[A.sp,A]]);shuffle(O).forEach(x=>{if(x.sp&&!seen.has(x.sp)&&seen.size<4)seen.set(x.sp,x)});
+  if(seen.size<2)return null;const zo=shuffle([...seen.values()].map(x=>x.p));return {k:'zwf',zo,za:zo.indexOf(A.p)}})}
+/* «كام مرة»: the longest phrase all the places share, counted over the whole mushaf; asked only when it is exactly once in each place and nowhere else */
+const ZNT=[];const zNT=id=>ZNT[id]||(ZNT[id]=AY[id].t.map(NRM).join(' '));
+function zCount(e){
+  if(e.Zc!==undefined)return e.Zc;e.Zc=null;
+  if(e.P.length<2||e.P.some(p=>p.u))return null;
+  const Z=zInfo(e),A=Z[0];let best=null;
+  for(let L=Math.min(A.n.length,12);L>=2&&!best;L--)for(let i=0;i+L<=A.n.length&&!best;i++){const ph=A.n.slice(i,i+L);if(ph.some(x=>!x))continue;const s=' '+ph.join(' ')+' ';if(Z.every(B=>(' '+B.n.join(' ')+' ').includes(s)))best={i,L,s}}
+  if(!best)return null;
+  const inP=new Set(e.P.flatMap(p=>p.ids));let occ=0;
+  for(let id=1;id<=6236;id++){const t=' '+zNT(id)+' ';let k=t.indexOf(best.s);while(k>=0){if(!inP.has(id))return null;occ++;k=t.indexOf(best.s,k+1)}}
+  if(occ!==e.P.length)return null;
+  return e.Zc={n:occ,ph:A.w.slice(best.i,best.i+best.L).map(x=>x.t).join(' ')};
+}
+function qZwc(t){return zPick(t,(A,O,e)=>{const c=zCount(e);if(!c)return null;const n=c.n,o=new Set([n]);[n+1,n-1,n+2,n-2,n+3].forEach(x=>{if(x>=1&&o.size<4)o.add(x)});return {k:'zwc',ph:c.ph,zo:[...o].sort((a,b)=>a-b),za:n}})}
+function qZwr(t){return zPick(t,(A,O,e)=>{const s=zSur(A),oth=O.filter(x=>zSur(x)!==s);if(!oth.length)return null;
+  const B=pick(oth),bs=zSur(B),ent=new Set(e.P.map(p=>AY[p.ids[0]].s)),d=[];
+  for(const k of shuffle([1,-1,2,-2,3,-3,5,-5,8,-8]))if(d.length<3&&D.n[bs+k]&&!ent.has(bs+k))d.push(bs+k);
+  while(d.length<3){const r=1+rnd(114);if(!ent.has(r)&&!d.includes(r))d.push(r)}
+  return {k:'zwr',pb:B.p,zo:shuffle([bs,...d]),za:bs}})}
+/* a wrong answer: one mistake on the target's first word that differs, linked to the entry */
+function zwRec(q){const A=zA(q.pa);let j=[...(q.ua||A.uq)].sort((a,b)=>a-b)[0];if(j===undefined)j=Math.max(0,A.alo);const x=A.w[j];addMistake(x.id,x.t,AY[x.id].line,{q:q.k,sim:q.e})}
+const zTimes=n=>n===1?'مرة واحدة':n===2?'مرتين':AR(n)+(n<=10?' مرات':' مرة');
+function zwText(q){
+  const e=ZID[q.e];if(!e)return '<p class="muted">جاري تحميل المعجم…</p>';
+  const A=zA(q.pa),B=q.pb?zA(q.pb):null,done=!!q.fin;
+  const res=done?(q.bad?`<p class="qno">${q.errs?'اتسجّلت الغلطة':'اتسجّلت غلطة'} · ${esc(zNum(e))}</p>`:'<p class="qok">ما شاء الله، صح</p>'):'';
+  const foot=done?`${zSign(e,!!q.bad)}<div class="row"><button data-zo="${e.id}" data-aid="${q.id}">افتح البند كله</button></div>`:'';
+  const opt=(v,lab,cls)=>`<button data-zc="${v}" class="${cls||''} ${q.ch!==undefined?(v===q.za?'r3':v===q.ch?'r1':''):''}"${q.ch!==undefined?' disabled':''}>${lab}</button>`;
+  const grade=()=>q.bad===undefined?`<div class="row"><button class="r3" data-g="1">قلتها صح</button><button class="r1" data-g="0">غلطت</button></div>`
+    :q.bad?'<p class="qno">دوس على الكلمة اللي غلطت فيها علشان تتسجّل (لو ما دستش، هتتسجّل على أول كلمة بتفرّق).</p>':'';
+  const rev=lab=>`<div class="row"><button class="p" id="qRev">${lab}</button></div>`;
+  if(q.k==='zwd')return `<p class="qp">فرّق بين الموضعين: المخفي هو اللي بيفرّق كل موضع عن التاني. قوله في الاتنين، وبعدين اكشف.</p>
+    <div class="zcmp">${zCard(A,{blank:!q.rev,uq:q.ua,cut:5})}${zCard(B,{blank:!q.rev,uq:q.ub,cut:5})}</div>
+    ${q.rev?grade():rev('اكشف')}${res}${foot}`;
+  if(q.k==='zws')return `<p class="qp">في أنهي سورة جت الصيغة دي؟</p><p class="qline zv">${A.lo>0?'… ':''}${esc(zSpanTxt(A))}${A.hi<A.w.length-1?' …':''}</p>
+    <div class="qopts">${q.zo.map(s=>opt(s,'سورة '+esc(sname(s)))).join('')}</div>${res}${done?zCmp(e,{cur:q.id,cut:4,max:6}):''}${foot}`;
+  if(q.k==='zwf')return `<p class="qp">اختار الصيغة الصح في ${esc(zLab(A.p))}:</p><p class="qline zv">${zPlaceH(A,{blankSpan:!done,cut:6})}</p>
+    <div class="qopts qw4">${q.zo.map((p,i)=>opt(i,esc(zSpanTxt(zA(p))),'qf')).join('')}</div>${res}${done?zCmp(e,{only:q.zo,cur:q.id,cut:3}):''}${foot}`;
+  if(q.k==='zwc'){
+    const ok=q.ch!==undefined&&q.ch===q.za;
+    return `<p class="qp">كام مرة جه في القرآن قوله تعالى: <span class="qq">﴿${esc(q.ph)}﴾</span>؟</p>
+    <div class="qopts">${q.zo.map(n=>opt(n,zTimes(n))).join('')}</div>
+    ${ok&&!done?`<p class="qok">صح، ${zTimes(q.za)}.</p><p class="qp">وفين؟ قول السور قبل ما تكشف.</p>`:''}
+    ${q.ch===undefined?'':q.rev||done?zCmp(e,{cur:q.id,cut:3}):rev('اكشف المواضع')}
+    ${ok&&q.rev&&!done?grade():''}${done&&ok?grade():''}${res}${foot}`}
+  if(q.k==='zwr')return `<p class="qp">الآية دي ليها شبيه في سورة تانية. فين؟</p><p class="qline zv">${zPlaceH(A,{cut:6})}</p>
+    <div class="qopts">${q.zo.map(s=>opt(s,'سورة '+esc(sname(s)))).join('')}</div>${res}${done?zCmp(e,{cur:q.id,cut:4,max:6}):''}${foot}`;
+  return '';
+}
+function startZw(eid){zNeed(()=>{
+  const be=bmEnd();if(!be){toast('أسئلة المتشابهات بتختار من اللي قبل علامتك. علّم مكان وقوفك في المصحف الأول');return}
+  if(eid){if(!zTargetsIn(1,be,ZID[eid]).length){toast('مواضع البند ده بعد علامتك (أو رقمها مش مؤكد)، فمش هتيجي في الأسئلة');return}
+    startQZ({mode:'zw',sc:{k:'bm'},types:ZWT,goal:'rnd',zent:eid})}
+  else startQZ({mode:'zw',sc:{k:'bm'},types:ZWT,goal:'cov',key:'zw'});
+})}
 
 $('#srB').onclick=()=>openSearch();
 applyTheme();
