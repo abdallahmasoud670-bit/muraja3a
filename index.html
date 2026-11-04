@@ -488,6 +488,23 @@ details.zx summary{cursor:pointer;font-weight:600;color:var(--gold)}
 .zlet button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .sr .zq{font-size:1.05em}
 .qtypes .zsep{grid-column:1/-1;font-size:.85rem;color:var(--gold);font-weight:600;margin-top:4px}
+/* phase 4: surah card, السراج and asbab al-nuzul */
+.ln.sura[data-s]{cursor:pointer}
+.bk{margin-top:10px}.bk>h4{margin:0 0 6px;font-size:.95rem;color:var(--gold)}.bk>h4 .muted{font-weight:400;font-size:.8rem}
+.gr{display:flex;flex-direction:column;gap:4px;line-height:1.9}
+.gr div{padding:4px 10px;border-radius:10px;background:var(--bg)}.gr div.cur{box-shadow:0 0 0 1.5px var(--gold2) inset}
+.gr b{font-family:var(--quran),var(--ui);font-weight:400;font-size:1.12rem;color:var(--accent)}
+.bq{color:var(--accent)}
+details.asb{padding:8px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line);margin-bottom:6px;line-height:1.9;font-size:.95rem}
+details.asb summary{cursor:pointer;font-weight:600}details.asb p{margin:6px 0}
+.asb .rj{display:inline-block;padding:0 8px;border-radius:99px;background:var(--gold2);color:#1a1300;font-size:.78rem;margin-inline-end:6px}
+.asb .res{padding:6px 10px;border-radius:10px;background:color-mix(in srgb,var(--gold2) 14%,transparent)}
+.asb .nb{border-top:1px dashed var(--line);padding-top:4px}.asb .fn{font-size:.8rem;color:var(--muted)}
+.scard .smeta{display:flex;flex-wrap:wrap;gap:6px}.scard .smeta span{padding:2px 10px;border-radius:99px;background:var(--bg);font-size:.85rem}
+.scard .mq{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent) 10%,transparent);line-height:1.9}
+.scard .fd p{margin:0 0 8px;line-height:1.9}.scard .ah{margin:10px 0 4px;font-weight:600;color:var(--accent)}
+.wmg{font-size:.85rem;line-height:1.7;margin:-2px 0 6px;text-align:center;max-width:300px}
+.sr .srx{align-self:flex-start;margin-top:4px;font-size:.8rem;padding:2px 10px;border:1px solid var(--line);border-radius:99px;color:var(--accent)}
 </style>
 
 <canvas id="fx" aria-hidden="true" hidden></canvas>
@@ -721,9 +738,9 @@ function pageHTML(p,o){
     if(e===0)h+='<div class="ln blank"></div>';
     else if(typeof e==='string'){
       const c=e[0],s=+e.slice(1)||1;
-      if(c==='b')h+=`<div class="ln sura">سورة ${esc(sname(s))}</div>`;
+      if(c==='b')h+=`<div class="ln sura" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}</div>`;
       else if(c==='m')h+=`<div class="ln bsm">${esc(ayahText(1))}</div>`;
-      else if(c==='B')h+=`<div class="ln sura">سورة ${esc(sname(s))}</div>`;
+      else if(c==='B')h+=`<div class="ln sura" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}</div>`;
     }else h+=buildLine(e,i,o,mk,gl);
   });
   return h;
@@ -789,11 +806,12 @@ window.addEventListener('resize',()=>{document.querySelectorAll('.mushaf').forEa
 if(document.fonts&&document.fonts.load)document.fonts.load('40px "KFGQPC Hafs"').then(()=>document.querySelectorAll('.mushaf').forEach(fit)).catch(()=>{});
 
 /* ---- tafsir ---- */
-const TAF=[['m','التفسير الميسر','مجمع الملك فهد لطباعة المصحف الشريف'],['s','تفسير السعدي','عبد الرحمن بن ناصر السعدي'],['k','تفسير ابن كثير','إسماعيل بن عمر بن كثير']];
-const TC={};
+const TAF=[['m','التفسير الميسر','مجمع الملك فهد لطباعة المصحف الشريف'],['s','تفسير السعدي','عبد الرحمن بن ناصر السعدي'],['k','تفسير ابن كثير','إسماعيل بن عمر بن كثير'],['b','تفسير البغوي','الحسين بن مسعود البغوي (معالم التنزيل)']];
+const TC={},TCB={};
 async function tafsirText(s,code,a){
-  if(!TC[s]){const r=await fetch('t/'+s+'.json');if(!r.ok)throw new Error('http '+r.status);TC[s]=await r.json()}
-  const obj=TC[s][code]||{};const ks=Object.keys(obj).map(Number).sort((x,y)=>x-y);
+  let obj;
+  if(code==='b'){if(!TCB[s]){const r=await fetch('b/'+s+'.json');if(!r.ok)throw new Error('http '+r.status);TCB[s]=await r.json()}obj=TCB[s]}
+  else{if(!TC[s]){const r=await fetch('t/'+s+'.json');if(!r.ok)throw new Error('http '+r.status);TC[s]=await r.json()}obj=TC[s][code]||{}}const ks=Object.keys(obj).map(Number).sort((x,y)=>x-y);
   let best=null;for(const k of ks){if(k<=a)best=k}
   if(best===null)return null;
   return {text:obj[best],from:best};
@@ -829,6 +847,8 @@ function openWMenu(w,x,y){
     let left=Math.min(vw-r.width-8,Math.max(8,x-r.width/2)),top=y-r.height-18;if(top<8)top=y+24;
     m.style.left=left+'px';m.style.top=top+'px';m.classList.toggle('below',top>y);m.style.setProperty('--ax',(x-left)+'px')};
   place();requestAnimationFrame(()=>m.classList.add('on'));
+  const gm=()=>{const x=grFor(id,word);if(x&&m.isConnected&&!m.querySelector('.wmg')){m.querySelector('.wmh').insertAdjacentHTML('afterend',`<div class="wmg">${esc(x[2])} <span class="muted">(السراج)</span></div>`);place()}};
+  if(GR)gm();else loadBK().then(gm).catch(()=>{});
   m.onclick=e=>{
     const b=e.target.closest('button');if(!b)return;
     const k=b.dataset.k,a=b.dataset.a;
@@ -896,16 +916,19 @@ function openSheet(id,ctx){
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="تفاصيل الآية">
    <div class="row sp"><h3>سورة ${esc(sname(A.s))} · آية ${AR(A.a)} · صفحة ${AR(A.page)}</h3><button class="g" id="x">إغلاق</button></div>
    <p class="ayat">${esc(ayahText(id))}</p><p class="muted" id="cnts">${esc(cntText(id,ctx.word))}</p>
-   <div class="row"><button class="p" id="mis">سجّل خطأ هنا</button><button id="sgo">افتح الصفحة</button><button id="sbm">${S.bm&&S.bm.aid===id?'شيل علامة الآية':'علّم هنا (مكان وقوفي)'}</button>${ZA.has(id)?'<button id="szw">متشابهات الآية (الزواوي)</button>':''}</div>
+   <div class="row"><button class="p" id="mis">سجّل خطأ هنا</button><button id="sgo">افتح الصفحة</button><button id="sbm">${S.bm&&S.bm.aid===id?'شيل علامة الآية':'علّم هنا (مكان وقوفي)'}</button>${ZA.has(id)?'<button id="szw">متشابهات الآية (الزواوي)</button>':''}<button id="ssc">بطاقة سورة ${esc(D.n[A.s])}</button></div>
    ${AUDIO?`<div class="row" id="arow"><button class="p" id="ap">▶ اسمع الآية</button><button id="apv" aria-label="السابقة">⏮</button><button id="anx" aria-label="التالية">⏭</button><button id="ast" aria-label="إيقاف">⏹</button><select id="asr" aria-label="القارئ">${REC.map(r=>`<option value="${r.k}"${r.k===S.rc?' selected':''}>${r.n}</option>`).join('')}</select></div>`:''}
    <div class="row">${open?'<span class="muted">فيها خطأ مسجّل</span>':''}</div>
    <div class="seg" id="seg">${TAF.map(t=>`<button data-c="${t[0]}" aria-pressed="${t[0]===code}">${t[1]}</button>`).join('')}</div>
    <div id="tf" class="tafsir muted">جاري التحميل…</div><div id="tfs" class="muted"></div>
+   <div id="sgr" data-id="${id}"></div><div id="sas"></div>
    <label class="muted" for="nt">ملاحظتي وتدبّري في هذه الآية</label><textarea id="nt" placeholder="اكتب اللي وقفك فيها أو اللي هتطبّقه النهارده">${esc(S.notes[id]||'')}</textarea>
   </div>`;
   $('#sbk').onclick=$('#x').onclick=closeSheet;
   $('#sgo').onclick=()=>{closeSheet();openPage(A.page,id)};
   const szw=$('#szw');if(szw)szw.onclick=()=>zOpenAyat([id]);
+  $('#ssc').onclick=()=>openSurah(A.s);
+  bkNeed(()=>{const g=$('#sgr'),a=$('#sas');if(!g||g.dataset.id!=id)return;g.innerHTML=grHTML(id,ctx.word);a.innerHTML=asbHTML(BKN.ay[id]||[],{open:true})},$('#sgr'));
   $('#sbm').onclick=()=>{
     if(S.bm&&S.bm.aid===id){S.bm=null;toast('اتشالت العلامة')}
     else{S.bm={p:A.page,aid:id,d:TODAY()};toast('اتعلّمت سورة '+sname(A.s)+' آية '+AR(A.a)+' كمكان وقوفك')}
@@ -934,6 +957,7 @@ function openSheet(id,ctx){
 }
 function wireWords(el,opts){
   el.onclick=e=>{
+    const su=e.target.closest('.ln.sura[data-s]');if(su&&!(opts&&opts.onLine)){openSurah(+su.dataset.s);return}
     const w=e.target.closest('.w');if(!w)return;
     const ln=w.closest('.ln');
     if(opts&&opts.onLine&&ln.classList.contains('hide')){opts.onLine(+ln.dataset.i);return}
@@ -1190,6 +1214,7 @@ function renderMushaf(){
     $('#stage').onclick=e=>{
       if(swiped){swiped=false;return}
       const hl=S.hideMode&&e.target.closest('.ln.hide');if(hl){revealLine(+hl.dataset.i);return}
+      const su=e.target.closest('.ln.sura[data-s]');if(su){openSurah(+su.dataset.s);return}
       const w=e.target.closest('.w');if(!w)return;
       wordTap(w);
     };
@@ -2158,7 +2183,7 @@ function renderMe(){
    <div class="card"><h2>الزرارين العايمين</h2><p class="muted">زرار القائمة وزرار «اكشف السطر»: اسحبهم بهدوء وسيبهم يقفوا مكانهم، أو ارميهم ناحية ركن يتشبكوا فيه.</p><div class="row"><button id="flr">رجّع أماكنهم الأصلية</button>${AUDIO?'<button id="dlo">بدون نت (التحميل)</button>':''}</div></div>
    <div class="card"><h2>نسخة احتياطية</h2><p class="muted">بياناتك محفوظة في المتصفح ده بس. انسخ الكود واحتفظ به، وللرجوع على جهاز تاني الصقه واضغط استرجاع.</p>
     <textarea id="bk" dir="ltr" rows="3"></textarea><div class="row"><button id="cp">نسخ</button><button id="rs">استرجاع</button></div></div>
-   <div class="card"><h2>المصادر</h2><p class="muted">نص المصحف: مجمع الملك فهد، المصحف الشريف برواية حفص عن عاصم، نسخة ١٨ (مستودع ibnhazm/KFGQPC على GitHub)، بخط المجمع. توزيع السطور والصفحات: مصحف المدينة طبعة ١٤٤١ هـ (حزمة quran-qcf4 المبنية على خط مجمع الملك فهد QCF4)، وبيّنت المقارنة إنه يطابق صفحة ٧٧ في مصحفك. التفاسير: التفسير الميسر، والسعدي، وابن كثير، من quran.com دون تعديل. التفسير الميسر هنا نسخة quran.com (الأقدم)، وفيه نسخة تانية بمقدمات للسور عند alquran.cloud مختلفة في بعض الآيات.</p></div>`;
+   <div class="card"><h2>المصادر</h2><p class="muted">نص المصحف: مجمع الملك فهد، المصحف الشريف برواية حفص عن عاصم، نسخة ١٨ (مستودع ibnhazm/KFGQPC على GitHub)، بخط المجمع. توزيع السطور والصفحات: مصحف المدينة طبعة ١٤٤١ هـ (حزمة quran-qcf4 المبنية على خط مجمع الملك فهد QCF4)، وبيّنت المقارنة إنه يطابق صفحة ٧٧ في مصحفك. التفاسير: التفسير الميسر، والسعدي، وابن كثير، والبغوي (معالم التنزيل)، من quran.com دون تعديل. معاني الكلمات: السراج في بيان غريب القرآن لمحمد الخضيري (ط١ ١٤٢٩ هـ، من المكتبة الشاملة). مقاصد السور: المختصر في تفسير القرآن الكريم، مركز تفسير للدراسات القرآنية (ط٣ ١٤٣٦ هـ، من المكتبة الشاملة). أسباب النزول (الصحيح بس): المحرر في أسباب نزول القرآن لخالد المزيني (دار ابن الجوزي ط١ ١٤٢٧ هـ، من الموسوعة القرآنية quranpedia.net، نسخة 2026-08-10) للترجيح، والصحيح المسند من أسباب النزول لمقبل الوادعي (ط٤ ١٤٠٨ هـ، من المكتبة الشاملة). فضل السور: أحاديث الصحيحين بس من «معلومات السور» في quranpedia.net (نسخة 2026-10-31). معجم المتشابهات: يحيى عبد الفتاح الزواوي. التفسير الميسر هنا نسخة quran.com (الأقدم)، وفيه نسخة تانية بمقدمات للسور عند alquran.cloud مختلفة في بعض الآيات.</p></div>`;
   const el=$('#t-me');
   el.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>openPage(JS[+b.dataset.j]));
   el.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const p=+b.dataset.v;S.verified[p]=!S.verified[p];if(!S.verified[p])delete S.verified[p];save();openPage(p)});
@@ -2511,7 +2536,7 @@ function openJump(){
     <select id="jhz" aria-label="الحزب">${[...Array(60)].map((_,i)=>`<option value="${i+1}">الحزب ${AR(i+1)}</option>`).join('')}</select>
     <select id="jrb" aria-label="الربع">${[...Array(240)].map((_,i)=>`<option value="${i+1}">${rubLabel(i+1)}</option>`).join('')}</select>
     <select id="jsu" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('')}</select></div>
-   <div class="row"><label for="jpg">صفحة</label><input id="jpg" type="number" min="1" max="604" value="${MP}"><button class="p" id="jgo">روح</button></div></div>`;
+   <div class="row"><label for="jpg">صفحة</label><input id="jpg" type="number" min="1" max="604" value="${MP}"><button class="p" id="jgo">روح</button><button id="jsc">بطاقة السورة المختارة</button></div></div>`;
   $('#jjz').value=Math.ceil(r/8);$('#jhz').value=Math.ceil(r/4);$('#jrb').value=r;$('#jsu').value=AY[FA[MP]].s;
   const go=p=>{closeSheet();openPage(p)};
   $('#sbk').onclick=$('#x').onclick=closeSheet;
@@ -2520,6 +2545,7 @@ function openJump(){
   $('#jrb').onchange=e=>go(RUBP[+e.target.value]);
   $('#jsu').onchange=e=>go(AY[ID_BY_KEY[e.target.value+':1']].page);
   $('#jgo').onclick=()=>go(+$('#jpg').value||1);
+  $('#jsc').onclick=()=>openSurah(+$('#jsu').value);
   $('#jpg').onkeydown=e=>{if(e.key==='Enter')go(+e.target.value||1)};
   $('#jjz').focus();
 }
@@ -2527,7 +2553,7 @@ function openJump(){
 /* ---- offline: page fonts, tafsir and the search text in one cache; each reciter's audio in its own cache (sw.js serves them) ---- */
 const DATA_C='mj-data',audC=r=>'mj-aud-'+r.k;
 const hasCaches=()=>AUDIO&&'caches' in window;
-const coreUrls=()=>[...new Set((D.f||[]).filter(Boolean))].map(n=>FURL(String(n).padStart(2,'0'))).concat([...Array(114)].map((_,i)=>'t/'+(i+1)+'.json'),['s.json',ZV]);
+const coreUrls=()=>[...new Set((D.f||[]).filter(Boolean))].map(n=>FURL(String(n).padStart(2,'0'))).concat([...Array(114)].map((_,i)=>'t/'+(i+1)+'.json'),[...Array(114)].map((_,i)=>'b/'+(i+1)+'.json'),['s.json',ZV,NV,GV]);
 let PERS=false;
 function persistOnce(){if(PERS)return;PERS=true;try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
 async function cacheMiss(c,urls){const out=[];for(const u of urls)if(!(await c.match(u)))out.push(u);return out}
@@ -2704,7 +2730,7 @@ function openSearch(q0){
     const R=searchAll(q),qn=NRM(LATN(q).trim().replace(/^سور[ةه]\s+/,'')),toks=qn.split(' ').filter(Boolean),parts=[];
     const sec=(k,title,n,body)=>{if((f==='all'||f===k)&&n)parts.push(`<div class="srg"><h4>${title} <span class="muted">(${AR(n)})</span></h4>${body}</div>`)};
     sec('pl','مواضع',R.pl.length,R.pl.map(x=>item(x.lab,'',x.p,x.aid)).join(''));
-    sec('su','سور',R.su.length,R.su.map(x=>item('سورة '+sname(x.s),'رقم '+AR(x.s)+' · '+AR(AYC[x.s])+' آية · صفحة '+AR(x.p),x.p,x.id)).join(''));
+    sec('su','سور',R.su.length,R.su.map(x=>item('سورة '+sname(x.s),'رقم '+AR(x.s)+' · '+AR(AYC[x.s])+' آية · صفحة '+AR(x.p),x.p,x.id).replace(/<\/button>$/,`<span class="srx" data-sc="${x.s}">بطاقة السورة</span></button>`)).join(''));
     const lim=f==='ay'?more*3:more;
     sec('ay',R.approx?'آيات (بحث تقريبي)':'آيات',R.ay.length,R.ay.slice(0,lim).map(id=>{const a=D.a[id-1];return item('','سورة '+sname(a[0])+' · آية '+AR(a[1])+' · صفحة '+AR(a[2]),a[2],id,hiText(SQ.t[id-1],qn,toks))}).join('')+(R.ay.length>lim?'<button class="g srmore" id="srmore">اعرض أكتر</button>':''));
     sec('zw','المتشابهات (معجم الزواوي)',R.zw.length,R.zw.slice(0,f==='zw'?200:12).map(e=>`<button class="sr" data-zo="${e.id}"><span class="srt">${zQ(e.t||e.h)}</span><span class="srm">${esc(zNum(e)+' · '+AR(e.P.length)+' موضع · صفحة '+AR(e.bp)+' في الكتاب')}</span></button>`).join('')+(f!=='zw'&&R.zw.length>12?'<button class="g srmore" data-f2="zw">كل نتايج المعجم</button>':''));
@@ -2715,6 +2741,7 @@ function openSearch(q0){
   }
   $('#sres').onclick=e=>{const c=e.target.closest('[data-q]');if(c){q=c.dataset.q;inp.value=q;draw();return}
     const zf=e.target.closest('[data-f2]');if(zf){const b=$('#sfl [data-f="zw"]');if(b)b.click();return}
+    const sc=e.target.closest('[data-sc]');if(sc){if(q.trim()){S.srh=[q.trim()].concat((S.srh||[]).filter(x=>x!==q.trim())).slice(0,8);save()}openSurah(+sc.dataset.sc);return}
     if(e.target.closest('[data-zo]')){if(q.trim()){S.srh=[q.trim()].concat((S.srh||[]).filter(x=>x!==q.trim())).slice(0,8);save()}return}
     const b=e.target.closest('.sr');if(b)go({p:+b.dataset.p,aid:+b.dataset.aid||null})};
   let tm=0;inp.oninput=()=>{clearTimeout(tm);tm=setTimeout(()=>{q=inp.value;more=40;draw()},140)};
@@ -2981,6 +3008,78 @@ function startZw(eid){zNeed(()=>{
     startQZ({mode:'zw',sc:{k:'bm'},types:ZWT,goal:'rnd',zent:eid})}
   else startQZ({mode:'zw',sc:{k:'bm'},types:ZWT,goal:'cov',key:'zw'});
 })}
+
+/* ---- phase 4: surah cards, السراج في بيان غريب القرآن, and asbab al-nuzul (owner-approved sources, books/REPORT.md).
+   g.json: السراج per ayah id [[our Uthmani words, the book's word, meaning]]. n.json: maqasid (المختصر), fadl (Sahihayn only),
+   asbab per ayah id ("m"+number = المحرر, accepted and sound; "w"+id = الصحيح المسند), surah-level reports, and the texts.
+   Every text is the book's own wording; nothing is shown for an ayah the two books give no authentic cause for. ---- */
+const NV='n.json?v=1',GV='g.json?v=1';
+let BKN=null,GR=null,BKP=null;
+function loadBK(){
+  if(BKN&&GR)return Promise.resolve();
+  if(!BKP)BKP=Promise.all([fetch(NV),fetch(GV)]).then(rs=>{if(rs.some(r=>!r.ok))throw new Error('books');return Promise.all(rs.map(r=>r.json()))})
+    .then(([n,g])=>{BKN=n;GR=g.a}).catch(e=>{BKP=null;throw e});
+  return BKP;
+}
+function bkNeed(fn,el){if(BKN&&GR){fn();return}if(el)el.innerHTML='<p class="muted">جاري تحميل الكتب…</p>';
+  loadBK().then(fn).catch(()=>{if(el&&el.isConnected)el.innerHTML='<p class="muted">معاني الكلمات وأسباب النزول محتاجين نت أول مرة (أو نزّلهم من «بدون نت»).</p>'})}
+/* the books quote the Quran between {} or ﴿﴾: coloured, the words untouched */
+const bkQ=s=>esc(s).replace(/\{([^{}]*)\}|﴿([^﴾]*)﴾/g,(m,a,b)=>`<span class="bq">﴿${a!==undefined?a:b}﴾</span>`);
+const bkP=x=>String(x||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>`<p>${bkQ(l)}</p>`).join('');
+function grFor(id,word){const L=GR&&GR[id];if(!L||!word)return null;return L.find(x=>x[0]&&x[0].split(' ').includes(word))||null}
+function grHTML(id,word){
+  const L=GR[id];if(!L||!L.length)return '';
+  const cur=grFor(id,word);
+  return `<div class="bk"><h4>معاني الكلمات <span class="muted">· السراج في بيان غريب القرآن (الخضيري)</span></h4><div class="gr">${
+    L.map(x=>`<div${x===cur?' class="cur"':''}><b>${esc(x[1])}</b>: ${esc(x[2])}</div>`).join('')}</div></div>`;
+}
+/* one report: المحرر = the author's verdict («النتيجة») marked الراجح, then the narrations; الصحيح المسند = his text as printed */
+function asbOne(r,o){
+  const k=r[0],n=r.slice(1),op=o.open?' open':'';
+  if(k==='m'){const e=BKN.m[n];if(!e)return '';
+    return `<details class="asb"${op}><summary><span class="rj">الراجح</span>المحرر في أسباب النزول · رقم ${AR(n)}${o.lab?' · '+esc(o.lab(e)):''}</summary>
+     <div class="res"><b>النتيجة:</b> ${bkQ(e.res)}</div>${e.note?`<p class="muted">${esc(e.note)}</p>`:''}
+     <p class="muted">الروايات اللي درسها المؤلف (من الكتب التسعة):</p>${e.riw.map(bkP).join('')}
+     <p class="fn">المحرر في أسباب نزول القرآن، خالد بن سليمان المزيني، ج${AR(e.pg[0])} ص${AR(e.pg[1])}.</p></details>`}
+  const e=BKN.w[n];if(!e)return '';
+  return `<details class="asb"${op}><summary>الصحيح المسند من أسباب النزول (الوادعي)${o.lab?' · '+esc(o.lab(e)):''}</summary>
+   ${e.t.map(l=>`<p>${bkQ(l)}</p>`).join('')}${e.nb&&e.nb.length?`<div class="nb"><p class="muted">تنبيه المؤلف:</p>${e.nb.map(l=>`<p>${bkQ(l)}</p>`).join('')}</div>`:''}
+   ${e.fn&&e.fn.length?e.fn.map(l=>`<p class="fn">${esc(l)}</p>`).join(''):''}
+   <p class="fn">الصحيح المسند من أسباب النزول، مقبل بن هادي الوادعي، ص${AR(e.pp)}. الحكم على الإسناد كلام المؤلف.</p></details>`;
+}
+function asbHTML(refs,o){
+  o=o||{};if(!refs.length)return '';
+  const m=refs.filter(r=>r[0]==='m'),w=refs.filter(r=>r[0]==='w');
+  return `<div class="bk"><h4>سبب النزول <span class="muted">· ${m.length&&w.length?'الراجح من المحرر أولًا، وبعده الصحيح المسند':m.length?'المحرر في أسباب النزول':'الصحيح المسند'}</span></h4>${
+    m.concat(w).map((r,i)=>asbOne(r,{open:o.open&&i===0,lab:o.lab})).join('')}</div>`;
+}
+function openSurah(s){
+  s=+s;if(!D.n[s])return;
+  const id1=ID_BY_KEY[s+':1'],p1=AY[id1].page;
+  const draw=()=>{
+    const sh=$('#sheetRoot .scard');if(!sh)return;
+    const body=sh.querySelector('#scb');
+    if(!BKN){body.innerHTML='<p class="muted">جاري تحميل البطاقة…</p>';return}
+    const q=BKN.q[s],fd=BKN.f[s]||[],ids=[];
+    for(let a=1;a<=AYC[s];a++){const id=ID_BY_KEY[s+':'+a];if(BKN.ay[id])ids.push(id)}
+    const sl=(BKN.sur[s]||[]).map(n=>'w'+n);
+    body.innerHTML=`${q?`<div class="bk"><h4>من مقاصد السورة <span class="muted">· المختصر في التفسير (مركز تفسير)</span></h4><div class="mq">${bkQ(q)}</div></div>`:''}
+     ${fd.length?`<div class="bk fd"><h4>فضلها <span class="muted">· أحاديث في الصحيحين بس</span></h4>${fd.map(bkP).join('')}<p class="fn">النقل من «معلومات السور» في الموسوعة القرآنية quranpedia.net، واتاخد بس اللي تخريجه البخاري أو مسلم.</p></div>`:''}
+     <div class="bk"><h4>أسباب النزول${ids.length||sl.length?' <span class="muted">· الصحيح بس، من المحرر والصحيح المسند</span>':''}</h4>${
+       ids.length||sl.length?(sl.length?`<div class="ah">عن السورة</div>${sl.map(r=>asbOne(r,{})).join('')}`:'')+ids.map(id=>`<div class="ah"><button class="g" data-ga="${id}">آية ${AR(AY[id].a)} · صفحة ${AR(AY[id].page)}</button></div>${BKN.ay[id].map(r=>asbOne(r,{})).join('')}`).join('')
+       :'<p class="muted">مفيش سبب نزول صحيح للسورة دي في المحرر ولا الصحيح المسند.</p>'}</div>`;
+    body.onclick=e=>{const b=e.target.closest('[data-ga]');if(b){const id=+b.dataset.ga;closeSheet();openPage(AY[id].page,id)}};
+  };
+  $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet tall scard" role="dialog" aria-label="بطاقة السورة">
+   <div class="row sp"><h3>سورة ${esc(D.n[s])}</h3><button class="g" id="x">إغلاق</button></div>
+   <div class="smeta"><span>رقمها ${AR(s)}</span><span>${stype(s)}</span><span>${AR(AYC[s])} آية</span><span>من صفحة ${AR(p1)}</span></div>
+   <div class="row"><button class="p" id="sgo">افتح السورة</button>${AUDIO?'<button id="sau">اسمعها</button>':''}</div>
+   <div id="scb"></div></div>`;
+  $('#sbk').onclick=$('#x').onclick=closeSheet;
+  $('#sgo').onclick=()=>{closeSheet();openPage(p1,id1)};
+  const au=$('#sau');if(au)au.onclick=()=>{AU.until=0;playAyah(id1)};
+  draw();if(!BKN)loadBK().then(draw).catch(()=>{const b=$('#scb');if(b)b.innerHTML='<p class="muted">البطاقة محتاجة نت أول مرة (أو نزّلها من «بدون نت»).</p>'});
+}
 
 $('#srB').onclick=()=>openSearch();
 applyTheme();
