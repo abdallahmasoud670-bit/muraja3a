@@ -21,7 +21,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 .ii{width:18px;height:18px;flex:none;vertical-align:-4px}
-button:has(>.ii){display:inline-flex;align-items:center;justify-content:center;gap:7px}
+:where(button:has(>.ii)){display:inline-flex;align-items:center;justify-content:center;gap:7px}
 #nl{scroll-margin-bottom:92px}
 body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.7;
  padding-block:16px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
