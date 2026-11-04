@@ -19,6 +19,10 @@
   --accent:#a99bff; --accent-ink:#0d0b26; --gold:#e8bf5f; --gold2:#f3d27e;
   --st3:#5b9dff; --st2:#e3b04b; --st1:#ef6f58; --st0:#2c3158; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
+.ii{width:18px;height:18px;flex:none;vertical-align:-4px}
+button:has(>.ii){display:inline-flex;align-items:center;justify-content:center;gap:7px}
+#nl{scroll-margin-bottom:92px}
 body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.7;
  padding-block:16px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 main{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
@@ -116,7 +120,7 @@ body.reading .mkr small{writing-mode:vertical-rl;max-width:none;font-size:.6rem;
 .rdot{display:none}
 body.reading .rdot{display:grid;position:fixed;top:calc(4px + env(safe-area-inset-top,0px));left:calc(4px + env(safe-area-inset-left,0px));z-index:47;width:30px;height:30px;border-radius:50%;padding:0;place-items:center;opacity:.3;font-size:1.1rem;line-height:1}
 body.anim{overflow-x:hidden}
-.rinfo{flex:1;min-width:0;text-align:center;font-size:.85rem;color:var(--muted)}
+.rinfo{flex:1 1 150px;min-width:0;text-align:center;font-size:.85rem;color:var(--muted);line-height:1.5}
 .rbar button,.rbar select{padding:5px 10px;font-size:.88rem}
 .leaf{position:relative;background:var(--paper);padding:10px 12px 8px;border:1px solid var(--line);backface-visibility:hidden;overflow:hidden}
 .leaf.right{border-radius:2px 14px 14px 2px;background-image:linear-gradient(to right,color-mix(in srgb,var(--ink) 15%,transparent),transparent 7%)}
@@ -453,8 +457,8 @@ body.reading .fab,body.reading .fmenu,body.reading .fback{display:none}
 .mctl .seg button{padding:4px 11px;font-size:.82rem;min-height:34px}
 .mgrp summary{display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;font-weight:600;min-height:32px}
 .mgrp summary::-webkit-details-marker{display:none}
-.mgrp summary::before{content:"‹";color:var(--muted);transition:transform .2s}
-.mgrp[open] summary::before{transform:rotate(-90deg)}
+.mgrp summary::before{content:"";width:9px;height:9px;border:solid currentColor;border-width:0 0 1.8px 1.8px;transform:rotate(45deg);display:inline-block;color:var(--muted);transition:transform .2s}
+.mgrp[open] summary::before{transform:rotate(-45deg)}
 .mgrp summary span:first-child{flex:1}
 .cnt{font-size:.78rem;font-weight:500;color:var(--muted);background:color-mix(in srgb,var(--st1) 12%,transparent);padding:1px 10px;border-radius:999px}
 .mact{justify-content:flex-end}.mact button{padding:5px 10px;font-size:.82rem;min-height:36px}
@@ -505,6 +509,50 @@ details.asb summary{cursor:pointer;font-weight:600}details.asb p{margin:6px 0}
 .scard .fd p{margin:0 0 8px;line-height:1.9}.scard .ah{margin:10px 0 4px;font-weight:600;color:var(--accent)}
 .wmg{font-size:.85rem;line-height:1.7;margin:-2px 0 6px;text-align:center;max-width:300px}
 .sr .srx{align-self:flex-start;margin-top:4px;font-size:.8rem;padding:2px 10px;border:1px solid var(--line);border-radius:99px;color:var(--accent)}
+
+/* ---- polish 2026-11 (style ج): calm glass surfaces, glow only on what matters (main action, menu button, the active thing).
+   Real blur only on the few floating parts (sheet, word menu, reading bar, mini player, toast); the many cards fake the glass without blur
+   so scrolling stays smooth on mid phones. The mushaf page itself is not touched. ---- */
+:root{--hi:rgba(255,255,255,.95);--edge:rgba(255,255,255,.95);--gl1:rgba(255,255,255,.86);--gl2:rgba(255,255,255,.62);--glow:color-mix(in srgb,var(--accent) 42%,transparent);--shade:0 10px 28px -16px rgba(40,30,110,.38)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--hi:rgba(255,255,255,.16);--edge:rgba(255,255,255,.10);--gl1:rgba(255,255,255,.075);--gl2:rgba(255,255,255,.025);--glow:color-mix(in srgb,var(--accent) 55%,transparent);--shade:0 12px 30px -16px rgba(0,0,0,.7)}}
+:root[data-theme="dark"]{--hi:rgba(255,255,255,.16);--edge:rgba(255,255,255,.10);--gl1:rgba(255,255,255,.075);--gl2:rgba(255,255,255,.025);--glow:color-mix(in srgb,var(--accent) 55%,transparent);--shade:0 12px 30px -16px rgba(0,0,0,.7)}
+.card,.task{-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:18px;
+  background:linear-gradient(160deg,var(--gl1),var(--gl2)),color-mix(in srgb,var(--surface) 72%,transparent);
+  border:1px solid var(--edge);border-top-color:color-mix(in srgb,var(--gold2) 40%,var(--edge));
+  box-shadow:inset 0 1px 0 var(--hi),var(--shade)}
+button,select{border-radius:12px;border-color:var(--edge);background:linear-gradient(160deg,var(--gl1),var(--gl2)),var(--surface);box-shadow:inset 0 1px 0 var(--hi);transition:transform .12s,box-shadow .2s,background .2s}
+button:active{transform:scale(.97)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button.p{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 70%,var(--st3)));border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 18px var(--glow)}
+button.g{background:none;box-shadow:none}
+.ib,.fi,.wmb{box-shadow:none}
+.ib{background:transparent}
+.tg[aria-pressed="true"],.chips button[aria-pressed="true"]{box-shadow:inset 0 1px 0 var(--hi),0 0 12px var(--glow)}
+.sheet,.wmenu,.mini,body.reading .rbar,.toast{-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%)}
+.sheet{background:linear-gradient(170deg,var(--gl1),var(--gl2)),color-mix(in srgb,var(--surface) 86%,transparent);border-top:1px solid var(--edge);box-shadow:inset 0 1px 0 var(--hi),0 -12px 40px -20px rgba(10,8,40,.6)}
+.wmenu{background:linear-gradient(170deg,var(--gl1),var(--gl2)),color-mix(in srgb,var(--surface) 84%,transparent);border-color:var(--edge)}
+body.reading .rbar{background:color-mix(in srgb,var(--surface) 70%,transparent);border-bottom:1px solid var(--edge)}
+.toast{background:color-mix(in srgb,var(--ink) 88%,transparent);border-radius:14px}
+.fab{box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 0 0 5px color-mix(in srgb,var(--accent) 14%,transparent),0 0 26px var(--glow)}
+.flt{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 0 22px color-mix(in srgb,var(--gold2) 35%,transparent)}
+.fi{background:linear-gradient(160deg,var(--gl1),var(--gl2)),var(--surface);border-color:var(--edge);box-shadow:inset 0 1px 0 var(--hi),var(--shade)}
+.fi[aria-current="page"]{background:var(--accent);box-shadow:0 0 16px var(--glow)}
+.edge{background:linear-gradient(160deg,var(--gl1),var(--gl2)),var(--surface);border:1px solid var(--edge)}
+.edge .ii{width:22px;height:22px}
+@media (prefers-reduced-motion:no-preference){
+  .fab[aria-expanded="false"]{animation:mjBreathe 3.4s ease-in-out infinite}
+  @keyframes mjBreathe{50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 0 0 8px color-mix(in srgb,var(--accent) 9%,transparent),0 0 34px var(--glow)}}
+}
+@media (prefers-reduced-motion:reduce){button,select{transition:none}button:active{transform:none}}
+
+.hlp{font-size:.88rem;color:var(--accent);text-decoration:underline;text-underline-offset:4px;padding:4px 8px;min-height:auto}
+.hsteps{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.hsteps li{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:14px;border:1px solid var(--edge);background:linear-gradient(160deg,var(--gl1),var(--gl2))}
+.hsteps b{font-size:1rem}
+.hsteps p{margin:2px 0 4px;color:var(--muted);font-size:.9rem;line-height:1.7}
+.hsteps button{padding:4px 0;color:var(--accent);font-weight:600}
+.hic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 22%,transparent)}
+.hic svg{width:22px;height:22px}
 </style>
 
 <canvas id="fx" aria-hidden="true" hidden></canvas>
@@ -523,8 +571,9 @@ details.asb summary{cursor:pointer;font-weight:600}details.asb p{margin:6px 0}
     <div class="bshadow"></div>
    </div>
    <p class="where" id="where"></p>
-   <div class="row"><button class="p" id="goOn">كمّل</button><button id="srB" aria-label="بحث"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg> ابحث</button><button id="tiltB" hidden>فعّل الميل</button></div>
+   <div class="row"><button class="p" id="goOn">كمّل</button><button id="srB" aria-label="بحث"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg> ابحث</button><button id="tiltB" hidden>فعّل الميل</button></div>
    <p class="hhint">اضغط على المصحف يفتح لك، أو حرّكه بصباعك. انزل لتحت لخطة النهارده.</p>
+   <p class="hhint"><button class="g hlp" id="helpB">أول مرة؟ إزاي أستخدم الموقع</button></p>
   </div>
   <div id="homeBody" class="col"></div>
  </section>
@@ -538,10 +587,10 @@ details.asb summary{cursor:pointer;font-weight:600}details.asb p{margin:6px 0}
 <div id="sheetRoot"></div>
 <div id="mini" class="mini" hidden></div>
 <div id="rbar" class="rbar"></div>
-<button id="rdot" class="rdot" aria-label="قائمة القراءة">⋯</button>
+<button id="rdot" class="rdot" aria-label="قائمة القراءة"><svg class="ii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="18" cy="12" r=".9"/></svg></button>
 <div id="fback" class="fback" hidden></div>
 <div id="fmenu" class="fmenu" role="menu" aria-label="القائمة" hidden></div>
-<button id="fab" class="fab c-br" aria-label="القائمة" aria-haspopup="menu" aria-expanded="false" aria-controls="fmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+<button id="fab" class="fab c-br" aria-label="القائمة" aria-haspopup="menu" aria-expanded="false" aria-controls="fmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
 <div class="bflash" id="bflash"></div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -599,7 +648,7 @@ function cntText(id,word){
   const A=AY[id],w=word&&S.wc[id+'|'+word],pe=pageErr(A.page),parts=[];
   if(w)parts.push('غلطت في «'+word+'» '+AR(w.n)+' مرة');
   if(pe)parts.push('الصفحة كلها: '+AR(pe)+' مرة غلط');
-  return parts.join(' · ');
+  return parts.join(' – ');
 }
 function decWord(key){
   const w=S.wc[key];if(!w)return;const p=w.p;w.n--;
@@ -645,10 +694,12 @@ function placeMarks(leaf){
   const p=+leaf.dataset.p;let lastTop=-99;const boxes=[],zw=[];
   pageMarks(p).map(m=>{const ln=leaf.querySelector(`.ln[data-i="${m.li}"]`);return ln?{m,ln,top:ln.offsetTop+ln.offsetHeight/2-14}:null}).filter(Boolean).sort((a,b)=>a.top-b.top).forEach(x=>{
     if(x.m.k==='zw'){zw.push(x);return}
-    let top=Math.max(0,x.top);if(top-lastTop<42)top=lastTop+42;lastTop=top;boxes.push([top,top+40]);
+    let top=Math.max(0,x.top);if(top<lastTop)top=lastTop;
     const d=document.createElement('div');d.className='mkr '+x.m.k;d.title=x.m.tip;
     d.innerHTML=`<span class="sym">${x.m.sym}</span><small>${x.m.t1}${x.m.t2?' '+x.m.t2:''}</small>`;
     d.style.top=top+'px';d.onclick=()=>toast(x.m.tip);box.appendChild(d);
+    /* the real height: a two-line label (نصف الحزب ٨) is taller than the old fixed 40px */
+    const h=Math.max(40,d.offsetHeight);boxes.push([top,top+h]);lastTop=top+h+2;
   });
   /* similar-verse signs: under any sign on the same height; never on a hidden line (it would show the hidden ayah) */
   let lz=-99;
@@ -784,21 +835,24 @@ function fit(el){
 }
 /* toolbar icons (stroke, 24 grid) */
 const UI={
+ cont:'<path d="M13 6.5v11L4.5 12z"/><path d="M20 6.5v11L11.5 12z"/>',close:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+ dots:'<circle cx="6" cy="12" r=".9"/><circle cx="12" cy="12" r=".9"/><circle cx="18" cy="12" r=".9"/>',trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>',
  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
  prev:'<path d="M9 6l6 6-6 6"/>',next:'<path d="M15 6l-6 6 6 6"/>',
  bm:'<path d="M6 3h12v18l-6-4.5L6 21z"/>',eyeoff:'<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.2 6.3A17 17 0 0 0 2 12s4 7 10 7a9.6 9.6 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
  full:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',more:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
  snd:'<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',mgn:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M15 3v18"/><circle cx="17.5" cy="9" r=".6"/>',
- play:'<path d="M7 4.5v15l12-7.5z" fill="currentColor"/>',pause:'<rect x="6" y="4.5" width="4" height="15" rx="1" fill="currentColor"/><rect x="14" y="4.5" width="4" height="15" rx="1" fill="currentColor"/>',
- stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',skipn:'<path d="M17 5l-9 7 9 7z"/><path d="M6 5v14"/>',skipp:'<path d="M7 5l9 7-9 7z"/><path d="M18 5v14"/>',
+ play:'<path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.2-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>',pause:'<path d="M8.5 5v14M15.5 5v14"/>',
+ stop:'<rect x="6" y="6" width="12" height="12" rx="3"/>',skipn:'<path d="M16 6.5v11a.8.8 0 0 1-1.25.66L7.5 13a1.2 1.2 0 0 1 0-2l7.25-5.16A.8.8 0 0 1 16 6.5z"/><path d="M5 6v12"/>',skipp:'<path d="M8 6.5v11a.8.8 0 0 0 1.25.66L16.5 13a1.2 1.2 0 0 0 0-2L9.25 5.84A.8.8 0 0 0 8 6.5z"/><path d="M19 6v12"/>',
  book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
  rep:'<path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>',
  speed:'<path d="M12 14l4-4"/><path d="M3.3 17a9 9 0 1 1 17.4 0"/>',mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
  auto:'<path d="M5 12h12M13 7l5 5-5 5"/><path d="M3 5v14"/>',follow:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M9 9l2 2 4-4"/>',
  list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',page:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>'
 };
-const ic=(k,c)=>`<svg class="${c||''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${UI[k]}</svg>`;
+const ic=(k,c)=>`<svg class="${c||''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${UI[k]}</svg>`;
 function zoomSel(){return `<select class="zm" aria-label="تكبير الصفحة"><option value="1">حجم عادي</option><option value="1.3">تكبير ١٫٣×</option><option value="1.6">تكبير ١٫٦×</option></select>`}
 function applyZoom(){document.documentElement.style.setProperty('--z',S.zoom||1);document.querySelectorAll('.zm').forEach(s=>{s.value=String(S.zoom||1);s.onchange=e=>{S.zoom=+e.target.value;save();applyZoom()}});document.querySelectorAll('.mushaf').forEach(fit)}
 function drawPage(el,p,o){el.innerHTML=pageHTML(p,o);fit(el)}
@@ -838,10 +892,10 @@ function openWMenu(w,x,y){
   closeWMenu(true);
   const id=+w.dataset.id,A=AY[id];if(!A)return;
   const word=w.dataset.w,line=+w.dataset.i+1,bmOn=S.bm&&S.bm.aid===id;
-  const btn=(k,lab)=>`<button class="wmb wm-${k}" data-k="${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${WM_IC[k]}</svg><span>${lab}</span></button>`;
+  const btn=(k,lab)=>`<button class="wmb wm-${k}" data-k="${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${WM_IC[k]}</svg><span>${lab}</span></button>`;
   const m=document.createElement('div');m.id='wmenu';m.className='wmenu';m.setAttribute('role','menu');
-  m.innerHTML=`<div class="wmh">«${esc(word||A.t[0])}» · ${esc(sname(A.s))} ${AR(A.a)}</div><div class="wmr">${btn('taf','تفسير')}${btn('mis','سجّل غلط')}${S.wc[id+'|'+word]?btn('dec','شيل غلطة'):''}${btn('bm',bmOn?'شيل العلامة':'علامة')}${AUDIO?btn('aud','استماع'):''}</div>
-   ${AUDIO?`<div class="wmr wma" hidden><button data-a="one">▶ الآية دي</button><button data-a="on">⏩ من هنا وكمّل</button><button data-a="rep">🔁 كرّرها ×٣</button></div>`:''}`;
+  m.innerHTML=`<div class="wmh">«${esc(word||A.t[0])}» – ${esc(sname(A.s))} ${AR(A.a)}</div><div class="wmr">${btn('taf','تفسير')}${btn('mis','سجّل غلط')}${S.wc[id+'|'+word]?btn('dec','شيل غلطة'):''}${btn('bm',bmOn?'شيل العلامة':'علامة')}${AUDIO?btn('aud','استماع'):''}</div>
+   ${AUDIO?`<div class="wmr wma" hidden><button data-a="one">${ic('play','ii')}الآية دي</button><button data-a="on">${ic('cont','ii')}من هنا وكمّل</button><button data-a="rep">${ic('rep','ii')}كرّرها ٣ مرات</button></div>`:''}`;
   document.body.appendChild(m);NAV.push('wmenu',()=>closeWMenu(true));
   const place=()=>{const r=m.getBoundingClientRect(),vw=innerWidth;
     let left=Math.min(vw-r.width-8,Math.max(8,x-r.width/2)),top=y-r.height-18;if(top<8)top=y+24;
@@ -906,7 +960,7 @@ function addMistake(id,word,line,extra){
   AUDP=0;save();renderAll();
   const msg=dup||wc.n>1?'غلطة رقم '+AR(wc.n)+' في «'+word+'»':'اتسجّل غلط في «'+word+'»';
   if(zp){const o=zp.e.P.filter(x=>x!==zp).slice(0,2).map(zLab).join(' و');
-    toast(msg+(o?' · غالبًا اتلخبطت مع '+o:''),[{label:'البند',fn:()=>zOpen(zp.e.id,{aid:id})},{label:'تراجع',fn:undo}])}
+    toast(msg+(o?' – غالبًا اتلخبطت مع '+o:''),[{label:'البند',fn:()=>zOpen(zp.e.id,{aid:id})},{label:'تراجع',fn:undo}])}
   else toast(msg,{label:'تراجع',fn:undo});
 }
 function openSheet(id,ctx){
@@ -914,10 +968,10 @@ function openSheet(id,ctx){
   const open=S.mistakes.find(m=>m.aid===id&&m.n<4);
   let code='m';
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="تفاصيل الآية">
-   <div class="row sp"><h3>سورة ${esc(sname(A.s))} · آية ${AR(A.a)} · صفحة ${AR(A.page)}</h3><button class="g" id="x">إغلاق</button></div>
+   <div class="row sp"><h3>سورة ${esc(sname(A.s))} – آية ${AR(A.a)} – صفحة ${AR(A.page)}</h3><button class="g" id="x">إغلاق</button></div>
    <p class="ayat">${esc(ayahText(id))}</p><p class="muted" id="cnts">${esc(cntText(id,ctx.word))}</p>
    <div class="row"><button class="p" id="mis">سجّل خطأ هنا</button><button id="sgo">افتح الصفحة</button><button id="sbm">${S.bm&&S.bm.aid===id?'شيل علامة الآية':'علّم هنا (مكان وقوفي)'}</button>${ZA.has(id)?'<button id="szw">متشابهات الآية (الزواوي)</button>':''}<button id="ssc">بطاقة سورة ${esc(D.n[A.s])}</button></div>
-   ${AUDIO?`<div class="row" id="arow"><button class="p" id="ap">▶ اسمع الآية</button><button id="apv" aria-label="السابقة">⏮</button><button id="anx" aria-label="التالية">⏭</button><button id="ast" aria-label="إيقاف">⏹</button><select id="asr" aria-label="القارئ">${REC.map(r=>`<option value="${r.k}"${r.k===S.rc?' selected':''}>${r.n}</option>`).join('')}</select></div>`:''}
+   ${AUDIO?`<div class="row" id="arow"><button class="p" id="ap">${ic('play','ii')}اسمع الآية</button><button id="apv" class="ibt" aria-label="السابقة">${ic('skipp','ii')}</button><button id="anx" class="ibt" aria-label="التالية">${ic('skipn','ii')}</button><button id="ast" class="ibt" aria-label="إيقاف">${ic('stop','ii')}</button><select id="asr" aria-label="القارئ">${REC.map(r=>`<option value="${r.k}"${r.k===S.rc?' selected':''}>${r.n}</option>`).join('')}</select></div>`:''}
    <div class="row">${open?'<span class="muted">فيها خطأ مسجّل</span>':''}</div>
    <div class="seg" id="seg">${TAF.map(t=>`<button data-c="${t[0]}" aria-pressed="${t[0]===code}">${t[1]}</button>`).join('')}</div>
    <div id="tf" class="tafsir muted">جاري التحميل…</div><div id="tfs" class="muted"></div>
@@ -1027,39 +1081,39 @@ function renderToday(){
   const mk=(t,tag,time)=>{
     const done=d[t]&&d[t].done,u=unitFor(t),[a,b]=unitPages(u);
     const j1=juzOfPage(a),j2=juzOfPage(b);
-    return `<div class="task ${done?'done':''}"><button class="chk" data-t="${t}" aria-label="تم" aria-pressed="${!!done}">${done?'✓':''}</button>
-    <div class="body"><span class="tag">${tag} · ${time}</span><span class="big">صفحة ${AR(a)} إلى ${AR(b)}</span><span class="muted">${j1===j2?'الجزء '+AR(j1):'الجزء '+AR(j1)+' و'+AR(j2)} · راجع من الذاكرة</span></div><button data-open="${a}">افتح</button></div>`;
+    return `<div class="task ${done?'done':''}"><button class="chk" data-t="${t}" aria-label="تم" aria-pressed="${!!done}">${done?ic('check','ii'):''}</button>
+    <div class="body"><span class="tag">${tag} – ${time}</span><span class="big">صفحة ${AR(a)} إلى ${AR(b)}</span><span class="muted">${j1===j2?'الجزء '+AR(j1):'الجزء '+AR(j1)+' و'+AR(j2)} – راجع من الذاكرة</span></div><button data-open="${a}">افتح</button></div>`;
   };
   const items=tItems(),tdone=d.t&&d.t.done;
-  const tl=items.length?items.map(i=>i.k==='m'?`<div class="item"><div>خطأ في صفحة ${AR(i.p)} · كلمة «${esc(i.w)}»</div><button data-open="${i.p}" data-aid="${i.aid}">افتح</button></div>`:`<div class="item"><div>صفحة ${AR(i.p)} · محتاجة تثبيت</div><button data-open="${i.p}">افتح</button></div>`).join(''):'<p class="muted">مفيش مواضع مستحقة النهارده. جلسة تثبيت خفيفة: افتح أي صفحة ضعيفة من خريطتك.</p>';
+  const tl=items.length?items.map(i=>i.k==='m'?`<div class="item"><div>خطأ في صفحة ${AR(i.p)} – كلمة «${esc(i.w)}»</div><button data-open="${i.p}" data-aid="${i.aid}">افتح</button></div>`:`<div class="item"><div>صفحة ${AR(i.p)} – محتاجة تثبيت</div><button data-open="${i.p}">افتح</button></div>`).join(''):'<p class="muted">مفيش مواضع مستحقة النهارده. جلسة تثبيت خفيفة: افتح أي صفحة ضعيفة من خريطتك.</p>';
   const qn=(d.q&&d.q.n)||0,qdone=qn>=3,mn=(d.m&&d.m.n)||0,mg=memGoal(),mdone=mn>=mg;
   const pos=Math.round(S.cursor/60*100);
   /* hero line: where the owner stopped */
   const bp=S.bm?S.bm.p:1,ba=AY[(S.bm&&S.bm.aid)||FA[bp]];
-  $('#where').innerHTML=S.bm?`مكان وقوفك: <b>صفحة ${AR(bp)}</b> · سورة ${esc(sname(ba.s))} · آية ${AR(ba.a)}`:`لسه ما علّمتش مكان وقوفك. هتبدأ من <b>صفحة ١</b> · سورة ${esc(sname(ba.s))}`;
+  $('#where').innerHTML=S.bm?`مكان وقوفك: <b>صفحة ${AR(bp)}</b> – سورة ${esc(sname(ba.s))} – آية ${AR(ba.a)}`:`لسه ما علّمتش مكان وقوفك. هتبدأ من <b>صفحة ١</b> – سورة ${esc(sname(ba.s))}`;
   /* the ring: today's five sessions */
   const segs=[d.c&&d.c.done,d.s&&d.s.done,d.t&&d.t.done,qdone,mdone],nd=segs.filter(Boolean).length,NS=segs.length,C=2*Math.PI*50,L=C/NS;
   const arcs=cls=>segs.map((on,i)=>`<circle cx="60" cy="60" r="50" fill="none" stroke-width="11" stroke-linecap="round" class="${on?'on':'trk'}" stroke-dasharray="${(L-9).toFixed(2)} ${(C-L+9).toFixed(2)}" stroke-dashoffset="${(-i*L-4.5+C/4).toFixed(2)}"/>`).join('');
-  const ring=`<div class="ring3d${nd===NS?' full':''}" role="img" aria-label="جلسات النهارده ${nd} من ${NS} ·${streak()} يوم متواصل"><div class="rr">
+  const ring=`<div class="ring3d${nd===NS?' full':''}" role="img" aria-label="جلسات النهارده ${nd} من ${NS} –${streak()} يوم متواصل"><div class="rr">
     <svg class="lay" viewBox="0 0 120 120" aria-hidden="true">${arcs()}</svg>
     <svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rgold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b8"/><stop offset=".55" stop-color="#e3b04b"/><stop offset="1" stop-color="#a86f12"/></linearGradient></defs>${arcs()}</svg></div>
     <div class="rs"></div><div class="rc"><b id="streak">${AR(streak())}</b><small>يوم متواصل</small></div></div>`;
   /* ayah of the day, with a quick play that resumes the last ayah played */
   const did=ayahOfDay(),DA=AY[did],la=S.lastAid&&AY[S.lastAid]?S.lastAid:0;
-  const aod=`<div class="card aod quote"><div class="row sp"><h2>آية اليوم</h2><span class="muted">سورة ${esc(sname(DA.s))} · آية ${AR(DA.a)}</span></div><p class="q">${esc(ayahText(did))}</p>
-    <div class="row"><button id="aodT">التفسير</button><button id="aodD">اكتب تدبّرك</button>${AUDIO?`<button class="p" id="aodP">${la?'▶ كمّل التلاوة · '+esc(sname(AY[la].s))+' '+AR(AY[la].a):'▶ اسمع آية اليوم'}</button>`:''}</div></div>`;
+  const aod=`<div class="card aod quote"><div class="row sp"><h2>آية اليوم</h2><span class="muted">سورة ${esc(sname(DA.s))} – آية ${AR(DA.a)}</span></div><p class="q">${esc(ayahText(did))}</p>
+    <div class="row"><button id="aodT">التفسير</button><button id="aodD">اكتب تدبّرك</button>${AUDIO?`<button class="p" id="aodP">${ic('play','ii')}${la?'كمّل التلاوة – '+esc(sname(AY[la].s))+' '+AR(AY[la].a):'اسمع آية اليوم'}</button>`:''}</div></div>`;
   /* the shelf: 30 standing books coloured by strength */
   let shelf='';for(let j=1;j<=30;j++){const st=juzState(j),h=62+((j*37)%5)*4;shelf+=`<button class="vbook" data-j="${j}" data-s="${st.s}" style="--h:${h}px" aria-label="الجزء ${j}${['',' ناسيه',' بتردد',' ثابت',' ممتاز'][st.s]||' لم يُختبر'}">${st.s===4?'<i class="gl"></i>':''}${AR(j)}</button>`}
   $('#homeBody').innerHTML=`<div class="card ringcard">${ring}<div class="ringtx"><h2>النهارده: ${AR(nd)} من ${AR(NS)} جلسات</h2><p class="muted">${nd===NS?'اليوم اكتمل. تقبّل الله منك.':esc(m.lines.join(' '))}</p></div></div>
    ${mk('c','المواصلات','حوالي ٢٥ دقيقة')}
    ${mk('s','قبل النوم','حوالي ٢٥ دقيقة')}
-   <div class="task ${tdone?'done':''}"><button class="chk" data-t="t" aria-label="تم" aria-pressed="${!!tdone}">${tdone?'✓':''}</button>
-    <div class="body" style="flex:1"><span class="tag">تثبيت · ١٠ دقايق</span><span class="big">مواضع الضعف المستحقة</span>${tl}</div></div>
-   <div class="task ${qdone?'done':''}"><span class="chk" style="background:${qdone?'var(--st3)':'none'};border-color:${qdone?'var(--st3)':'var(--accent)'}">${qdone?'✓':AR(qn)}</span>
-    <div class="body"><span class="tag">اختبار مفاجئ · ٥ دقايق</span><span class="big">٣ صفحات عشوائية (${AR(Math.min(qn,3))} من ٣)</span><span class="muted">بيكشف نقاط الضعف المستخبية</span></div><button class="p" id="goTest">ابدأ</button></div>
-   <div class="task ${mdone?'done':''}"><span class="chk" style="background:${mdone?'var(--st3)':'none'};border-color:${mdone?'var(--st3)':'var(--accent)'}">${mdone?'✓':AR(mn)}</span>
-    <div class="body"><span class="tag">اختبار المحفوظ · ١٠ دقايق</span><span class="big">${AR(mg)} مواضع من اللي قبل علامتك (${AR(Math.min(mn,mg))} من ${AR(mg)})</span><span class="muted">${mdone?'خلصت، وزرار «كمان» بيجيب موضع جديد':'سمّع واكشف سطر سطر، وفي الآخر «حسبك»'}</span></div><button class="p" id="goMem">${mdone?'كمان':'ابدأ'}</button></div>
-   <div class="card"><div class="row sp"><span>دورة المراجعة</span><span class="muted">${AR(pos)}٪ · ختمات: ${AR(Math.floor(S.sessions/60))}</span></div><div class="bar"><i style="width:${pos}%"></i></div>
+   <div class="task ${tdone?'done':''}"><button class="chk" data-t="t" aria-label="تم" aria-pressed="${!!tdone}">${tdone?ic('check','ii'):''}</button>
+    <div class="body" style="flex:1"><span class="tag">تثبيت – ١٠ دقايق</span><span class="big">مواضع الضعف المستحقة</span>${tl}</div></div>
+   <div class="task ${qdone?'done':''}"><span class="chk" style="background:${qdone?'var(--st3)':'none'};border-color:${qdone?'var(--st3)':'var(--accent)'}">${qdone?ic('check','ii'):AR(qn)}</span>
+    <div class="body"><span class="tag">اختبار مفاجئ – ٥ دقايق</span><span class="big">٣ صفحات عشوائية (${AR(Math.min(qn,3))} من ٣)</span><span class="muted">بيكشف نقاط الضعف المستخبية</span></div><button class="p" id="goTest">ابدأ</button></div>
+   <div class="task ${mdone?'done':''}"><span class="chk" style="background:${mdone?'var(--st3)':'none'};border-color:${mdone?'var(--st3)':'var(--accent)'}">${mdone?ic('check','ii'):AR(mn)}</span>
+    <div class="body"><span class="tag">اختبار المحفوظ – ١٠ دقايق</span><span class="big">${AR(mg)} مواضع من اللي قبل علامتك (${AR(Math.min(mn,mg))} من ${AR(mg)})</span><span class="muted">${mdone?'خلصت، وزرار «كمان» بيجيب موضع جديد':'سمّع واكشف سطر سطر، وفي الآخر «حسبك»'}</span></div><button class="p" id="goMem">${mdone?'كمان':'ابدأ'}</button></div>
+   <div class="card"><div class="row sp"><span>دورة المراجعة</span><span class="muted">${AR(pos)}٪ – ختمات: ${AR(Math.floor(S.sessions/60))}</span></div><div class="bar"><i style="width:${pos}%"></i></div>
    <p class="muted">كل جلسة ١٠ صفحات بترتيب المصحف. ٦٠ جلسة تعمل ختمة مراجعة.</p></div>
    ${aod}
    <div class="card zday" id="zday"></div>
@@ -1100,7 +1154,7 @@ function renderMushafOld(){
      <div class="row"><select id="su" aria-label="السورة"></select><select id="jz" aria-label="الجزء"></select></div>
      <div class="pagehead"><span id="m1"></span><span id="m2"></span>${zoomSel()}</div><div class="mwrap"><article class="mushaf" id="mp"></article></div>
      <p class="muted">دوسة على الكلمة = غلطة (ودوسة تانية = غلطتين). دوسة مطوّلة = قايمة التفسير والعلامة والاستماع. الكلمات اللي تحتها خط متعرّج هي مواضع أخطائك.</p>`;
-    $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('');
+    $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${AR(+s)}. ${esc(D.n[s])} – ${stype(s)}</option>`).join('');
     $('#jz').innerHTML=Object.keys(D.j).map(j=>`<option value="${j}">الجزء ${AR(j)}</option>`).join('');
     $('#nx').onclick=()=>openPage(MP+1);$('#pv').onclick=()=>openPage(MP-1);
     $('#pg').onchange=e=>openPage(+e.target.value||1);
@@ -1147,7 +1201,7 @@ function toggleHide(){S.hideMode=!S.hideMode;HSH={p:0,show:new Set()};save();ren
 function syncBm(){
   const here=S.bm&&S.bm.p===MP;
   [['#bmB',here?'شيل العلامة':'علّم الصفحة هنا'],['#rbm',here?'شيل العلامة':'علّم الصفحة']].forEach(([q,t])=>{const b=$(q);if(!b)return;if(b.classList.contains('ib')){b.setAttribute('aria-label',t);b.title=t;b.setAttribute('aria-pressed',String(!!here))}else b.textContent=t});
-  const g=$('#bmG');if(g){g.hidden=!(S.bm&&S.bm.p!==MP);if(S.bm)g.innerHTML=ic('bm')+'<span>روح للعلامة · صفحة '+AR(S.bm.p)+'</span>'}
+  const g=$('#bmG');if(g){g.hidden=!(S.bm&&S.bm.p!==MP);if(S.bm)g.innerHTML=ic('bm')+'<span>روح للعلامة – صفحة '+AR(S.bm.p)+'</span>'}
 }
 function toggleBookmark(){
   if(S.bm&&S.bm.p===MP){S.bm=null;toast('اتشالت العلامة')}
@@ -1157,19 +1211,19 @@ function toggleBookmark(){
 function renderCue(){
   const b=$('#nextcue');if(!b)return;const c=cueData(MP);
   if(!c){b.innerHTML='<span class="cw" style="font-family:var(--ui);font-size:1rem">دي آخر صفحة في المصحف. تقبّل الله منك.</span>';b.onclick=null;return}
-  b.innerHTML=`<span class="cl">الصفحة ${AR(MP+1)} تبدأ بـ${c.cont?' (بقية آية)':''}</span><span class="cw">${esc(c.w)}</span><span class="cr">سورة ${esc(sname(c.s))} · آية ${AR(c.a)}</span><span class="ca">‹</span>`;
+  b.innerHTML=`<span class="cl">الصفحة ${AR(MP+1)} تبدأ بـ${c.cont?' (بقية آية)':''}</span><span class="cw">${esc(c.w)}</span><span class="cr">سورة ${esc(sname(c.s))} – آية ${AR(c.a)}</span><span class="ca">${ic('next','ii')}</span>`;
   b.onclick=()=>navigate(MP+1);
 }
 function syncNav(){
   const r=rubAt(MP);
   $('#pg').value=MP;$('#jz').value=Math.ceil(r/8);$('#hz').value=Math.ceil(r/4);$('#rb').value=r;$('#su').value=AY[FA[MP]].s;syncSnd();syncBm();renderCue();if(AUDIO)markPlaying();
-  if(READ==='mushaf'){const i=$('#rinfo');if(i)i.textContent='صفحة '+AR(MP)+' · '+pageHeadL(MP)}
+  if(READ==='mushaf'){const i=$('#rinfo');if(i)i.textContent='صفحة '+AR(MP)+' – '+pageHeadL(MP)}
 }
 function renderChips(){
   const p=MP,rec=S.pages[p],n=pageErr(p),side=p%2?'يمين':'شمال';
   const due=rec&&rec.r&&rec.r<3&&rec.due<=TODAY();
-  const lv=pageLvl(p),st=lv?`<span class="pchip s${lv}">${LVL[lv]}${due?' · مستحقة للتثبيت':''}</span>`:'<span class="pchip">لم تُختبر</span>';
-  const er=n>0?`<span class="pchip ${n>=3?'warn':''}">غلطت هنا ${AR(n)} مرة${n>=3?' · موضع متكرر الغلط':''}</span>`:'';
+  const lv=pageLvl(p),st=lv?`<span class="pchip s${lv}">${LVL[lv]}${due?' – مستحقة للتثبيت':''}</span>`:'<span class="pchip">لم تُختبر</span>';
+  const er=n>0?`<span class="pchip ${n>=3?'warn':''}">غلطت هنا ${AR(n)} مرة${n>=3?' – موضع متكرر الغلط':''}</span>`:'';
   const bmc=S.bm&&S.bm.p===p?'<span class="pchip warn">علامتك هنا</span>':'';
   $('#pchips').innerHTML=`<span class="pchip">صفحة ${side}</span>${bmc}${st}${er}<span class="pchip">تفاصيل الصفحة</span>`;
 }
@@ -1189,14 +1243,14 @@ function renderMushaf(){
       <div class="row"><button class="tg" id="snd" aria-pressed="false">${ic('snd')}<span>صوت التقليب</span></button><button class="tg" id="mgn" aria-pressed="false">${ic('mgn')}<span>علامات الهامش</span></button>${zoomSel()}</div>
      </div>
      <div class="mstate"><button class="pill" id="bmG" hidden></button><button class="pill acc" id="hnl" hidden>${ic('eye')}<span>اكشف السطر</span></button></div>
-     <div class="stagewrap"><button class="edge nx" id="enx" aria-label="التالية">‹</button><button class="edge pv" id="epv" aria-label="السابقة">›</button><div class="stage" id="stage"></div><div class="nextcue" id="nextcue"></div></div>
+     <div class="stagewrap"><button class="edge nx" id="enx" aria-label="التالية">${ic('next','ii')}</button><button class="edge pv" id="epv" aria-label="السابقة">${ic('prev','ii')}</button><div class="stage" id="stage"></div><div class="nextcue" id="nextcue"></div></div>
      <div class="pchips" id="pchips"></div>
-     <p class="hint">دوسة على الكلمة = غلطة · دوسة مطوّلة = تفسير وعلامة واستماع · اسحب الصفحة لتقليبها</p>`;
+     <p class="hint">دوسة على الكلمة = غلطة – دوسة مطوّلة = تفسير وعلامة واستماع – اسحب الصفحة لتقليبها</p>`;
     $('#mMore').onclick=()=>{const m=$('#mmore');m.hidden=!m.hidden;$('#mMore').setAttribute('aria-expanded',String(!m.hidden))};
     $('#jz').innerHTML=Object.keys(D.j).map(j=>`<option value="${j}">الجزء ${AR(j)}</option>`).join('');
     $('#hz').innerHTML=[...Array(60)].map((_,i)=>`<option value="${i+1}">الحزب ${AR(i+1)}</option>`).join('');
     $('#rb').innerHTML=[...Array(240)].map((_,i)=>`<option value="${i+1}">${rubLabel(i+1)}</option>`).join('');
-    $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('');
+    $('#su').innerHTML=Object.keys(D.n).map(s=>`<option value="${s}">${AR(+s)}. ${esc(D.n[s])} – ${stype(s)}</option>`).join('');
     $('#nx').onclick=$('#enx').onclick=()=>navigate(MP+1);
     $('#pv').onclick=$('#epv').onclick=()=>navigate(MP-1);
     $('#pg').onchange=e=>navigate(+e.target.value||1);
@@ -1229,11 +1283,11 @@ function renderMushaf(){
 function openPageSheet(p){
   const c=S.pc[p]||{f:0,s:0,w:0},rec=S.pages[p]||{};
   const words=Object.keys(S.wc).map(k=>{const i=k.indexOf('|');return {aid:+k.slice(0,i),w:k.slice(i+1),n:S.wc[k].n,p:S.wc[k].p}}).filter(x=>x.p===p&&AY[x.aid]).sort((a,b)=>b.n-a.n);
-  const lv=pageLvl(p),st=lv?(LVL[lv]+' (من عدد الأخطاء)'+(rec.d?' · آخر اختبار '+rec.d:'')):'لم تُختبر بعد';
+  const lv=pageLvl(p),st=lv?(LVL[lv]+' (من عدد الأخطاء)'+(rec.d?' – آخر اختبار '+rec.d:'')):'لم تُختبر بعد';
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="تفاصيل الصفحة">
-   <div class="row sp"><h3>صفحة ${AR(p)} · ${esc(pageHeadL(p))}</h3><button class="g" id="x">إغلاق</button></div>
-   <p>${p%2?'صفحة يمين':'صفحة شمال'} · ${st}</p>
-   <div class="card"><b>عدد مرات الغلط في الصفحة دي</b><span>${AR(c.w)} مرة في كلمات سجّلتها · ${AR(c.f)} مرة نسيتها في الاختبار · ${AR(c.s)} مرة ترددت</span></div>
+   <div class="row sp"><h3>صفحة ${AR(p)} – ${esc(pageHeadL(p))}</h3><button class="g" id="x">إغلاق</button></div>
+   <p>${p%2?'صفحة يمين':'صفحة شمال'} – ${st}</p>
+   <div class="card"><b>عدد مرات الغلط في الصفحة دي</b><span>${AR(c.w)} مرة في كلمات سجّلتها – ${AR(c.f)} مرة نسيتها في الاختبار – ${AR(c.s)} مرة ترددت</span></div>
    ${words.length?`<div class="card">${words.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">سورة ${esc(sname(AY[x.aid].s))} آية ${AR(AY[x.aid].a)}</span></div><div class="row"><span class="pchip ${x.n>=2?'warn':''}">${AR(x.n)} مرة</span><button data-dec="${esc(x.aid+'|'+x.w)}">نقّص ١</button></div></div>`).join('')}</div>`:''}
    <div class="row rate" id="prt"><button class="r4" data-r="4">ممتاز</button><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></div>
    <p class="muted">مستوى الصفحة بيتحسب لوحده من عدد الأخطاء: صفر = ممتاز، ١–٢ ثابتة، ٣–٦ بتردد، أكتر من ٦ ناسيها. التقييم هنا بيحدّث جدول التثبيت ومش بيتحسب من اختبارات اليوم.</p></div>`;
@@ -1432,13 +1486,13 @@ function renderRbar(){
     $('#rall').onclick=()=>{const x=$('#all');if(x)x.click()};
     if($('#rrt'))$('#rrt').onclick=e=>{const r=e.target.dataset.r;if(!r)return;const x=document.querySelector('#rt [data-r="'+r+'"]');if(x)x.click()};
   }else{
-    b.innerHTML=`<button id="rx">إغلاق</button><span class="rinfo" id="rinfo"></span>${AUDIO?'<button id="rpl">▶ تلاوة</button>':''}<button id="rbm"></button><button id="rhd" aria-pressed="false">إخفاء السطور</button><button id="rhnl" hidden>اكشف السطر</button><button id="rmg" class="g"></button><button id="rsnd" class="g"></button>`;
+    b.innerHTML=`<button id="rx">إغلاق</button><span class="rinfo" id="rinfo"></span>${AUDIO?'<button id="rpl">'+ic('play','ii')+'<span>تلاوة</span></button>':''}<button id="rbm"></button><button id="rhd" aria-pressed="false">إخفاء السطور</button><button id="rhnl" hidden>اكشف السطر</button><button id="rmg" class="g"></button><button id="rsnd" class="g"></button>`;
     $('#rmg').onclick=()=>{S.margin=!S.margin;save();renderMushaf();syncSnd();applyReaderFit()};
     $('#rbm').onclick=toggleBookmark;
     $('#rhd').onclick=toggleHide;$('#rhnl').onclick=revealNext;
     if(AUDIO)$('#rpl').onclick=()=>{if(AU.on&&AU.playing){toggleAudio()}else{AU.until=0;playAyah(AU.on&&AY[AU.id]&&AY[AU.id].page===MP?AU.id:FA[MP])}};
     $('#rsnd').onclick=()=>{S.sound=!S.sound;save();syncSnd();if(S.sound)sound('shift')};
-    const i=$('#rinfo');if(i)i.textContent='صفحة '+AR(MP)+' · '+pageHeadL(MP);
+    const i=$('#rinfo');if(i)i.textContent='صفحة '+AR(MP)+' – '+pageHeadL(MP);
   }
   $('#rx').onclick=exitReader;
   applyZoom();syncSnd();syncBm();
@@ -1556,7 +1610,7 @@ function audioEl(){
 function setMedia(){
   if(!('mediaSession' in navigator))return;
   try{
-    const lab=AU.mode==='surah'?'سورة '+sname(AU.s):'سورة '+sname(D.a[AU.id-1][0])+' · آية '+AR(D.a[AU.id-1][1]);
+    const lab=AU.mode==='surah'?'سورة '+sname(AU.s):'سورة '+sname(D.a[AU.id-1][0])+' – آية '+AR(D.a[AU.id-1][1]);
     navigator.mediaSession.metadata=new MediaMetadata({title:lab,artist:recOf().n});
     navigator.mediaSession.setActionHandler('play',()=>AU.a&&AU.a.play());
     navigator.mediaSession.setActionHandler('pause',()=>AU.a&&AU.a.pause());
@@ -1613,7 +1667,7 @@ function syncPlayer(){
     if(!AU.on){m.hidden=true}
     else{
       const a=D.a[AU.id-1];
-      const lab=AU.mode==='surah'?'سورة '+sname(AU.s)+' (كاملة)':'سورة '+sname(a[0])+' · آية '+AR(a[1]);
+      const lab=AU.mode==='surah'?'سورة '+sname(AU.s)+' (كاملة)':'سورة '+sname(a[0])+' – آية '+AR(a[1]);
       m.hidden=false;
       m.innerHTML=`<div class="mlab"><b>${esc(lab)}</b><span class="muted">${esc(recOf().n)}</span></div>
        <button class="ib" id="mpv" aria-label="الآية السابقة">${ic('skipp')}</button><button class="playb sm" id="mpl" aria-label="${AU.playing?'إيقاف مؤقت':'تشغيل'}">${ic(AU.playing?'pause':'play')}</button><button class="ib" id="mnx" aria-label="الآية التالية">${ic('skipn')}</button>
@@ -1623,7 +1677,7 @@ function syncPlayer(){
     }
   }
   const pb=$('#aplay');if(pb){pb.innerHTML=ic(AU.playing?'pause':'play');pb.setAttribute('aria-label',AU.playing?'إيقاف مؤقت':'تشغيل')}
-  const rp=$('#rpl');if(rp)rp.textContent=AU.playing?'⏸ تلاوة':'▶ تلاوة';
+  const rp=$('#rpl');if(rp)rp.innerHTML=ic(AU.playing?'pause':'play','ii')+'<span>تلاوة</span>';
 }
 function renderAud(){
   if(!AUDIO)return;const el=$('#t-aud');if(!el)return;
@@ -1633,7 +1687,7 @@ function renderAud(){
     $('#astage').onclick=e=>{const w=e.target.closest('.w');if(w)wordTap(w)}}
   const playing=AU.on&&AU.mode==='ayah'&&AU.id===id&&AU.playing;
   $('#actl').innerHTML=`<div class="card player">
-   <div class="pl-pick"><select id="asu" aria-label="السورة">${Object.keys(D.n).map(k=>`<option value="${k}"${+k===s?' selected':''}>${k}. ${esc(D.n[k])} · ${stype(k)}</option>`).join('')}</select>
+   <div class="pl-pick"><select id="asu" aria-label="السورة">${Object.keys(D.n).map(k=>`<option value="${k}"${+k===s?' selected':''}>${AR(+k)}. ${esc(D.n[k])} – ${stype(k)}</option>`).join('')}</select>
     <select id="aay" aria-label="الآية">${[...Array(AYC[s])].map((_,i)=>`<option value="${i+1}"${i+1===A.a?' selected':''}>آية ${AR(i+1)}</option>`).join('')}</select></div>
    <div class="pl-ctl"><button class="ib" id="astop" aria-label="إيقاف" title="إيقاف">${ic('stop')}</button><button class="ib" id="aprev" aria-label="الآية السابقة" title="السابقة">${ic('skipp')}</button>
     <button class="playb" id="aplay" aria-label="${AU.playing?'إيقاف مؤقت':'تشغيل'}">${ic(AU.playing?'pause':'play')}</button>
@@ -1717,7 +1771,7 @@ function scopeRange(sc){
 }
 function scopeName(sc){
   const v=+sc.v||1,v2=+sc.v2||v;
-  return {bm:'كل اللي قبل علامتك',all:'المصحف كله',s:'سورة '+sname(v),j:'الجزء '+AR(v),h:'الحزب '+AR(v),r:rubLabel(v)+' · الجزء '+AR(Math.ceil(v/8)),pg:'الصفحات '+AR(Math.min(v,v2))+'–'+AR(Math.max(v,v2))}[sc.k]||'';
+  return {bm:'كل اللي قبل علامتك',all:'المصحف كله',s:'سورة '+sname(v),j:'الجزء '+AR(v),h:'الحزب '+AR(v),r:rubLabel(v)+' – الجزء '+AR(Math.ceil(v/8)),pg:'الصفحات '+AR(Math.min(v,v2))+'–'+AR(Math.max(v,v2))}[sc.k]||'';
 }
 const scopeKey=sc=>sc.k+(sc.k==='bm'||sc.k==='all'?'':':'+(+sc.v||1)+(sc.k==='pg'?'-'+(+sc.v2||sc.v):''));
 /* coverage: the ayat a scope has already been tested on, kept as ranges "1-7,12" */
@@ -1884,17 +1938,17 @@ function qAy(id,o){
     if(mk.has(id+'|'+w)&&o.swap!==i)c+=' mk';
     return `<span class="${c}" data-id="${id}" data-w="${esc(w)}" data-i="${A.line-1}" data-k="${i}">${esc(x)}</span>`}).join(' ')+` <span class="qn">${AR(A.a)}</span></span>`;
 }
-const where=id=>`سورة ${esc(sname(AY[id].s))} · آية ${AR(AY[id].a)} · صفحة ${AR(AY[id].page)}`;
+const where=id=>`سورة ${esc(sname(AY[id].s))} – آية ${AR(AY[id].a)} – صفحة ${AR(AY[id].page)}`;
 function renderQZ(el){
   const q=QZ.cur,d=day(),qn=(d.m&&d.m.n)||0,g=memGoal();
   const title={mem:'اختبار المحفوظ',smart:'اختبار أخطائي',list:'اختبار على الأخطاء اللي اخترتها',custom:'اختبار مخصص',zw:'اختبار المتشابهات'}[QZ.mode];
   let prog='',zfull=false;
   if(QZ.mode==='zw'&&!QZ.zent){const T=zwTargets(),c=T.filter(x=>QZ.cov.has(x)).length;zfull=T.length>0&&c>=T.length;prog=`<div class="row sp"><span>متشابهات قبل علامتك</span><span class="muted">غطّيت ${AR(c)} من ${AR(T.length)} موضع</span></div><div class="bar"><i style="width:${T.length?(c/T.length*100).toFixed(1):0}%"></i></div>`}
-  else if(QZ.mode==='zw'){const e=ZID[QZ.zent];prog=`<p class="muted">${e?esc(zNum(e))+' · ':''}كل الأنواع على البند ده</p>`}
-  else if(QZ.mode==='mem')prog=`<div class="row sp"><span>النهارده</span><span class="muted">${AR(qn)} من ${AR(g)}${qn>=g?' · خلصت، وتقدر تكمّل':''}</span></div><div class="bar"><i style="width:${Math.min(100,Math.round(qn/g*100))}%"></i></div>`;
+  else if(QZ.mode==='zw'){const e=ZID[QZ.zent];prog=`<p class="muted">${e?esc(zNum(e))+' – ':''}كل الأنواع على البند ده</p>`}
+  else if(QZ.mode==='mem')prog=`<div class="row sp"><span>النهارده</span><span class="muted">${AR(qn)} من ${AR(g)}${qn>=g?' – خلصت، وتقدر تكمّل':''}</span></div><div class="bar"><i style="width:${Math.min(100,Math.round(qn/g*100))}%"></i></div>`;
   else if(QZ.list){const c=QZ.list.filter(x=>QZ.cov.has(x)).length;prog=`<div class="row sp"><span>غطّيت</span><span class="muted">${AR(c)} من ${AR(QZ.list.length)} موضع</span></div><div class="bar"><i style="width:${Math.round(c/QZ.list.length*100)}%"></i></div>`}
-  else if(QZ.key){const N=QZ.rg[1]-QZ.rg[0]+1,c=covCount(QZ.cov,QZ.rg);prog=`<div class="row sp"><span>${esc(scopeName(QZ.sc))}</span><span class="muted">غطّيت ${AR(c)} من ${AR(N)} آية · ${AR(Math.floor(c/N*100))}٪</span></div><div class="bar"><i style="width:${(c/N*100).toFixed(1)}%"></i></div>`}
-  else prog=`<p class="muted">سؤال رقم ${AR(QZ.n+(q.fin?0:1))} · كل سؤال نص وجه بالكتير، والأولوية للأكتر غلط والأحدث</p>`;
+  else if(QZ.key){const N=QZ.rg[1]-QZ.rg[0]+1,c=covCount(QZ.cov,QZ.rg);prog=`<div class="row sp"><span>${esc(scopeName(QZ.sc))}</span><span class="muted">غطّيت ${AR(c)} من ${AR(N)} آية – ${AR(Math.floor(c/N*100))}٪</span></div><div class="bar"><i style="width:${(c/N*100).toFixed(1)}%"></i></div>`}
+  else prog=`<p class="muted">سؤال رقم ${AR(QZ.n+(q.fin?0:1))} – كل سؤال نص وجه بالكتير، والأولوية للأكتر غلط والأحدث</p>`;
   const full=QZ.mode==='zw'?zfull:QZ.key&&QZ.goal==='cov'&&covCount(QZ.cov,QZ.rg)>=QZ.rg[1]-QZ.rg[0]+1;
   let body=q.ls?qzPassage(q):qzText(q);
   const nxl=QZ.mode==='mem'&&qn>=g?'كمان':'السؤال التالي';
@@ -1925,8 +1979,8 @@ function qzPassage(q){
   const done=q.done?`<div class="qdone"><b class="hsb">حسبك</b>
      <p class="muted">دوس على أي كلمة غلطت فيها في الموضع (اتسجّل ${AR(q.errs)}). وبعدين قولّي حصل إيه:</p>
      <div class="chips qprob">${P.map(x=>`<button data-pr="${x[0]}" aria-pressed="${!!q.pr[x[0]]}">${x[1]}</button>`).join('')}</div>
-     ${tips.length?`<div class="qtip">${tips.map(t=>`<p>${t}</p>`).join('')}${q.pr.sim?zSimBlock(q):''}<div class="row">${q.pr.hes&&AUDIO?'<button id="qL3">▶ اسمعه ٣ مرات</button>':''}${q.pr.sim?'<button id="qNt">اكتب الفرق</button>':''}</div></div>`:''}</div>`:'';
-  return `<div class="card"><div class="row sp"><span class="muted">${pages.length>1?`صفحة ${AR(p)} · ${AR(pi+1)} من ${AR(pages.length)} في الموضع`:`صفحة ${AR(p)}`}</span>
+     ${tips.length?`<div class="qtip">${tips.map(t=>`<p>${t}</p>`).join('')}${q.pr.sim?zSimBlock(q):''}<div class="row">${q.pr.hes&&AUDIO?'<button id="qL3">'+ic('rep','ii')+'اسمعه ٣ مرات</button>':''}${q.pr.sim?'<button id="qNt">اكتب الفرق</button>':''}</div></div>`:''}</div>`:'';
+  return `<div class="card"><div class="row sp"><span class="muted">${pages.length>1?`صفحة ${AR(p)} – ${AR(pi+1)} من ${AR(pages.length)} في الموضع`:`صفحة ${AR(p)}`}</span>
      <span class="row">${pages.length>1?`<button class="ib" id="qpP" aria-label="صفحة الموضع اللي قبلها" ${pi?'':'disabled'}>${ic('prev')}</button><button class="ib" id="qpN" aria-label="صفحة الموضع اللي بعدها" ${pi<pages.length-1?'':'disabled'}>${ic('next')}</button>`:''}${zoomSel()}</span></div>
     ${head}
     <div class="stagewrap"><div id="tp" class="stage"></div></div>
@@ -1943,7 +1997,8 @@ function wirePassage(q){
     if(w.classList.contains('qo'))return;wordTap(w)};
   const pages=qPages(q),pi=pages.indexOf(p);
   const pP=$('#qpP'),pN=$('#qpN');if(pP)pP.onclick=()=>{q.pv=pages[pi-1];renderTest()};if(pN)pN.onclick=()=>{q.pv=pages[pi+1];renderTest()};
-  const nl=$('#nl');if(nl){nl.onclick=()=>qzReveal();$('#all').onclick=()=>qzReveal(true);$('#fsT').onclick=()=>enterReader('test')}
+  const nl=$('#nl');if(nl&&!q.scl){q.scl=1;setTimeout(()=>{const x=$('#nl');if(!x)return;const d=x.getBoundingClientRect().bottom-(innerHeight-92);if(d>0)window.scrollBy(0,d)},150)}
+  if(nl){nl.onclick=()=>qzReveal();$('#all').onclick=()=>qzReveal(true);$('#fsT').onclick=()=>enterReader('test')}
   document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{const k=b.dataset.pr;q.pr[k]=!q.pr[k];if(k==='none'&&q.pr.none)q.pr.word=q.pr.sim=q.pr.hes=false;else if(k!=='none')q.pr.none=false;renderTest()});
   const l3=$('#qL3');if(l3)l3.onclick=()=>{AU.until=0;playAyah(q.from);AU.upto=q.to;AU.frc=3;AU.left=3};
   const nt=$('#qNt');if(nt)nt.onclick=()=>{const k=q.mw[0];openSheet(k?+k.slice(0,k.indexOf('|')):q.from);const n=$('#nt');if(n)n.focus()};
@@ -1961,21 +2016,21 @@ function qzText(q){
   else if(q.k==='lfz'){h=`<p class="qp">اذكر آية من سورة ${esc(sname(q.s))} ورد فيها لفظ <span class="qq">«${esc(q.w)}»</span>.</p>${q.ans.length>1?'<p class="muted">اللفظ ده جه في آيتين في السورة، أي واحدة منهم تنفع.</p>':''}`;ans=selfc()}
   else if(q.k==='sur'){
     h=`<p class="qp">في أنهي سورة قوله تعالى:</p><p class="qline">${qAy(q.id)}</p>`;
-    ans=`<div class="qopts">${q.opts.map(s=>`<button data-o="${s}" class="${q.ch!==undefined?(s===q.ans?'r3':s===q.ch?'r1':''):''}"${q.ch!==undefined?' disabled':''}>سورة ${esc(sname(s))}</button>`).join('')}</div>${q.ch!==undefined?`<p class="${q.ch===q.ans?'qok':'qno'}">${q.ch===q.ans?'صح':'الإجابة: سورة '+esc(sname(q.ans))+' · اتسجّلت غلطة'} · آية ${AR(AY[q.id].a)}</p>`:''}`}
+    ans=`<div class="qopts">${q.opts.map(s=>`<button data-o="${s}" class="${q.ch!==undefined?(s===q.ans?'r3':s===q.ch?'r1':''):''}"${q.ch!==undefined?' disabled':''}>سورة ${esc(sname(s))}</button>`).join('')}</div>${q.ch!==undefined?`<p class="${q.ch===q.ans?'qok':'qno'}">${q.ch===q.ans?'صح':'الإجابة: سورة '+esc(sname(q.ans))+' – اتسجّلت غلطة'} – آية ${AR(AY[q.id].a)}</p>`:''}`}
   else if(q.k==='blk'){
     const w=AY[q.id].t[q.wk];
     h=`<p class="qp">املأ الفراغ:</p><p class="qline">${qAy(q.id,{blank:q.wk,fill:q.ch!==undefined?w:''})}</p>`;
-    ans=`<div class="qopts qw4">${q.opts.map((o,i)=>`<button data-o="${i}" class="qf ${q.ch!==undefined?(o===w?'r3':i===q.ch?'r1':''):''}"${q.ch!==undefined?' disabled':''}>${esc(o)}</button>`).join('')}</div>${q.ch!==undefined?`<p class="${q.opts[q.ch]===w?'qok':'qno'}">${q.opts[q.ch]===w?'صح':'اتسجّلت غلطة في «'+esc(w)+'»'} · ${where(q.id)}</p>`:''}`}
+    ans=`<div class="qopts qw4">${q.opts.map((o,i)=>`<button data-o="${i}" class="qf ${q.ch!==undefined?(o===w?'r3':i===q.ch?'r1':''):''}"${q.ch!==undefined?' disabled':''}>${esc(o)}</button>`).join('')}</div>${q.ch!==undefined?`<p class="${q.opts[q.ch]===w?'qok':'qno'}">${q.opts[q.ch]===w?'صح':'اتسجّلت غلطة في «'+esc(w)+'»'} – ${where(q.id)}</p>`:''}`}
   else if(q.k==='fix'||q.k==='tf'){
     const swap=q.k==='fix'||q.alt;
     if(q.k==='tf'&&q.ch===undefined){h=`<p class="qp">صح ولا غلط؟ ولو غلط صحّحه:</p><p class="qline">${qAy(q.id,swap?{swap:q.wk,bad:q.bad}:{})}</p>`;ans=`<div class="row"><button class="r3" data-tf="1">صح</button><button class="r1" data-tf="0">غلط</button></div>`}
     else if(!q.rev){h=`<p class="qp">${q.k==='fix'?'في الآية دي كلمة غلط. دوس عليها:':'دوس على الكلمة الغلط علشان تصحّحها:'}</p><p class="qline qpick">${qAy(q.id,{swap:q.wk,bad:q.bad})}</p>`}
     else{h=`<p class="qp">${q.k==='fix'?'صحّح الخطأ':'صح ولا غلط'}:</p><p class="qline">${qAy(q.id,{hi:swap?q.wk:-1})}</p><p class="muted">${where(q.id)}</p>`;
-      ans=`<p class="${q.ok?'qok':'qno'}">${q.ok?'صح':'اتسجّلت غلطة'}${swap?' · كان مكتوب «'+esc(q.bad)+'» والصح «'+esc(AY[q.id].t[q.wk])+'»':' · الآية كانت صح'}</p>`}}
+      ans=`<p class="${q.ok?'qok':'qno'}">${q.ok?'صح':'اتسجّلت غلطة'}${swap?' – كان مكتوب «'+esc(q.bad)+'» والصح «'+esc(AY[q.id].t[q.wk])+'»':' – الآية كانت صح'}</p>`}}
   else if(q.k==='ord'){
     const left=q.sh.filter(i=>!q.pk.includes(i));
     h=`<p class="qp">رتّب الآيات دي زي ما في المصحف: دوس عليها بالترتيب.</p>`;
-    ans=q.rev?`<div class="qans">${q.ids.map((i,n)=>`<p class="qline ${q.pk[n]===i?'':'qbad'}">${qAy(i)}</p>`).join('')}</div><p class="${q.ok?'qok':'qno'}">${q.ok?'ترتيب صح':'الترتيب الصح متعلّم فوق · اتسجّلت غلطة'} · ${where(q.ids[0])}</p>`
+    ans=q.rev?`<div class="qans">${q.ids.map((i,n)=>`<p class="qline ${q.pk[n]===i?'':'qbad'}">${qAy(i)}</p>`).join('')}</div><p class="${q.ok?'qok':'qno'}">${q.ok?'ترتيب صح':'الترتيب الصح متعلّم فوق – اتسجّلت غلطة'} – ${where(q.ids[0])}</p>`
       :`${q.pk.length?`<div class="qans">${q.pk.map((i,n)=>`<p class="qline"><b>${AR(n+1)}.</b> ${esc(ayahText(i))}</p>`).join('')}</div>`:''}<div class="qcards">${left.map(i=>`<button class="qcard" data-od="${i}">${esc(ayahText(i))}</button>`).join('')}</div>${q.pk.length?'<div class="row"><button id="qUn">رجّع آخر واحدة</button></div>':''}`}
   return `<div class="card qcard0">${h}${ans}</div>`;
 }
@@ -2016,10 +2071,10 @@ function renderTest(){
   const tested=Object.values(S.pages).filter(r=>r.r).length,qn=(day().m&&day().m.n)||0,sq=(day().q&&day().q.n)||0,g=memGoal(),be=bmEnd();
   const open=S.mistakes.filter(m=>m.n<4).length,c=qcfg(),rg=scopeRange(c.sc),key=scopeKey(c.sc),cv=rg?covCount(covGet(key),rg):0,N=rg?rg[1]-rg[0]+1:0;
   const vsel=()=>{const k=c.sc.k,v=+c.sc.v||1;
-    if(k==='s')return `<select id="qsv" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}"${+s===v?' selected':''}>${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('')}</select>`;
+    if(k==='s')return `<select id="qsv" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}"${+s===v?' selected':''}>${AR(+s)}. ${esc(D.n[s])} – ${stype(s)}</option>`).join('')}</select>`;
     if(k==='j')return `<select id="qsv" aria-label="الجزء">${[...Array(30)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>الجزء ${AR(i+1)}</option>`).join('')}</select>`;
     if(k==='h')return `<select id="qsv" aria-label="الحزب">${[...Array(60)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>الحزب ${AR(i+1)}</option>`).join('')}</select>`;
-    if(k==='r')return `<select id="qsv" aria-label="الربع">${[...Array(240)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>${rubLabel(i+1)} · ج${AR(Math.ceil((i+1)/8))}</option>`).join('')}</select>`;
+    if(k==='r')return `<select id="qsv" aria-label="الربع">${[...Array(240)].map((_,i)=>`<option value="${i+1}"${i+1===v?' selected':''}>${rubLabel(i+1)} – ج${AR(Math.ceil((i+1)/8))}</option>`).join('')}</select>`;
     if(k==='pg')return `<label class="row">من صفحة <input id="qsv" type="number" min="1" max="604" value="${v}"> إلى <input id="qsv2" type="number" min="1" max="604" value="${+c.sc.v2||v}"></label>`;
     if(k==='bm')return `<span class="muted">${be?'من أول المصحف لحد '+where(be):'لسه ما علّمتش مكان وقوفك'}</span>`;
     return '';};
@@ -2043,7 +2098,7 @@ function renderTest(){
      ${rg?`<div class="row sp"><span>التغطية: ${esc(scopeName(c.sc))}</span><span class="muted">${AR(cv)} من ${AR(N)} آية</span></div><div class="bar"><i style="width:${(cv/N*100).toFixed(1)}%"></i></div>`:''}
      <p class="muted">الاختبار ما بيخلصش لوحده: كمّل لحد ما كل آية في النطاق تتغطى، والتغطية بتتحفظ وتكمّل بعدين.</p>
      <div class="row"><button class="p" id="qCu"${rg?'':' disabled'}>ابدأ</button>${cv?'<button id="qCr">صفّر التغطية</button>':''}</div></div>
-   <div class="card"><div class="row sp"><h2>الاختبار المفاجئ · صفحة كاملة</h2><span class="muted">النهارده ${AR(Math.min(sq,3))} من ٣</span></div>
+   <div class="card"><div class="row sp"><h2>الاختبار المفاجئ – صفحة كاملة</h2><span class="muted">النهارده ${AR(Math.min(sq,3))} من ٣</span></div>
      <p class="muted">هتشوف الصفحة بشكلها الحقيقي والسطور مخفية. قيّم نفسك بصدق: النتيجة هي اللي بتحدد جدول التثبيت.</p>
      <div class="row sp"><span>صفحات اتختبرت</span><span class="muted">${AR(tested)} من ٦٠٤</span></div><div class="bar"><i style="width:${Math.round(tested/6.04)}%"></i></div>
      <label class="row"><input type="checkbox" id="hf"> أخفي السطر الأول كمان (أعرف بداية الصفحة من رقمها بس)</label>
@@ -2086,7 +2141,7 @@ const mv=()=>Object.assign({},MV0,S.mv||{});
 const mCnt=m=>(S.wc[m.aid+'|'+m.word]||{n:1}).n;
 const dayLab=k=>k===TODAY()?'النهارده':k===addDays(TODAY(),-1)?'إمبارح':AR(k.split('-').reverse().join('/'));
 const MG={s:['السورة',m=>AY[m.aid].s,k=>'سورة '+sname(k)],j:['الجزء',m=>Math.ceil(D.r[m.aid-1]/8),k=>'الجزء '+AR(k)],h:['الحزب',m=>Math.ceil(D.r[m.aid-1]/4),k=>'الحزب '+AR(k)],
-  p:['الصفحة',m=>m.page,k=>'صفحة '+AR(k)],d:['اليوم',m=>ymd(new Date(m.id)),dayLab],sim:['متشابه',m=>zSimKey(m),k=>+k===0?'مش متشابهات':+k===-1?'متشابهات (من غير بند في معجم الزواوي)':ZID[k]?(x=>'المتشابه: '+zNum(ZID[k])+' · '+(x.length>70?x.slice(0,70)+'…':x))(zPlain(ZID[k].t||ZID[k].h).replace(/\.{3,}/g,'…')):'متشابهات · بند '+AR(k)],none:['من غير تجميع',()=>0,()=>'كل الأخطاء']};
+  p:['الصفحة',m=>m.page,k=>'صفحة '+AR(k)],d:['اليوم',m=>ymd(new Date(m.id)),dayLab],sim:['متشابه',m=>zSimKey(m),k=>+k===0?'مش متشابهات':+k===-1?'متشابهات (من غير بند في معجم الزواوي)':ZID[k]?(x=>'المتشابه: '+zNum(ZID[k])+' – '+(x.length>70?x.slice(0,70)+'…':x))(zPlain(ZID[k].t||ZID[k].h).replace(/\.{3,}/g,'…')):'متشابهات – بند '+AR(k)],none:['من غير تجميع',()=>0,()=>'كل الأخطاء']};
 const MOPEN=new Set();
 function misFilter(v,noJ){return S.mistakes.filter(m=>AY[m.aid]&&(v.st==='all'||(v.st==='open'?m.n<4:m.n>=4))&&(v.sm==='all'||(v.sm==='sim'?!!m.sim:!m.sim))&&(noJ||!v.j||Math.ceil(D.r[m.aid-1]/8)===v.j))}
 function renderMis(){
@@ -2101,24 +2156,24 @@ function renderMis(){
   gs.sort(v.g==='d'&&v.o!=='n'?(a,b)=>b.last-a.last:{n:(a,b)=>b.n-a.n||b.last-a.last,new:(a,b)=>b.last-a.last,mus:(a,b)=>a.first-b.first}[v.o]);
   if(!gs.some(g=>MOPEN.has(v.g+':'+g.k))&&gs[0])MOPEN.add(v.g+':'+gs[0].k);
   const seg=(id,opts,cur)=>`<div class="seg" id="${id}">${opts.map(([k,l])=>`<button data-v="${k}" aria-pressed="${String(k)===String(cur)}">${l}</button>`).join('')}</div>`;
-  const item=m=>{const c=mCnt(m),op=m.n<4;return `<div class="item"><div><b>«${esc(m.word)}»</b> <span class="muted">${where(m.aid)} · سطر ${AR(m.line)}</span>${m.sim?(ZID[m.sim]?` <button class="pchip" data-zo="${m.sim}">متشابه · ${esc(zNum(ZID[m.sim]))}</button>`:' <span class="pchip">متشابه</span>'):''}${m.q?' <span class="pchip">من اختبار</span>':''}
-    <div class="dots">${[0,1,2,3].map(i=>`<i class="${i<m.n?'on':''}"></i>`).join('')}</div><div class="muted">${op?(m.due<=TODAY()?'مستحق النهارده':'الموعد '+m.due):'اتثبّت'} · اتسجّل ${dayLab(ymd(new Date(m.id)))}</div></div>
-    <div class="row mact"><span class="pchip ${c>=2?'warn':''}">${AR(c)} مرة</span><button data-o="${m.id}">افتح</button>${op?`<button data-ok="${m.id}">راجعتها</button>`:''}<button class="tg" data-sim="${m.id}" aria-pressed="${!!m.sim}">متشابه</button><button class="g" data-del="${m.id}" aria-label="حذف">✕</button></div></div>`};
+  const item=m=>{const c=mCnt(m),op=m.n<4;return `<div class="item"><div><b>«${esc(m.word)}»</b> <span class="muted">${where(m.aid)} – سطر ${AR(m.line)}</span>${m.sim?(ZID[m.sim]?` <button class="pchip" data-zo="${m.sim}">متشابه – ${esc(zNum(ZID[m.sim]))}</button>`:' <span class="pchip">متشابه</span>'):''}${m.q?' <span class="pchip">من اختبار</span>':''}
+    <div class="dots">${[0,1,2,3].map(i=>`<i class="${i<m.n?'on':''}"></i>`).join('')}</div><div class="muted">${op?(m.due<=TODAY()?'مستحق النهارده':'الموعد '+m.due):'اتثبّت'} – اتسجّل ${dayLab(ymd(new Date(m.id)))}</div></div>
+    <div class="row mact"><span class="pchip ${c>=2?'warn':''}">${AR(c)} مرة</span><button data-o="${m.id}">افتح</button>${op?`<button data-ok="${m.id}">راجعتها</button>`:''}<button class="tg" data-sim="${m.id}" aria-pressed="${!!m.sim}">متشابه</button><button class="g" data-del="${m.id}" aria-label="حذف">${ic('trash','ii')}</button></div></div>`};
   const repW=Object.keys(S.wc).map(k=>{const i=k.indexOf('|');return {aid:+k.slice(0,i),w:k.slice(i+1),n:S.wc[k].n,p:S.wc[k].p}}).filter(x=>x.n>=2&&AY[x.aid]).sort((a,b)=>b.n-a.n).slice(0,12);
   const repP=Object.keys(S.pc).map(Number).map(p=>({p,n:pageErr(p)})).filter(x=>x.n>=2).sort((a,b)=>b.n-a.n).slice(0,8);
   const repCard=(repW.length||repP.length)?`<details class="card mgrp"><summary><h2 style="display:inline">مواضع الغلط المتكررة</h2></summary>
-   ${repW.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">سورة ${esc(sname(AY[x.aid].s))} آية ${AR(AY[x.aid].a)} · صفحة ${AR(x.p)}</span></div><div class="row"><span class="pchip warn">${AR(x.n)} مرة</span><button data-rp="${x.p}" data-aid="${x.aid}">افتح</button></div></div>`).join('')}
+   ${repW.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">سورة ${esc(sname(AY[x.aid].s))} آية ${AR(AY[x.aid].a)} – صفحة ${AR(x.p)}</span></div><div class="row"><span class="pchip warn">${AR(x.n)} مرة</span><button data-rp="${x.p}" data-aid="${x.aid}">افتح</button></div></div>`).join('')}
    ${repP.map(x=>`<div class="item"><div>صفحة ${AR(x.p)} كلها</div><div class="row"><span class="pchip warn">${AR(x.n)} مرة غلط</span><button data-rp="${x.p}">افتح</button></div></div>`).join('')}</details>`:'';
   $('#t-mis').innerHTML=`<div class="card"><h2>أخطائي</h2>
     <div class="mstats"><div><b>${AR(open.length)}</b><span>تحت التثبيت</span></div><div><b>${AR(fixed)}</b><span>اتثبّت</span></div><div><b>${AR(words)}</b><span>مرة غلط في كلمات</span></div><div><b>${AR(pages)}</b><span>صفحة فيها غلط</span></div></div>
     <div class="jchart" role="group" aria-label="الأخطاء في كل جزء">${jc.slice(1).map((n,i)=>`<button class="jb${v.j===i+1?' on':''}" data-j="${i+1}" aria-label="الجزء ${i+1}: ${n} غلطة" aria-pressed="${v.j===i+1}"><i style="height:${n?Math.max(6,Math.round(n/jm*100)):0}%"></i><small>${i===0||(i+1)%5===0||v.j===i+1?AR(i+1):'&nbsp;'}</small></button>`).join('')}</div>
-    <p class="muted">${v.j?`مفلتر على الجزء ${AR(v.j)} · <button class="g lnk" id="mjX">شيل الفلتر</button>`:'دوس على عمود الجزء علشان تشوف أخطاءه بس.'}</p></div>
+    <p class="muted">${v.j?`مفلتر على الجزء ${AR(v.j)} – <button class="g lnk" id="mjX">شيل الفلتر</button>`:'دوس على عمود الجزء علشان تشوف أخطاءه بس.'}</p></div>
    <div class="card mctl">
     <div class="row"><span class="muted">تجميع حسب</span>${seg('mg',[['s','السورة'],['j','الجزء'],['h','الحزب'],['p','الصفحة'],['d','اليوم'],['sim','متشابه'],['none','من غير']],v.g)}</div>
     <div class="row"><span class="muted">الترتيب</span>${seg('mo',[['n','الأكتر غلط'],['new','الأحدث'],['mus','ترتيب المصحف']],v.o)}</div>
     <div class="row"><span class="muted">الحالة</span>${seg('mst',[['open','مفتوح'],['fixed','اتثبّت'],['all','الكل']],v.st)}${seg('msm',[['all','الكل'],['sim','متشابه'],['non','غيره']],v.sm)}</div>
     <div class="row sp"><span>${AR(list.length)} موضع في ${AR(gs.length)} مجموعة</span><button class="p" id="mTest"${list.length?'':' disabled'}>اختبرني على دول</button></div></div>
-   ${gs.length?gs.map(g=>`<details class="card mgrp" data-g="${esc(v.g+':'+g.k)}"${MOPEN.has(v.g+':'+g.k)?' open':''}><summary><span>${esc(G[2](g.k))}</span><span class="cnt">${AR(g.a.length)} موضع · ${AR(g.n)} مرة</span></summary>${v.g==='sim'&&ZID[g.k]?`<div class="row"><button data-zo="${g.k}">افتح البند: المواضع وعلامة الزواوي</button></div>`:''}${g.a.map(item).join('')}</details>`).join('')
+   ${gs.length?gs.map(g=>`<details class="card mgrp" data-g="${esc(v.g+':'+g.k)}"${MOPEN.has(v.g+':'+g.k)?' open':''}><summary><span>${esc(G[2](g.k))}</span><span class="cnt">${AR(g.a.length)} موضع – ${AR(g.n)} مرة</span></summary>${v.g==='sim'&&ZID[g.k]?`<div class="row"><button data-zo="${g.k}">افتح البند: المواضع وعلامة الزواوي</button></div>`:''}${g.a.map(item).join('')}</details>`).join('')
      :`<div class="card"><p class="muted">${S.mistakes.length?'مفيش أخطاء بالفلاتر دي.':'مفيش أخطاء مسجّلة. من صفحة المصحف اضغط على الكلمة اللي بتغلط فيها وسجّلها، أو اختبر نفسك.'}</p></div>`}
    ${fixed&&v.st==='open'?`<p class="muted">اتثبّت ${AR(fixed)} موضع بعد ٤ مراجعات (بعد يوم، ٣، ٧، ٣٠). اختار «اتثبّت» علشان تشوفهم.</p>`:''}${repCard}`;
   const el=$('#t-mis'),setv=f=>{const x=mv();f(x);S.mv=x;save();renderMis()};
@@ -2144,10 +2199,10 @@ function ayahOfDay(){
 function renderTad(){
   const id=ayahOfDay(),A=AY[id],ids=Object.keys(S.notes).map(Number).sort((a,b)=>a-b);
   $('#t-tad').innerHTML=`<div class="card"><h2>آية اليوم</h2><p class="ayat" style="font-family:var(--quran);font-size:1.5rem;line-height:2.2">${esc(ayahText(id))}</p>
-   <span class="muted">سورة ${esc(sname(A.s))} · آية ${AR(A.a)} · صفحة ${AR(A.page)}</span>
+   <span class="muted">سورة ${esc(sname(A.s))} – آية ${AR(A.a)} – صفحة ${AR(A.page)}</span>
    <ul class="muted" style="margin:0;padding-inline-start:20px">${PROMPTS.map(p=>`<li>${p}</li>`).join('')}</ul>
    <button class="p" id="ad">افتح التفسير واكتب تدبّرك</button></div>
-   <div class="card"><h2>تدبّراتي (${AR(ids.length)})</h2>${ids.length?ids.map(i=>`<div class="item"><div><span class="muted">سورة ${esc(sname(AY[i].s))} · آية ${AR(AY[i].a)}</span><div>${esc(S.notes[i])}</div></div><button data-n="${i}">افتح</button></div>`).join(''):'<p class="muted">لسه ما كتبتش تدبّرات. اضغط على أي كلمة في المصحف واكتب في خانة الملاحظة.</p>'}</div>`;
+   <div class="card"><h2>تدبّراتي (${AR(ids.length)})</h2>${ids.length?ids.map(i=>`<div class="item"><div><span class="muted">سورة ${esc(sname(AY[i].s))} – آية ${AR(AY[i].a)}</span><div>${esc(S.notes[i])}</div></div><button data-n="${i}">افتح</button></div>`).join(''):'<p class="muted">لسه ما كتبتش تدبّرات. اضغط على أي كلمة في المصحف واكتب في خانة الملاحظة.</p>'}</div>`;
   $('#ad').onclick=()=>openSheet(id);
   $('#t-tad').querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>openSheet(+b.dataset.n));
 }
@@ -2177,12 +2232,12 @@ function renderMe(){
     <div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز ${AR(cnt[4])}</span><span><i style="background:var(--st3)"></i>ثابت ${AR(cnt[3])}</span><span><i style="background:var(--st2)"></i>بتردد ${AR(cnt[2])}</span><span><i style="background:var(--st1)"></i>ناسيه ${AR(cnt[1])}</span><span><i style="background:var(--st0)"></i>لم يُختبر ${AR(cnt[0])}</span></div></div>
    <div class="card"><h2>آخر ٣٥ يوم</h2><div class="heat">${heat.join('')}</div><div class="legend"><span><i style="background:var(--st3)"></i>جلستين</span><span><i style="background:var(--st2)"></i>أقل من كده</span></div></div>
    <div class="card"><h2>تأكد من المصحف بعينك</h2><p class="muted">النص اتقارن آليًا بنص مجمع الملك فهد. توزيع السطور من بيانات مصحف المدينة ولازم تتأكد منه بعينك على عينة. افتح كل صفحة وقارن بمصحفك، وعلّم اللي طابقت. صفحة ٧٧ اتأكدت منها بالفعل مقابل مصحفك.</p>
-    <div class="chips">${SAMPLE.map(p=>`<button data-v="${p}" style="${S.verified[p]?'border-color:var(--st3)':''}">${S.verified[p]?'✓ ':''}${AR(p)}</button>`).join('')}</div>
+    <div class="chips">${SAMPLE.map(p=>`<button data-v="${p}" style="${S.verified[p]?'border-color:var(--st3)':''}">${S.verified[p]?ic('check','ii'):''}${AR(p)}</button>`).join('')}</div>
     <p class="muted">اتأكدت من ${AR(Object.keys(S.verified).length)} صفحة.</p></div>
    <div class="card"><h2>نصايح</h2><ul style="margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:8px">${TIPS.map(t=>`<li><b>${t[0]}.</b> ${t[1]}</li>`).join('')}</ul></div>
    <div class="card"><h2>الزرارين العايمين</h2><p class="muted">زرار القائمة وزرار «اكشف السطر»: اسحبهم بهدوء وسيبهم يقفوا مكانهم، أو ارميهم ناحية ركن يتشبكوا فيه.</p><div class="row"><button id="flr">رجّع أماكنهم الأصلية</button>${AUDIO?'<button id="dlo">بدون نت (التحميل)</button>':''}</div></div>
    <div class="card"><h2>نسخة احتياطية</h2><p class="muted">بياناتك محفوظة في المتصفح ده بس. انسخ الكود واحتفظ به، وللرجوع على جهاز تاني الصقه واضغط استرجاع.</p>
-    <textarea id="bk" dir="ltr" rows="3"></textarea><div class="row"><button id="cp">نسخ</button><button id="rs">استرجاع</button></div></div>
+    <textarea id="bk" dir="ltr" rows="3"></textarea><div class="row"><button id="cp">نسخ</button><button id="rs">استرجاع</button>${(()=>{try{return localStorage.getItem(KEY+'-prev')?'<button id="ub">رجّع اللي كان قبل الاسترجاع</button>':''}catch(e){return ''}})()}</div></div>
    <div class="card"><h2>المصادر</h2><p class="muted">نص المصحف: مجمع الملك فهد، المصحف الشريف برواية حفص عن عاصم، نسخة ١٨ (مستودع ibnhazm/KFGQPC على GitHub)، بخط المجمع. توزيع السطور والصفحات: مصحف المدينة طبعة ١٤٤١ هـ (حزمة quran-qcf4 المبنية على خط مجمع الملك فهد QCF4)، وبيّنت المقارنة إنه يطابق صفحة ٧٧ في مصحفك. التفاسير: التفسير الميسر، والسعدي، وابن كثير، والبغوي (معالم التنزيل)، من quran.com دون تعديل. معاني الكلمات: السراج في بيان غريب القرآن لمحمد الخضيري (ط١ ١٤٢٩ هـ، من المكتبة الشاملة). مقاصد السور: المختصر في تفسير القرآن الكريم، مركز تفسير للدراسات القرآنية (ط٣ ١٤٣٦ هـ، من المكتبة الشاملة). أسباب النزول (الصحيح بس): المحرر في أسباب نزول القرآن لخالد المزيني (دار ابن الجوزي ط١ ١٤٢٧ هـ، من الموسوعة القرآنية quranpedia.net، نسخة 2026-08-10) للترجيح، والصحيح المسند من أسباب النزول لمقبل الوادعي (ط٤ ١٤٠٨ هـ، من المكتبة الشاملة). فضل السور: أحاديث الصحيحين بس من «معلومات السور» في quranpedia.net (نسخة 2026-10-31). معجم المتشابهات: يحيى عبد الفتاح الزواوي. التفسير الميسر هنا نسخة quran.com (الأقدم)، وفيه نسخة تانية بمقدمات للسور عند alquran.cloud مختلفة في بعض الآيات.</p></div>`;
   const el=$('#t-me');
   el.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>openPage(JS[+b.dataset.j]));
@@ -2190,9 +2245,16 @@ function renderMe(){
   el.querySelector('#flr').onclick=fltReset;if(AUDIO)el.querySelector('#dlo').onclick=openDL;
   const bk=el.querySelector('#bk');bk.value=JSON.stringify(S);
   el.querySelector('#cp').onclick=()=>{bk.select();(navigator.clipboard?navigator.clipboard.writeText(bk.value):Promise.reject()).then(()=>toast('اتنسخ')).catch(()=>toast('حدد الكود وانسخه يدويًا'))};
-  el.querySelector('#rs').onclick=()=>{try{const o=JSON.parse(bk.value);if(typeof o!=='object'||!o.days)throw 0;S=o;load2();save();applyTheme();renderAll();toast('اتسترجعت البيانات')}catch(e){toast('الكود غير صالح')}};
+  el.querySelector('#rs').onclick=()=>{let o;try{o=JSON.parse(bk.value);if(!o||typeof o!=='object'||!o.days)throw 0}catch(e){toast('الكود غير صالح');return}
+    if(JSON.stringify(o)===JSON.stringify(S)){toast('ده نفس الكود الحالي. الصق كود النسخة اللي عايز ترجعها الأول');return}
+    const sum=x=>AR(Object.keys(x.days||{}).length)+' يوم، '+AR((x.mistakes||[]).length)+' غلطة، '+AR(Object.keys(x.notes||{}).length)+' ملاحظة';
+    toast('هتستبدل بياناتك ('+sum(S)+') بالنسخة دي ('+sum(o)+'). الحالية هتتحفظ وتقدر ترجعها.',[{label:'استبدل',fn:()=>{
+      try{localStorage.setItem(KEY+'-prev',JSON.stringify(S))}catch(e){}
+      S=o;load2();save();applyTheme();renderAll();toast('اتسترجعت البيانات')}},{label:'إلغاء',fn:()=>{}}])};
+  const ub=el.querySelector('#ub');if(ub)ub.onclick=()=>{let o=null;try{o=JSON.parse(localStorage.getItem(KEY+'-prev'))}catch(e){}if(!o||!o.days){toast('مفيش نسخة قبل الاسترجاع');return}
+    toast('ترجّع البيانات اللي كانت قبل آخر استرجاع؟',[{label:'رجّعها',fn:()=>{try{localStorage.setItem(KEY+'-prev',JSON.stringify(S))}catch(e){}S=o;load2();save();applyTheme();renderAll();toast('رجعت البيانات اللي كانت قبل الاسترجاع')}},{label:'إلغاء',fn:()=>{}}])};
 }
-function load2(){S.cursor=S.cursor||0;S.sessions=S.sessions||0;S.days=S.days||{};S.pages=S.pages||{};S.mistakes=S.mistakes||[];S.notes=S.notes||{};S.verified=S.verified||{};S.theme=S.theme||'auto';S.pc=S.pc||{};S.wc=S.wc||{};if(S.sound===undefined)S.sound=true;if(S.margin===undefined)S.margin=true}
+function load2(){if(S.qc&&Array.isArray(S.qc.types)&&!S.qc.zv){S.qc.types=S.qc.types.concat(['zwd','zws','zwf','zwc','zwr']);S.qc.zv=1}S.cursor=S.cursor||0;S.sessions=S.sessions||0;S.days=S.days||{};S.pages=S.pages||{};S.mistakes=S.mistakes||[];S.notes=S.notes||{};S.verified=S.verified||{};S.theme=S.theme||'auto';S.pc=S.pc||{};S.wc=S.wc||{};if(S.sound===undefined)S.sound=true;if(S.margin===undefined)S.margin=true}
 
 function renderAll(){
   renderToday();renderTest();renderMis();renderTad();renderMe();if(AUDIO)renderAud();
@@ -2350,8 +2412,32 @@ const IC={
  theme:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
  dl:'<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/>',
- zw:'<path d="M4 9c2.7-2.4 5.3-2.4 8 0s5.3 2.4 8 0"/><path d="M4 15c2.7-2.4 5.3-2.4 8 0s5.3 2.4 8 0"/>'
+ zw:'<path d="M4 9c2.7-2.4 5.3-2.4 8 0s5.3 2.4 8 0"/><path d="M4 15c2.7-2.4 5.3-2.4 8 0s5.3 2.4 8 0"/>',
+ help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>'
 };
+
+/* ---- a plain guide for anyone opening the site for the first time (opens by itself once on a fresh device; S.help remembers it) ---- */
+function openHelp(){
+  S.help=1;save();
+  const st=[
+    ['mushaf','المصحف','اقرا صفحة صفحة زي المصحف الورق. اسحب يمين وشمال علشان تقلّب. لو غلطت في كلمة دوس عليها مرة، ودوسة طويلة على أي كلمة بتفتح التفسير والتلاوة ومعنى الكلمة.','mushaf','افتح المصحف'],
+    ['bm','علّم مكان وقوفك','من زرار العلامة فوق الصفحة. العلامة = أول حتة لسه ما حفظتهاش، والاختبارات بتسألك في اللي قبلها بس.','',''],
+    ['today','خطة النهارده','في الرئيسية: جلسات قصيرة كل يوم (حفظ ومراجعة واختبار صغير). خلّص اللي تقدر عليه وعلّم عليه.','today','الرئيسية'],
+    ['test','اختبرني','اختبار على اللي حفظته: تكمّل الآية، أو تعرف السورة، أو تفرّق بين الآيات المتشابهة. أي غلطة بتتسجل لوحدها.','test','اختبرني'],
+    ['mis','أخطائي','كل كلمة غلطت فيها بتتجمع هنا، وبترجع لك في المراجعة لحد ما تثبت.','mis','أخطائي'],
+  ].concat(AUDIO?[['aud','التلاوة','اسمع أي آية أو سورة بصوت الشيخ اللي تختاره، وكرّرها لحد ما تحفظها.','aud','التلاوة']]:[]).concat([
+    ['search','الزرار العايم (+)','فيه كل حاجة: البحث عن أي آية أو سورة أو صفحة، والانتقال لأي جزء، والليلي والنهاري. تقدر تسحبه لأي ركن.','',''],
+    ['me','بياناتك','محفوظة على الموبايل ده بس، ومحدش غيرك بيشوفها. خد منها نسخة احتياطية من «حالتي» من وقت للتاني.','me','حالتي'],
+  ]);
+  $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet hsheet" role="dialog" aria-label="إزاي أستخدم الموقع">
+   <div class="row sp"><h3>إزاي أستخدم «مراجعتي»</h3><button class="g" id="x">إغلاق</button></div>
+   <p class="muted" style="margin:0">موقع يساعدك تحفظ القرآن وتراجعه وتختبر نفسك. مش محتاج حساب، وبيشتغل كمان من غير نت بعد أول مرة.</p>
+   <ol class="hsteps">${st.map(x=>`<li><span class="hic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[x[0]]}</svg></span>
+     <div><b>${x[1]}</b><p>${x[2]}</p>${x[3]?`<button class="g" data-go="${x[3]}">${x[4]}</button>`:''}</div></li>`).join('')}</ol>
+   <div class="row"><button class="p" id="hok">يلا نبدأ</button></div></div>`;
+  $('#sbk').onclick=$('#x').onclick=$('#hok').onclick=closeSheet;
+  $('#sheetRoot').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{closeSheet();goTab(b.dataset.go)});
+}
 /* ---- the phone's back button: every sheet, menu, reader and tab change is one step in the history.
    Back closes the newest one; with nothing open it goes home, and on the home screen it asks for a second press to leave.
    Invariant: our history entries above the guard = st.length. Closing from the page itself removes one entry with history.back(),
@@ -2468,8 +2554,8 @@ function fltReset(){delete S.fl;save();fltPlaceAll();toast('الزرارين ر�
    Tap = the next line, long press = the whole page. */
 (()=>{
   const b=document.createElement('button');b.id='rev';b.className='flt';b.hidden=true;
-  b.setAttribute('aria-label','اكشف السطر (دوسة طويلة: اكشف الصفحة كلها)');b.title='اكشف السطر · دوسة طويلة: الصفحة كلها';
-  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  b.setAttribute('aria-label','اكشف السطر (دوسة طويلة: اكشف الصفحة كلها)');b.title='اكشف السطر – دوسة طويلة: الصفحة كلها';
+  b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
   document.body.appendChild(b);
   makeFloat('rev',b,{def:()=>({c:'bl'}),
     onTap:()=>{const c=revCtx();if(c==='test'){const x=$('#nl');if(x)x.click()}else if(c==='mushaf')revealNext()},
@@ -2482,11 +2568,11 @@ function revCtx(){
 }
 function syncRev(){const b=$('#rev');if(!b)return;const c=revCtx(),was=!b.hidden;b.hidden=!c;if(c&&!was){fltPlace('rev');fltResolve('rev',true)}}
 
-const FI=[['search','بحث',''],['today','الرئيسية','t'],['mushaf','المصحف','t']].concat(AUDIO?[['aud','تلاوة','t']]:[]).concat([['test','اختبرني','t'],['zw','المتشابهات',''],['mis','أخطائي','t'],['tad','تدبّري','t'],['me','حالتي','t'],['bm','روح للعلامة',''],['jump','انتقال','']]).concat(AUDIO?[['dl','بدون نت','']]:[]).concat([['theme','الوضع','']]);
+const FI=[['search','بحث',''],['today','الرئيسية','t'],['mushaf','المصحف','t']].concat(AUDIO?[['aud','تلاوة','t']]:[]).concat([['test','اختبرني','t'],['zw','المتشابهات',''],['mis','أخطائي','t'],['tad','تدبّري','t'],['me','حالتي','t'],['bm','روح للعلامة',''],['jump','انتقال','']]).concat(AUDIO?[['dl','بدون نت','']]:[]).concat([['theme','ليلي / نهاري',''],['help','إزاي أستخدمه','']]);
 const FAB=(()=>{
   const fab=$('#fab'),menu=$('#fmenu'),back=$('#fback');
   fab.className='fab';
-  menu.innerHTML=FI.map(f=>`<button class="fi" role="menuitem" data-k="${f[0]}"${f[2]?` data-t="${f[0]}"`:''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[f[0]]}</svg><span>${f[1]}</span></button>`).join('');
+  menu.innerHTML=FI.map(f=>`<button class="fi" role="menuitem" data-k="${f[0]}"${f[2]?` data-t="${f[0]}"`:''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[f[0]]}</svg><span>${f[1]}</span></button>`).join('');
   const items=[...menu.querySelectorAll('.fi')];
   function layout(){
     const r=fab.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
@@ -2519,7 +2605,8 @@ const FAB=(()=>{
     else if(k==='search')openSearch();
     else if(k==='dl')openDL();
     else if(k==='zw')openZDict();
-    else if(k==='theme'){cycleTheme();fab.focus()}});
+    else if(k==='theme'){cycleTheme();fab.focus()}
+    else if(k==='help')openHelp();});
   menu.addEventListener('keydown',e=>{const i=items.indexOf(document.activeElement);let n=-1;
     if(e.key==='ArrowDown'||e.key==='ArrowLeft')n=(i+1)%items.length;else if(e.key==='ArrowUp'||e.key==='ArrowRight')n=(i-1+items.length)%items.length;
     else if(e.key==='Home')n=0;else if(e.key==='End')n=items.length-1;else if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeM(true);return}
@@ -2535,7 +2622,7 @@ function openJump(){
    <div class="nav4"><select id="jjz" aria-label="الجزء">${Object.keys(D.j).map(j=>`<option value="${j}">الجزء ${AR(j)}</option>`).join('')}</select>
     <select id="jhz" aria-label="الحزب">${[...Array(60)].map((_,i)=>`<option value="${i+1}">الحزب ${AR(i+1)}</option>`).join('')}</select>
     <select id="jrb" aria-label="الربع">${[...Array(240)].map((_,i)=>`<option value="${i+1}">${rubLabel(i+1)}</option>`).join('')}</select>
-    <select id="jsu" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}">${s}. ${esc(D.n[s])} · ${stype(s)}</option>`).join('')}</select></div>
+    <select id="jsu" aria-label="السورة">${Object.keys(D.n).map(s=>`<option value="${s}">${AR(+s)}. ${esc(D.n[s])} – ${stype(s)}</option>`).join('')}</select></div>
    <div class="row"><label for="jpg">صفحة</label><input id="jpg" type="number" min="1" max="604" value="${MP}"><button class="p" id="jgo">روح</button><button id="jsc">بطاقة السورة المختارة</button></div></div>`;
   $('#jjz').value=Math.ceil(r/8);$('#jhz').value=Math.ceil(r/4);$('#jrb').value=r;$('#jsu').value=AY[FA[MP]].s;
   const go=p=>{closeSheet();openPage(p)};
@@ -2621,11 +2708,11 @@ async function openDL(){
     $('#dlct').textContent=CORE.busy?'بيتنزّل… '+AR(CORE.done)+' من '+AR(CORE.n):cd>=N?'كله جاهز من غير نت':AR(cd)+' من '+AR(N)+' ملف';
     $('#dlcg').disabled=CORE.busy||cd>=N;$('#dlcg').textContent=cd>=N?'جاهز':'نزّل';
     const j=AUDL.cur;
-    $('#dlq').textContent=j?'بيتنزّل: '+j.r.n+' · سورة '+sname(j.s)+' '+AR(j.done||0)+'/'+AR(j.n||0)+(AUDL.q.length?' · وبعدها '+AR(AUDL.q.length)+' سورة':''):'';
+    $('#dlq').textContent=j?'بيتنزّل: '+j.r.n+' – سورة '+sname(j.s)+' '+AR(j.done||0)+'/'+AR(j.n||0)+(AUDL.q.length?' – وبعدها '+AR(AUDL.q.length)+' سورة':''):'';
     let full=0;
     $('#dlg').innerHTML=[...Array(114)].map((_,i)=>{const s=i+1,h=have[s]||0,need=needOf(r,s),k=h>=need?2:h?1:0;if(k===2)full++;
       return `<button data-s="${s}" class="k${k}" title="${esc(sname(s))}" aria-label="سورة ${esc(sname(s))}${k===2?' متنزّلة':k?' جزء منها متنزّل':''}">${AR(s)}</button>`}).join('');
-    $('#dlst').textContent=(est?est+' · ':'')+r.n+': '+AR(full)+' سورة متنزّلة من ١١٤';
+    $('#dlst').textContent=(est?est+' – ':'')+r.n+': '+AR(full)+' سورة متنزّلة من ١١٤';
   };
   const refresh=async()=>{
     try{const c=await caches.open(DATA_C);core=0;for(const u of coreUrls())if(await c.match(u))core++}catch(e){}
@@ -2677,14 +2764,14 @@ function searchAll(q){
   const qn=NRM(raw.replace(/^سور[ةه]\s+/,'')),toks=qn.split(' ').filter(Boolean);
   const pl=(lab,p,aid)=>out.pl.push({lab,p,aid});
   let m=/^(\d{1,3})\s*[:：\/\-.]\s*(\d{1,3})$/.exec(raw);
-  if(m){const id=ID_BY_KEY[+m[1]+':'+(+m[2])];if(id)pl('سورة '+sname(+m[1])+' · آية '+AR(+m[2]),AY[id].page,id)}
+  if(m){const id=ID_BY_KEY[+m[1]+':'+(+m[2])];if(id)pl('سورة '+sname(+m[1])+' – آية '+AR(+m[2]),AY[id].page,id)}
   m=/^(صفح[ةه]|ص|جزء|الجزء|حزب|الحزب|ربع|الربع)\s*(\d+)$/.exec(raw);
   const num=m?+m[2]:(/^\d+$/.test(raw)?+raw:0),kind=m?NRM(m[1]).replace(/^ال/,''):'';
   if(num){
-    if((!kind||kind==='صفحه'||kind==='ص')&&num>=1&&num<=604)pl('صفحة '+AR(num)+' · سورة '+pageSurahName(num),num);
-    if((!kind||kind==='جزء')&&num>=1&&num<=30)pl('الجزء '+AR(num)+' · صفحة '+AR(JS[num]),JS[num]);
-    if((!kind||kind==='حزب')&&num>=1&&num<=60)pl('الحزب '+AR(num)+' · صفحة '+AR(RUBP[4*(num-1)+1]),RUBP[4*(num-1)+1]);
-    if(kind==='ربع'&&num>=1&&num<=240)pl(rubLabel(num)+' · صفحة '+AR(RUBP[num]),RUBP[num]);
+    if((!kind||kind==='صفحه'||kind==='ص')&&num>=1&&num<=604)pl('صفحة '+AR(num)+' – سورة '+pageSurahName(num),num);
+    if((!kind||kind==='جز'||kind==='جزء')&&num>=1&&num<=30)pl('الجزء '+AR(num)+' – صفحة '+AR(JS[num]),JS[num]);
+    if((!kind||kind==='حزب')&&num>=1&&num<=60)pl('الحزب '+AR(num)+' – صفحة '+AR(RUBP[4*(num-1)+1]),RUBP[4*(num-1)+1]);
+    if(kind==='ربع'&&num>=1&&num<=240)pl(rubLabel(num)+' – صفحة '+AR(RUBP[num]),RUBP[num]);
     if(!kind&&num>=1&&num<=114){const id=ID_BY_KEY[num+':1'];out.su.push({s:num,p:AY[id].page,id})}
   }
   if(qn&&!/^\d+$/.test(qn)){
@@ -2730,12 +2817,12 @@ function openSearch(q0){
     const R=searchAll(q),qn=NRM(LATN(q).trim().replace(/^سور[ةه]\s+/,'')),toks=qn.split(' ').filter(Boolean),parts=[];
     const sec=(k,title,n,body)=>{if((f==='all'||f===k)&&n)parts.push(`<div class="srg"><h4>${title} <span class="muted">(${AR(n)})</span></h4>${body}</div>`)};
     sec('pl','مواضع',R.pl.length,R.pl.map(x=>item(x.lab,'',x.p,x.aid)).join(''));
-    sec('su','سور',R.su.length,R.su.map(x=>item('سورة '+sname(x.s),'رقم '+AR(x.s)+' · '+AR(AYC[x.s])+' آية · صفحة '+AR(x.p),x.p,x.id).replace(/<\/button>$/,`<span class="srx" data-sc="${x.s}">بطاقة السورة</span></button>`)).join(''));
+    sec('su','سور',R.su.length,R.su.map(x=>item('سورة '+sname(x.s),'رقم '+AR(x.s)+' – '+AR(AYC[x.s])+' آية – صفحة '+AR(x.p),x.p,x.id).replace(/<\/button>$/,`<span class="srx" data-sc="${x.s}">بطاقة السورة</span></button>`)).join(''));
     const lim=f==='ay'?more*3:more;
-    sec('ay',R.approx?'آيات (بحث تقريبي)':'آيات',R.ay.length,R.ay.slice(0,lim).map(id=>{const a=D.a[id-1];return item('','سورة '+sname(a[0])+' · آية '+AR(a[1])+' · صفحة '+AR(a[2]),a[2],id,hiText(SQ.t[id-1],qn,toks))}).join('')+(R.ay.length>lim?'<button class="g srmore" id="srmore">اعرض أكتر</button>':''));
-    sec('zw','المتشابهات (معجم الزواوي)',R.zw.length,R.zw.slice(0,f==='zw'?200:12).map(e=>`<button class="sr" data-zo="${e.id}"><span class="srt">${zQ(e.t||e.h)}</span><span class="srm">${esc(zNum(e)+' · '+AR(e.P.length)+' موضع · صفحة '+AR(e.bp)+' في الكتاب')}</span></button>`).join('')+(f!=='zw'&&R.zw.length>12?'<button class="g srmore" data-f2="zw">كل نتايج المعجم</button>':''));
-    sec('nt','ملاحظاتي',R.nt.length,R.nt.map(id=>item(S.notes[id],'سورة '+sname(AY[id].s)+' · آية '+AR(AY[id].a),AY[id].page,id)).join(''));
-    sec('mi','أخطائي',R.mi.length,R.mi.map(x=>item('«'+x.word+'»','سورة '+sname(AY[x.aid].s)+' · آية '+AR(AY[x.aid].a)+' · صفحة '+AR(x.page)+(x.n<4?'':' · اتثبّتت'),x.page,x.aid)).join(''));
+    sec('ay',R.approx?'آيات (بحث تقريبي)':'آيات',R.ay.length,R.ay.slice(0,lim).map(id=>{const a=D.a[id-1];return item('','سورة '+sname(a[0])+' – آية '+AR(a[1])+' – صفحة '+AR(a[2]),a[2],id,hiText(SQ.t[id-1],qn,toks))}).join('')+(R.ay.length>lim?'<button class="g srmore" id="srmore">اعرض أكتر</button>':''));
+    sec('zw','المتشابهات (معجم الزواوي)',R.zw.length,R.zw.slice(0,f==='zw'?200:12).map(e=>`<button class="sr" data-zo="${e.id}"><span class="srt">${zQ(e.t||e.h)}</span><span class="srm">${esc(zNum(e)+' – '+AR(e.P.length)+' موضع – صفحة '+AR(e.bp)+' في الكتاب')}</span></button>`).join('')+(f!=='zw'&&R.zw.length>12?'<button class="g srmore" data-f2="zw">كل نتايج المعجم</button>':''));
+    sec('nt','ملاحظاتي',R.nt.length,R.nt.map(id=>item(S.notes[id],'سورة '+sname(AY[id].s)+' – آية '+AR(AY[id].a),AY[id].page,id)).join(''));
+    sec('mi','أخطائي',R.mi.length,R.mi.map(x=>item('«'+x.word+'»','سورة '+sname(AY[x.aid].s)+' – آية '+AR(AY[x.aid].a)+' – صفحة '+AR(x.page)+(x.n<4?'':' – اتثبّتت'),x.page,x.aid)).join(''));
     el.innerHTML=parts.join('')||(!SQ&&f!=='su'&&f!=='pl'?'<p class="muted">جاري تحميل نص البحث…</p>':'<p class="muted">مفيش نتايج. جرّب كلمة تانية أو جزء أقصر.</p>');
     const mb=$('#srmore');if(mb)mb.onclick=()=>{more+=60;draw()};
   }
@@ -2756,7 +2843,7 @@ addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(doc
 /* ---- the Zawawi dictionary of similar verses (معجم المتشابهات لألفاظ القرآن الكريم، يحيى عبد الفتاح الزواوي).
    z.json (phase 3a extraction) gives the places (surah:ayah) and the author's sign; the verse text always comes from the site's
    King Fahd data. Loaded on first need; sw.js keeps it with the other data. ---- */
-const ZV='z.json?v=1';
+const ZV='z.json?v=2';
 let ZWP=null;
 function zKey(k){const m=/^(\d+):(\d+)(?:-(\d+))?$/.exec(k);if(!m)return null;const a=ID_BY_KEY[m[1]+':'+m[2]],b=m[3]?ID_BY_KEY[m[1]+':'+m[3]]:a;if(!a||!b||b<a||b-a>12)return null;const r=[];for(let i=a;i<=b;i++)r.push(i);return r}
 function loadZW(){
@@ -2833,12 +2920,12 @@ function zPlaceH(A,o){
 }
 const zSpanTxt=A=>A.w.slice(A.lo,A.hi+1).map(x=>x.t).join(' ');
 function zCard(A,o){o=o||{};const p=A.p,a=AY[p.ids[0]];
-  return `<div class="zpl${o.cur?' cur':''}"${o.go?` data-zgo="${p.ids[0]}" role="button" tabindex="0"`:''}><div class="zph"><b>${esc(zLab(p))}</b><span>${esc(stype(a.s))} · صفحة ${AR(a.page)}</span>${p.br?`<span>(الكتاب كاتب ${esc(zKL(p.br))}، واتصحّح من الآية المنقولة)</span>`:''}${p.u?'<span>(رقم الموضع مكتوب من غير نص الآية)</span>':''}</div><div class="zv">${zPlaceH(A,o)}</div></div>`}
+  return `<div class="zpl${o.cur?' cur':''}"${o.go?` data-zgo="${p.ids[0]}" role="button" tabindex="0"`:''}><div class="zph"><b>${esc(zLab(p))}</b><span>${esc(stype(a.s))} – صفحة ${AR(a.page)}</span>${p.br?`<span>(الكتاب كاتب ${esc(zKL(p.br))}، واتصحّح من الآية المنقولة)</span>`:''}${p.u?'<span>(رقم الموضع مكتوب من غير نص الآية)</span>':''}</div><div class="zv">${zPlaceH(A,o)}</div></div>`}
 function zCmp(e,o){
   o=o||{};const Z=zInfo(e),list=o.only?Z.filter(A=>o.only.includes(A.p)):Z,max=o.max||999,gs=[];
   list.slice(0,max).forEach(A=>{const g=o.only?'':A.p.g;let G=gs[gs.length-1];if(!G||G.g!==g)gs.push(G={g,a:[]});G.a.push(A)});
   return gs.map(G=>{const gt=G.g&&(e.g||[]).find(x=>x.k===G.g);
-    return (G.g?`<div class="zg">${esc(G.g)}${gt?' · '+zQ(gt.t):''}</div>`:'')+`<div class="zcmp">${G.a.map(A=>zCard(A,{cur:o.cur&&A.p.ids.includes(o.cur),go:o.go,cut:o.cut===undefined?8:o.cut})).join('')}</div>`}).join('')
+    return (G.g?`<div class="zg">${esc(G.g)}${gt?' – '+zQ(gt.t):''}</div>`:'')+`<div class="zcmp">${G.a.map(A=>zCard(A,{cur:o.cur&&A.p.ids.includes(o.cur),go:o.go,cut:o.cut===undefined?8:o.cut})).join('')}</div>`}).join('')
     +(list.length>max?`<p class="muted">و${AR(list.length-max)} مواضع كمان في البند</p>`:'');
 }
 /* the dictionary sheet: entries open inside it, with its own «رجوع»; the phone's back button closes it */
@@ -2856,22 +2943,22 @@ function zOpen(id,o){zNeed(()=>{const e=ZID[id];if(e)zSheet(()=>zEntryV(e,o||{})
 function zEntryV(e,o){
   const n=e.P.length,refs=(e.see||[]).filter(k=>ZBN[k]),back=e.n?ZW.x.filter(r=>r.to.includes(e.n)).slice(0,8):[];
   const body=`<p class="zt">${zQ(e.t||e.h)}</p>
-   <p class="zmeta">${zHasL(e.h)&&e.t?zQ(e.h)+' · ':''}${AR(n)} ${n===1?'موضع':'مواضع'}${e.c&&e.c!==n?' (الكتاب كاتب '+AR(e.c)+')':''} · صفحة ${AR(e.bp)} في الكتاب (المجلد ${AR(e.pp[0])}، صفحة ${AR(e.pp[1])} في الـ PDF) · ${esc(e.l)}</p>
+   <p class="zmeta">${zHasL(e.h)&&e.t?zQ(e.h)+' – ':''}${AR(n)} ${n===1?'موضع':'مواضع'}${e.c&&e.c!==n?' (الكتاب كاتب '+AR(e.c)+')':''} – صفحة ${AR(e.bp)} في الكتاب (المجلد ${AR(e.pp[0])}، صفحة ${AR(e.pp[1])} في الـ PDF) – ${esc(e.l)}</p>
    ${n?zCmp(e,{cur:o.aid,go:true}):'<p class="muted">البند ده ما فيهوش مواضع اتقرت من الكتاب.</p>'}
    ${n>1?'<p class="hint">الكلام المشترك بلون، واللي بيفرّق الموضع عن غيره متعلّم عليه، والباقي باهت. دوس على أي موضع يفتحه في المصحف.</p>':''}
    ${zSign(e,true)}
    ${refs.length?`<div class="row"><span class="muted">انظر كمان:</span>${refs.map(k=>`<button data-zo="${ZBN[k].id}">البند ${AR(k)}</button>`).join('')}</div>`:''}
-   ${back.length?`<p class="zmeta">بيتحال له في الكتاب من: ${back.map(r=>zQ(r.h)).join(' · ')}</p>`:''}
+   ${back.length?`<p class="zmeta">بيتحال له في الكتاب من: ${back.map(r=>zQ(r.h)).join(' – ')}</p>`:''}
    ${n>1?`<div class="row"><button class="p" data-zq="${e.id}">اختبرني على البند ده</button></div>`:''}
    <p class="hint">المصدر: معجم المتشابهات لألفاظ القرآن الكريم، يحيى عبد الفتاح الزواوي. نص الآيات من مصحف المدينة (مجمع الملك فهد).</p>`;
   return {title:esc(zNum(e)),label:zNum(e),body};
 }
-function zRow(e){return `<button class="sr" data-zo="${e.id}"><span class="srt">${zQ(e.t||e.h)}</span><span class="srm">${esc(zNum(e)+' · '+AR(e.P.length)+' موضع'+(e.P.length?' · '+e.P.slice(0,3).map(zLab).join('، ')+(e.P.length>3?'…':''):''))}</span></button>`}
+function zRow(e){return `<button class="sr" data-zo="${e.id}"><span class="srt">${zQ(e.t||e.h)}</span><span class="srm">${esc(zNum(e)+' – '+AR(e.P.length)+' موضع'+(e.P.length?' – '+e.P.slice(0,3).map(zLab).join('، ')+(e.P.length>3?'…':''):''))}</span></button>`}
 function zOpenAyat(ids){zNeed(()=>{
   const es=[];ids.forEach(id=>(ZA.get(id)||[]).forEach(p=>{if(!es.includes(p.e))es.push(p.e)}));if(!es.length)return;
   if(es.length===1){zSheet(()=>zEntryV(es[0],{aid:ids[0]}));return}
   zSheet(()=>({title:'متشابهات '+(ids.length===1?esc(zLab({ids:[ids[0]]})):'السطر ده'),label:'متشابهات',
-    body:`<p class="muted">${ids.length>1?'الآيات اللي بتبدأ في السطر: '+ids.map(i=>esc(zLab({ids:[i]}))).join(' · ')+'. ':''}${AR(es.length)} بند في معجم الزواوي. دوس على بند تشوف مواضعه وعلامته.</p>${es.map(zRow).join('')}`}))})}
+    body:`<p class="muted">${ids.length>1?'الآيات اللي بتبدأ في السطر: '+ids.map(i=>esc(zLab({ids:[i]}))).join(' – ')+'. ':''}${AR(es.length)} بند في معجم الزواوي. دوس على بند تشوف مواضعه وعلامته.</p>${es.map(zRow).join('')}`}))})}
 document.addEventListener('click',e=>{
   const z=e.target.closest('[data-zo]');if(z){e.preventDefault();zOpen(+z.dataset.zo,{aid:+z.dataset.aid||0});return}
   const g=e.target.closest('[data-zgo]');if(g){const id=+g.dataset.zgo;closeSheet();openPage(AY[id].page,id);return}
@@ -2918,7 +3005,7 @@ function renderZDay(){
   if(!ZDC||ZDC.be!==be)ZDC={be,c:ZW.e.filter(e=>e.P.some(inb))};
   if(!ZDC.c.length){el.innerHTML='<h2>متشابهة اليوم</h2><p class="muted">مفيش بند في المعجم قبل علامتك لسه.</p>';return}
   const e=ZDC.c[(diffDays(TODAY(),'2024-01-01')*7919)%ZDC.c.length],a=e.P.find(inb),b=e.P.find(p=>p!==a&&!p.u);
-  el.innerHTML=`<div class="row sp"><h2>متشابهة اليوم</h2><span class="muted">${esc(zNum(e))} · ${AR(e.P.length)} مواضع</span></div>
+  el.innerHTML=`<div class="row sp"><h2>متشابهة اليوم</h2><span class="muted">${esc(zNum(e))} – ${AR(e.P.length)} مواضع</span></div>
    <p class="zt">${zQ(e.t||e.h)}</p>${zCmp(e,{only:[a,b].filter(Boolean),go:true,cut:4})}
    ${e.P.length>2?`<p class="muted">و${AR(e.P.length-2)} كمان في البند</p>`:''}${be?'':'<p class="muted">علّم مكان وقوفك علشان المتشابهة تتختار من محفوظك.</p>'}
    <div class="row"><button class="p" data-zo="${e.id}" data-aid="${a.ids[0]}">البند وعلامة الزواوي</button><button data-zq="${e.id}">اختبرني عليها</button><button id="zdD">تصفّح المعجم</button></div>`;
@@ -2978,7 +3065,7 @@ const zTimes=n=>n===1?'مرة واحدة':n===2?'مرتين':AR(n)+(n<=10?' مر
 function zwText(q){
   const e=ZID[q.e];if(!e)return '<p class="muted">جاري تحميل المعجم…</p>';
   const A=zA(q.pa),B=q.pb?zA(q.pb):null,done=!!q.fin;
-  const res=done?(q.bad?`<p class="qno">${q.errs?'اتسجّلت الغلطة':'اتسجّلت غلطة'} · ${esc(zNum(e))}</p>`:'<p class="qok">ما شاء الله، صح</p>'):'';
+  const res=done?(q.bad?`<p class="qno">${q.errs?'اتسجّلت الغلطة':'اتسجّلت غلطة'} – ${esc(zNum(e))}</p>`:'<p class="qok">ما شاء الله، صح</p>'):'';
   const foot=done?`${zSign(e,!!q.bad)}<div class="row"><button data-zo="${e.id}" data-aid="${q.id}">افتح البند كله</button></div>`:'';
   const opt=(v,lab,cls)=>`<button data-zc="${v}" class="${cls||''} ${q.ch!==undefined?(v===q.za?'r3':v===q.ch?'r1':''):''}"${q.ch!==undefined?' disabled':''}>${lab}</button>`;
   const grade=()=>q.bad===undefined?`<div class="row"><button class="r3" data-g="1">قلتها صح</button><button class="r1" data-g="0">غلطت</button></div>`
@@ -3013,7 +3100,7 @@ function startZw(eid){zNeed(()=>{
    g.json: السراج per ayah id [[our Uthmani words, the book's word, meaning]]. n.json: maqasid (المختصر), fadl (Sahihayn only),
    asbab per ayah id ("m"+number = المحرر, accepted and sound; "w"+id = الصحيح المسند), surah-level reports, and the texts.
    Every text is the book's own wording; nothing is shown for an ayah the two books give no authentic cause for. ---- */
-const NV='n.json?v=1',GV='g.json?v=1';
+const NV='n.json?v=2',GV='g.json?v=1';
 let BKN=null,GR=null,BKP=null;
 function loadBK(){
   if(BKN&&GR)return Promise.resolve();
@@ -3030,19 +3117,20 @@ function grFor(id,word){const L=GR&&GR[id];if(!L||!word)return null;return L.fin
 function grHTML(id,word){
   const L=GR[id];if(!L||!L.length)return '';
   const cur=grFor(id,word);
-  return `<div class="bk"><h4>معاني الكلمات <span class="muted">· السراج في بيان غريب القرآن (الخضيري)</span></h4><div class="gr">${
+  return `<div class="bk"><h4>معاني الكلمات <span class="muted">– السراج في بيان غريب القرآن (الخضيري)</span></h4><div class="gr">${
     L.map(x=>`<div${x===cur?' class="cur"':''}><b>${esc(x[1])}</b>: ${esc(x[2])}</div>`).join('')}</div></div>`;
 }
 /* one report: المحرر = the author's verdict («النتيجة») marked الراجح, then the narrations; الصحيح المسند = his text as printed */
 function asbOne(r,o){
   const k=r[0],n=r.slice(1),op=o.open?' open':'';
   if(k==='m'){const e=BKN.m[n];if(!e)return '';
-    return `<details class="asb"${op}><summary><span class="rj">الراجح</span>المحرر في أسباب النزول · رقم ${AR(n)}${o.lab?' · '+esc(o.lab(e)):''}</summary>
+    return `<details class="asb"${op}><summary><span class="rj">الراجح</span>المحرر في أسباب النزول – رقم ${AR(n)}${o.lab?' – '+esc(o.lab(e)):''}</summary>
      <div class="res"><b>النتيجة:</b> ${bkQ(e.res)}</div>${e.note?`<p class="muted">${esc(e.note)}</p>`:''}
-     <p class="muted">الروايات اللي درسها المؤلف (من الكتب التسعة):</p>${e.riw.map(bkP).join('')}
+     ${e.ra?`<p class="muted">الرواية اللي رجّحها المؤلف (منقولة من دراسته):</p>${e.ra.map(bkP).join('')}`:''}
+     <p class="muted">${e.rj?'روايات درسها المؤلف ورجّح غيرها:':'الروايات اللي درسها المؤلف (من الكتب التسعة):'}</p>${e.riw.map(bkP).join('')}
      <p class="fn">المحرر في أسباب نزول القرآن، خالد بن سليمان المزيني، ج${AR(e.pg[0])} ص${AR(e.pg[1])}.</p></details>`}
   const e=BKN.w[n];if(!e)return '';
-  return `<details class="asb"${op}><summary>الصحيح المسند من أسباب النزول (الوادعي)${o.lab?' · '+esc(o.lab(e)):''}</summary>
+  return `<details class="asb"${op}><summary>الصحيح المسند من أسباب النزول (الوادعي)${o.lab?' – '+esc(o.lab(e)):''}</summary>
    ${e.t.map(l=>`<p>${bkQ(l)}</p>`).join('')}${e.nb&&e.nb.length?`<div class="nb"><p class="muted">تنبيه المؤلف:</p>${e.nb.map(l=>`<p>${bkQ(l)}</p>`).join('')}</div>`:''}
    ${e.fn&&e.fn.length?e.fn.map(l=>`<p class="fn">${esc(l)}</p>`).join(''):''}
    <p class="fn">الصحيح المسند من أسباب النزول، مقبل بن هادي الوادعي، ص${AR(e.pp)}. الحكم على الإسناد كلام المؤلف.</p></details>`;
@@ -3050,7 +3138,7 @@ function asbOne(r,o){
 function asbHTML(refs,o){
   o=o||{};if(!refs.length)return '';
   const m=refs.filter(r=>r[0]==='m'),w=refs.filter(r=>r[0]==='w');
-  return `<div class="bk"><h4>سبب النزول <span class="muted">· ${m.length&&w.length?'الراجح من المحرر أولًا، وبعده الصحيح المسند':m.length?'المحرر في أسباب النزول':'الصحيح المسند'}</span></h4>${
+  return `<div class="bk"><h4>سبب النزول <span class="muted">– ${m.length&&w.length?'الراجح من المحرر أولًا، وبعده الصحيح المسند':m.length?'المحرر في أسباب النزول':'الصحيح المسند'}</span></h4>${
     m.concat(w).map((r,i)=>asbOne(r,{open:o.open&&i===0,lab:o.lab})).join('')}</div>`;
 }
 function openSurah(s){
@@ -3063,10 +3151,10 @@ function openSurah(s){
     const q=BKN.q[s],fd=BKN.f[s]||[],ids=[];
     for(let a=1;a<=AYC[s];a++){const id=ID_BY_KEY[s+':'+a];if(BKN.ay[id])ids.push(id)}
     const sl=(BKN.sur[s]||[]).map(n=>'w'+n);
-    body.innerHTML=`${q?`<div class="bk"><h4>من مقاصد السورة <span class="muted">· المختصر في التفسير (مركز تفسير)</span></h4><div class="mq">${bkQ(q)}</div></div>`:''}
-     ${fd.length?`<div class="bk fd"><h4>فضلها <span class="muted">· أحاديث في الصحيحين بس</span></h4>${fd.map(bkP).join('')}<p class="fn">النقل من «معلومات السور» في الموسوعة القرآنية quranpedia.net، واتاخد بس اللي تخريجه البخاري أو مسلم.</p></div>`:''}
-     <div class="bk"><h4>أسباب النزول${ids.length||sl.length?' <span class="muted">· الصحيح بس، من المحرر والصحيح المسند</span>':''}</h4>${
-       ids.length||sl.length?(sl.length?`<div class="ah">عن السورة</div>${sl.map(r=>asbOne(r,{})).join('')}`:'')+ids.map(id=>`<div class="ah"><button class="g" data-ga="${id}">آية ${AR(AY[id].a)} · صفحة ${AR(AY[id].page)}</button></div>${BKN.ay[id].map(r=>asbOne(r,{})).join('')}`).join('')
+    body.innerHTML=`${q?`<div class="bk"><h4>من مقاصد السورة <span class="muted">– المختصر في التفسير (مركز تفسير)</span></h4><div class="mq">${bkQ(q)}</div></div>`:''}
+     ${fd.length?`<div class="bk fd"><h4>فضلها <span class="muted">– أحاديث في الصحيحين بس</span></h4>${fd.map(bkP).join('')}<p class="fn">النقل من «معلومات السور» في الموسوعة القرآنية quranpedia.net، واتاخد بس اللي تخريجه البخاري أو مسلم.</p></div>`:''}
+     <div class="bk"><h4>أسباب النزول${ids.length||sl.length?' <span class="muted">– الصحيح بس، من المحرر والصحيح المسند</span>':''}</h4>${
+       ids.length||sl.length?(sl.length?`<div class="ah">عن السورة</div>${sl.map(r=>asbOne(r,{})).join('')}`:'')+ids.map(id=>`<div class="ah"><button class="g" data-ga="${id}">آية ${AR(AY[id].a)} – صفحة ${AR(AY[id].page)}</button></div>${BKN.ay[id].map(r=>asbOne(r,{})).join('')}`).join('')
        :'<p class="muted">مفيش سبب نزول صحيح للسورة دي في المحرر ولا الصحيح المسند.</p>'}</div>`;
     body.onclick=e=>{const b=e.target.closest('[data-ga]');if(b){const id=+b.dataset.ga;closeSheet();openPage(AY[id].page,id)}};
   };
@@ -3084,6 +3172,9 @@ function openSurah(s){
 $('#srB').onclick=()=>openSearch();
 applyTheme();
 renderAll();applyZoom();showTab('today');
+{const hb=$('#helpB');if(hb)hb.onclick=openHelp}
+/* a brand-new visitor (nothing saved yet) gets the guide once */
+if(!S.help&&!Object.keys(S.days).some(kept)&&!S.mistakes.length&&!S.bm&&!Object.keys(S.pages).length)setTimeout(()=>{if(!$('#sheetRoot').innerHTML)openHelp()},700);
 try{ensureFont(+localStorage.getItem('muraja3a-last')||1)}catch(e){}
 if(AUDIO&&'serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
