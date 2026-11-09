@@ -1103,7 +1103,7 @@ function renderToday(){
   const aod=`<div class="card aod quote"><div class="row sp"><h2>آية اليوم</h2><span class="muted">سورة ${esc(sname(DA.s))} – آية ${AR(DA.a)}</span></div><p class="q">${esc(ayahText(did))}</p>
     <div class="row"><button id="aodT">التفسير</button><button id="aodD">اكتب تدبّرك</button>${AUDIO?`<button class="p" id="aodP">${ic('play','ii')}${la?'كمّل التلاوة – '+esc(sname(AY[la].s))+' '+AR(AY[la].a):'اسمع آية اليوم'}</button>`:''}</div></div>`;
   /* the shelf: 30 standing books coloured by strength */
-  let shelf='';for(let j=1;j<=30;j++){const st=juzState(j),h=62+((j*37)%5)*4;shelf+=`<button class="vbook" data-j="${j}" data-s="${st.s}" style="--h:${h}px" aria-label="الجزء ${j}${['',' ناسيه',' بتردد',' ثابت',' ممتاز'][st.s]||' لم يُختبر'}">${st.s===4?'<i class="gl"></i>':''}${AR(j)}</button>`}
+  let shelf='';const jc=[0,0,0,0,0];for(let j=1;j<=30;j++){const st=juzState(j);jc[st.s]++;const h=62+((j*37)%5)*4;shelf+=`<button class="vbook" data-j="${j}" data-s="${st.s}" style="--h:${h}px" aria-label="الجزء ${j}${['',' ناسيه',' بتردد',' ثابت',' ممتاز'][st.s]||' لم يُختبر'}">${st.s===4?'<i class="gl"></i>':''}${AR(j)}</button>`}
   $('#homeBody').innerHTML=`<div class="card ringcard">${ring}<div class="ringtx"><h2>النهارده: ${AR(nd)} من ${AR(NS)} جلسات</h2><p class="muted">${nd===NS?'اليوم اكتمل. تقبّل الله منك.':esc(m.lines.join(' '))}</p></div></div>
    ${mk('c','المواصلات','حوالي ٢٥ دقيقة')}
    ${mk('s','قبل النوم','حوالي ٢٥ دقيقة')}
@@ -1117,7 +1117,7 @@ function renderToday(){
    <p class="muted">كل جلسة ١٠ صفحات بترتيب المصحف. ٦٠ جلسة تعمل ختمة مراجعة.</p></div>
    ${aod}
    <div class="card zday" id="zday"></div>
-   <div class="card"><div class="row sp"><h2>رفّ الأجزاء</h2><span class="muted">اضغط على جزء يفتح</span></div><div class="shelf">${shelf}</div><div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز</span><span><i style="background:var(--st3)"></i>ثابت</span><span><i style="background:var(--st2)"></i>بتردد</span><span><i style="background:var(--st1)"></i>ناسيه</span><span><i style="background:var(--st0)"></i>لم يُختبر</span></div>
+   <div class="card"><div class="row sp"><h2>رفّ الأجزاء</h2><span class="muted">اضغط على جزء يفتح</span></div><div class="shelf">${shelf}</div><div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز ${AR(jc[4])}</span><span><i style="background:var(--st3)"></i>ثابت ${AR(jc[3])}</span><span><i style="background:var(--st2)"></i>بتردد ${AR(jc[2])}</span><span><i style="background:var(--st1)"></i>ناسيه ${AR(jc[1])}</span><span><i style="background:var(--st0)"></i>لم يُختبر ${AR(jc[0])}</span></div>
     </div>`;
   const hb=$('#homeBody');
   hb.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>toggle(b.dataset.t));
@@ -1188,7 +1188,7 @@ function syncSnd(){
 }
 /* hide lines outside the test: every line hidden except the page's first, tap a line (or "اكشف السطر") to reveal it */
 let HSH={p:0,show:new Set()};
-function firstShow(p){const s=new Set(),f=D.p[p-1].findIndex(e=>Array.isArray(e));if(f>=0)s.add(f);return s}
+function firstShow(p){return new Set()}
 function hideFor(p){
   if(!S.hideMode)return null;
   const show=HSH.p===p?HSH.show:firstShow(p),h=new Set();
@@ -1209,7 +1209,7 @@ function toggleBookmark(){
   save();renderMushaf();renderToday();if(READ)applyReaderFit();
 }
 function renderCue(){
-  const b=$('#nextcue');if(!b)return;const c=cueData(MP);
+  const b=$('#nextcue');if(!b)return;b.style.display=S.hideMode?'none':'';const c=cueData(MP);
   if(!c){b.innerHTML='<span class="cw" style="font-family:var(--ui);font-size:1rem">دي آخر صفحة في المصحف. تقبّل الله منك.</span>';b.onclick=null;return}
   b.innerHTML=`<span class="cl">الصفحة ${AR(MP+1)} تبدأ بـ${c.cont?' (بقية آية)':''}</span><span class="cw">${esc(c.w)}</span><span class="cr">سورة ${esc(sname(c.s))} – آية ${AR(c.a)}</span><span class="ca">${ic('next','ii')}</span>`;
   b.onclick=()=>navigate(MP+1);
