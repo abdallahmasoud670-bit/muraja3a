@@ -1,6 +1,6 @@
 /* app shell: network first so updates arrive. Page fonts, tafsir (and b/ Baghawi), the search text, the Zawawi dictionary and the phase-4 books: cache first in mj-data.
    Recitation: from the reciter's cache when downloaded (with byte ranges for seeking), otherwise from the network. */
-const V='mj-app-v8',DATA='mj-data';
+const V='mj-app-v9',DATA='mj-data';
 self.addEventListener('install',e=>{self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{
   for(const k of await caches.keys()){

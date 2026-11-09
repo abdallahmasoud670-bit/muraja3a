@@ -560,6 +560,9 @@ body.reading .rbar{background:color-mix(in srgb,var(--surface) 70%,transparent);
 .hsteps button{padding:4px 0;color:var(--accent);font-weight:600}
 .hic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);box-shadow:0 0 14px color-mix(in srgb,var(--accent) 22%,transparent)}
 .hic svg{width:22px;height:22px}
+.khh{display:block;margin-top:8px}.khdue{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+#khsheet .grid{margin-top:4px;grid-template-columns:repeat(10,1fr);gap:4px}#khsheet .juz{min-height:0;aspect-ratio:auto;padding:6px 0;font-size:.85rem}
+#khsheet .item{flex-direction:row;align-items:center}#khsheet .item>button{flex:none}
 </style>
 
 <canvas id="fx" aria-hidden="true" hidden></canvas>
@@ -647,18 +650,23 @@ const pageHeadL=p=>{const r=rubAt(p);return 'الجزء '+AR(Math.ceil(r/8))+'،
 const pageSurahName=p=>sname(AY[FA[p]].s);
 function bumpPage(p,k){const c=S.pc[p]||(S.pc[p]={f:0,s:0,w:0});c[k]++}
 const pageErr=p=>{const c=S.pc[p];return c?c.f+c.w:0};
+/* S.pc counts the current khatma only; the total over all khatmas adds the archived ones (the mushaf marks use the total) */
+function pcT(p){const c=S.pc[p],o={f:c?c.f:0,s:c?c.s:0,w:c?c.w:0};(S.khs||[]).forEach(r=>{const x=r.pc&&r.pc[p];if(x){o.f+=x.f||0;o.s+=x.s||0;o.w+=x.w||0}});return o}
+const pageErrT=p=>{const c=pcT(p);return c.f+c.w};
+/* a page rating counts for the level only in the khatma it was given in */
+const prc=p=>{const r=S.pages[p];return r&&r.r&&r.k===S.kh.n?r:null};
 /* page strength from the mistake count; only pages that were tested or have a counter get a level */
 const LVL=['لم تُختبر','ناسيها','بتردد','ثابتة','ممتاز'];
-const pageTested=p=>!!((S.pages[p]&&S.pages[p].r)||S.pc[p]);
-function pageLvl(p){if(!pageTested(p))return 0;const n=pageErr(p),r=S.pages[p];if(r&&r.r===4&&n<=(r.e4||0))return 4;return n===0?4:n<=2?3:n<=6?2:1}
+const pageTested=p=>!!(prc(p)||S.pc[p]);
+function pageLvl(p){if(!pageTested(p))return 0;const n=pageErr(p),r=prc(p);if(r&&r.r===4&&n<=(r.e4||0))return 4;return n===0?4:n<=2?3:n<=6?2:1}
 function cntText(id,word){
-  const A=AY[id],w=word&&S.wc[id+'|'+word],pe=pageErr(A.page),parts=[];
+  const A=AY[id],w=word&&S.wc[id+'|'+word],pe=pageErrT(A.page),parts=[];
   if(w)parts.push('غلطت في «'+word+'» '+AR(w.n)+' مرة');
   if(pe)parts.push('الصفحة كلها: '+AR(pe)+' مرة غلط');
   return parts.join(' – ');
 }
 function decWord(key){
-  const w=S.wc[key];if(!w)return;const p=w.p;w.n--;
+  const w=S.wc[key];if(!w)return;const p=w.p;w.n--;if(S.kw[key]>0){S.kw[key]--;if(!S.kw[key])delete S.kw[key]}
   if(w.n<=0){delete S.wc[key];const i=key.indexOf('|'),aid=+key.slice(0,i),word=key.slice(i+1);S.mistakes=S.mistakes.filter(m=>!(m.aid===aid&&m.word===word&&m.n<4))}
   const c=S.pc[p];if(c&&c.w>0)c.w--;AUDP=0;save();renderAll();toast(S.wc[key]?'اتنقص غلطة، فاضل '+AR(S.wc[key].n):'اتشال الغلط من الكلمة دي');
 }
@@ -744,6 +752,7 @@ function load(){
   S.cursor=S.cursor||0;S.sessions=S.sessions||0;S.days=S.days||{};S.pages=S.pages||{};S.mistakes=S.mistakes||[];S.notes=S.notes||{};S.nts=S.nts||{};S.verified=S.verified||{};S.theme=S.theme||'auto';S.pc=S.pc||{};S.wc=S.wc||{};if(S.sound===undefined)S.sound=true;if(S.margin===undefined)S.margin=true;
   /* custom-test types saved before phase 3: the similar-verse questions are added once */
   if(S.qc&&Array.isArray(S.qc.types)&&!S.qc.zv){S.qc.types=S.qc.types.concat(['zwd','zws','zwf','zwc','zwr']);S.qc.zv=1}
+  migKh();
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const day=(k)=>S.days[k||TODAY()]||(S.days[k||TODAY()]={});
@@ -953,15 +962,17 @@ function addMistake(id,word,line,extra){
     const zp=extra&&extra.sim!==undefined?(ZID[extra.sim]?null:zwFor(id,word)):zwFor(id,word);
     if(zp)extra=Object.assign({},extra||{},{sim:zp.e.id});
     const wkey=id+'|'+word,wc0=S.wc[wkey]?{...S.wc[wkey]}:null,pc0=S.pc[A.page]?{...S.pc[A.page]}:null;
+    const kw0=S.kw[wkey];S.kw[wkey]=(kw0||0)+1;
     const wc=S.wc[wkey]||(S.wc[wkey]={n:0,p:A.page});wc.n++;bumpPage(A.page,'w');
-    const dup=S.mistakes.find(m=>m.aid===id&&m.word===word&&m.n<4),dup0=dup?{n:dup.n,due:dup.due}:null;
+    const dup=S.mistakes.find(m=>m.aid===id&&m.word===word&&m.n<4),dup0=dup?{n:dup.n,due:dup.due,k:dup.k}:null;
     let made=null;
-    if(dup){dup.n=0;dup.due=TODAY();if(extra)Object.assign(dup,extra)}else{made=Object.assign({id:Date.now(),aid:id,page:A.page,line:line||A.line,word,n:0,due:TODAY()},extra||{});S.mistakes.unshift(made)}
+    if(dup){dup.n=0;dup.due=TODAY();dup.k=S.kh.n;if(extra)Object.assign(dup,extra)}else{made=Object.assign({id:Date.now(),aid:id,page:A.page,line:line||A.line,word,n:0,due:TODAY(),k:S.kh.n},extra||{});S.mistakes.unshift(made)}
     if(MHOOK)MHOOK(id,word);
     const undo=()=>{
       if(wc0)S.wc[wkey]=wc0;else delete S.wc[wkey];
       if(pc0)S.pc[A.page]=pc0;else delete S.pc[A.page];
-      if(dup){dup.n=dup0.n;dup.due=dup0.due}
+      if(kw0)S.kw[wkey]=kw0;else delete S.kw[wkey];
+      if(dup){dup.n=dup0.n;dup.due=dup0.due;dup.k=dup0.k}
       if(made)S.mistakes=S.mistakes.filter(m=>m!==made);
       AUDP=0;save();renderAll();toast('اتلغى التسجيل');
     };
@@ -1041,7 +1052,7 @@ function openPage(p,hl){p=Math.min(604,Math.max(1,p|0));if(TAB!=='mushaf'||p!==M
 const unitPages=u=>{const a=1+10*u,b=Math.min(a+9,604);return [a,b]};
 function unitFor(task){const r=day()[task];if(r&&r.done)return r.unit;const k=task==='c'?0:(day().c&&day().c.done?0:1);return (S.cursor+k)%60}
 function pageRate(p,r){
-  const rec=S.pages[p]||(S.pages[p]={iv:0});rec.r=r;rec.d=TODAY();
+  const rec=S.pages[p]||(S.pages[p]={iv:0});rec.r=r;rec.d=TODAY();rec.k=S.kh.n;
   if(r===1)bumpPage(p,'f');if(r===2)bumpPage(p,'s');
   if(r===4)rec.e4=pageErr(p);
   rec.iv=r===1?1:r===2?3:r===4?Math.min(120,Math.max(14,Math.round((rec.iv||3)*3))):Math.min(90,Math.max(7,Math.round((rec.iv||3)*2.2)));
@@ -1057,16 +1068,16 @@ function tItems(){
   return items;
 }
 function pickTestPage(){
-  const cnt=Array(31).fill(0);Object.keys(S.pages).forEach(p=>{if(S.pages[p].r)cnt[juzOfPage(+p)]++});
+  const cnt=Array(31).fill(0);Object.keys(S.pages).forEach(p=>{if(prc(+p))cnt[juzOfPage(+p)]++});
   const need=[];for(let j=1;j<=30;j++)if(cnt[j]<3)need.push(j);
   const rnd=a=>a[Math.floor(Math.random()*a.length)];
   if(need.length&&Math.random()<.85){
     const mn=Math.min(...need.map(j=>cnt[j]));const j=rnd(need.filter(x=>cnt[x]===mn));
-    const a=JS[j],b=j<30?JS[j+1]-1:604;const un=[];for(let p=a;p<=b;p++)if(!(S.pages[p]&&S.pages[p].r))un.push(p);
+    const a=JS[j],b=j<30?JS[j+1]-1:604;const un=[];for(let p=a;p<=b;p++)if(!prc(p))un.push(p);
     if(un.length)return rnd(un);
   }
   const dp=duePages();if(dp.length&&Math.random()<.6)return rnd(dp.slice(0,20));
-  const tested=Object.keys(S.pages).map(Number).filter(p=>S.pages[p].r).sort((a,b)=>(S.pages[a].d<S.pages[b].d?-1:1));
+  const tested=Object.keys(S.pages).map(Number).filter(p=>prc(p)).sort((a,b)=>(S.pages[a].d<S.pages[b].d?-1:1));
   if(tested.length)return rnd(tested.slice(0,40));
   return 1+Math.floor(Math.random()*604);
 }
@@ -1123,8 +1134,9 @@ function renderToday(){
     <div class="body"><span class="tag">اختبار مفاجئ – ٥ دقايق</span><span class="big">٣ صفحات عشوائية (${AR(Math.min(qn,3))} من ٣)</span><span class="muted">بيكشف نقاط الضعف المستخبية</span></div><button class="p" id="goTest">ابدأ</button></div>
    <div class="task ${mdone?'done':''}"><span class="chk" style="background:${mdone?'var(--st3)':'none'};border-color:${mdone?'var(--st3)':'var(--accent)'}">${mdone?ic('check','ii'):AR(mn)}</span>
     <div class="body"><span class="tag">اختبار المحفوظ – ١٠ دقايق</span><span class="big">${AR(mg)} مواضع من اللي قبل علامتك (${AR(Math.min(mn,mg))} من ${AR(mg)})</span><span class="muted">${mdone?'خلصت، وزرار «كمان» بيجيب موضع جديد':'سمّع واكشف سطر سطر، وفي الآخر «حسبك»'}</span></div><button class="p" id="goMem">${mdone?'كمان':'ابدأ'}</button></div>
-   <div class="card"><div class="row sp"><span>دورة المراجعة</span><span class="muted">${AR(pos)}٪ – ختمات: ${AR(Math.floor(S.sessions/60))}</span></div><div class="bar"><i style="width:${pos}%"></i></div>
-   <p class="muted">كل جلسة ١٠ صفحات بترتيب المصحف. ٦٠ جلسة تعمل ختمة مراجعة.</p></div>
+   <div class="card${S.kh.done?' khdue':''}"><div class="row sp"><span>دورة المراجعة – الختمة رقم ${AR(S.kh.n)}</span><span class="muted">${AR(pos)}٪ – ختمات: ${AR(S.kh.n-1)}</span></div><div class="bar"><i style="width:${S.kh.done?100:pos}%"></i></div>
+   <p class="muted">${S.kh.done?'<b>الختمة دي خلصت.</b> اقفلها علشان يتحفظ تقريرها ويبدأ عدّاد الختمة الجديدة.':'كل جلسة ١٠ صفحات بترتيب المصحف. ٦٠ جلسة تعمل ختمة مراجعة.'}</p>
+   <div class="row"><button${S.kh.done?' class="p"':''} id="goKh">${S.kh.done?'اقفل الختمة واحفظ تقريرها':'الختمات والتقارير'}</button></div></div>
    ${aod}
    <div class="card zday" id="zday"></div>
    <div class="card"><div class="row sp"><h2>رفّ الأجزاء</h2><span class="muted">اضغط على جزء يفتح</span></div><div class="shelf">${shelf}</div><div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز ${AR(jc[4])}</span><span><i style="background:var(--st3)"></i>ثابت ${AR(jc[3])}</span><span><i style="background:var(--st2)"></i>بتردد ${AR(jc[2])}</span><span><i style="background:var(--st1)"></i>ناسيه ${AR(jc[1])}</span><span><i style="background:var(--st0)"></i>لم يُختبر ${AR(jc[0])}</span></div>
@@ -1133,6 +1145,7 @@ function renderToday(){
   hb.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>toggle(b.dataset.t));
   hb.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPage(+b.dataset.open,b.dataset.aid?+b.dataset.aid:null));
   hb.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>openPage(JS[+b.dataset.j]));
+  $('#goKh').onclick=()=>S.kh.done?khAsk(true):openKh();
   $('#goTest').onclick=()=>{goTab('test');if(!QZ&&!T){const g=$('#go');if(g)g.click()}};$('#goMem').onclick=startMem;
   $('#aodT').onclick=()=>openSheet(did);
   $('#aodD').onclick=()=>{openSheet(did);const n=$('#nt');if(n)n.focus()};
@@ -1145,11 +1158,20 @@ function toggle(t){
     if(t==='t'){const items=tItems();d.t={done:true,items};
       items.forEach(i=>{if(i.k==='m'){const m=S.mistakes.find(x=>x.id===i.id);if(m){m.n++;m.due=addDays(TODAY(),MIS_IV[Math.min(m.n,3)])}}
         else{const rec=S.pages[i.p]||(S.pages[i.p]={iv:0});rec.iv=Math.max(3,Math.round((rec.iv||2)*1.5));rec.due=addDays(TODAY(),rec.iv)}})}
-    else{d[t]={done:true,unit:unitFor(t)};S.cursor=(S.cursor+1)%60;S.sessions++}
+    else{d[t]={done:true,unit:unitFor(t)};S.cursor=(S.cursor+1)%60;S.sessions++;
+      if(!S.kh.st0&&S.kh.from)S.kh.st0=TODAY();
+      /* the cursor came back to the first session: the whole mushaf was reviewed, the khatma ends (after a yes) */
+      if(S.cursor===0&&!S.kh.done){S.kh.done={d:TODAY(),ses:S.sessions};save();renderAll();khAsk(true);return}}
     toast(['تقبّل الله منك','خطوة كمان في الطريق','ثبّتك الله، كمّل','يوم جديد اتحسب لك'][Math.floor(Math.random()*4)]);
   }else{
     if(t==='t'){toast('التثبيت لا يُلغى بعد التسجيل');return}
-    if(r.unit===(S.cursor+59)%60){delete d[t];S.cursor=(S.cursor+59)%60;S.sessions=Math.max(0,S.sessions-1)}
+    /* the session that closed the last khatma, with nothing done since: undoing it reopens that khatma first */
+    const L=S.khs[S.khs.length-1];
+    if(L&&L.sesAt===S.sessions&&S.kh.n===L.n+1&&r.unit===(L.cur+59)%60){
+      toast('الختمة رقم '+AR(L.n)+' اتقفلت بعد الجلسة دي. لو ألغيتها الختمة هترجع مفتوحة وتقريرها يتشال لحد ما تقفلها تاني.',[{label:'ألغِها ورجّع الختمة',fn:()=>{khReopen(true);toggle(t)}},{label:'إلغاء',fn:()=>{}}]);return}
+    if(r.unit===(S.cursor+59)%60){delete d[t];S.cursor=(S.cursor+59)%60;S.sessions=Math.max(0,S.sessions-1);
+      if(S.kh.done&&S.sessions<S.kh.done.ses)delete S.kh.done;
+      if(S.kh.st0&&S.sessions<=S.kh.s0)delete S.kh.st0}
     else{toast('ألغِ الجلسة الأحدث أولاً');return}
   }
   save();renderAll();
@@ -1264,7 +1286,7 @@ function syncNav(){
   if(READ==='mushaf'){const i=$('#rinfo');if(i)i.textContent='صفحة '+AR(MP)+' – '+pageHeadL(MP)}
 }
 function renderChips(){
-  const p=MP,rec=S.pages[p],n=pageErr(p),side=p%2?'يمين':'شمال';
+  const p=MP,rec=S.pages[p],n=pageErrT(p),side=p%2?'يمين':'شمال';
   const due=rec&&rec.r&&rec.r<3&&rec.due<=TODAY();
   const lv=pageLvl(p),st=lv?`<span class="pchip s${lv}">${LVL[lv]}${due?' – مستحقة للتثبيت':''}</span>`:'<span class="pchip">لم تُختبر</span>';
   const er=n>0?`<span class="pchip ${n>=3?'warn':''}">غلطت هنا ${AR(n)} مرة${n>=3?' – موضع متكرر الغلط':''}</span>`:'';
@@ -1327,11 +1349,11 @@ function renderMushaf(){
 function openPageSheet(p){
   const c=S.pc[p]||{f:0,s:0,w:0},rec=S.pages[p]||{};
   const words=Object.keys(S.wc).map(k=>{const i=k.indexOf('|');return {aid:+k.slice(0,i),w:k.slice(i+1),n:S.wc[k].n,p:S.wc[k].p}}).filter(x=>x.p===p&&AY[x.aid]).sort((a,b)=>b.n-a.n);
-  const lv=pageLvl(p),st=lv?(LVL[lv]+' (من عدد الأخطاء)'+(rec.d?' – آخر اختبار '+rec.d:'')):'لم تُختبر بعد';
+  const lv=pageLvl(p),st=lv?(LVL[lv]+' (من عدد أخطاء الختمة دي)'+(rec.d?' – آخر اختبار '+rec.d:'')):'لم تُختبر بعد';
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="تفاصيل الصفحة">
    <div class="row sp"><h3>صفحة ${AR(p)} – ${esc(pageHeadL(p))}</h3><button class="g" id="x">إغلاق</button></div>
    <p>${p%2?'صفحة يمين':'صفحة شمال'} – ${st}</p>
-   <div class="card"><b>عدد مرات الغلط في الصفحة دي</b><span>${AR(c.w)} مرة في كلمات سجّلتها – ${AR(c.f)} مرة نسيتها في الاختبار – ${AR(c.s)} مرة ترددت</span></div>
+   <div class="card"><b>عدد مرات الغلط في الصفحة دي${S.khs.length?' (الختمة '+AR(S.kh.n)+')':''}</b><span>${AR(c.w)} مرة في كلمات سجّلتها – ${AR(c.f)} مرة نسيتها في الاختبار – ${AR(c.s)} مرة ترددت</span>${S.khs.length?(t=>`<span class="muted">في كل الختمات: ${AR(t.w)} في كلمات – ${AR(t.f)} نسيان – ${AR(t.s)} تردد</span>`)(pcT(p)):''}</div>
    ${words.length?`<div class="card">${words.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">سورة ${esc(sname(AY[x.aid].s))} آية ${AR(AY[x.aid].a)}</span></div><div class="row"><span class="pchip ${x.n>=2?'warn':''}">${AR(x.n)} مرة</span><button data-dec="${esc(x.aid+'|'+x.w)}">نقّص ١</button></div></div>`).join('')}</div>`:''}
    <div class="row rate" id="prt"><button class="r4" data-r="4">ممتاز</button><button class="r3" data-r="3">ثابتة</button><button class="r2" data-r="2">بتردد</button><button class="r1" data-r="1">نسيتها</button></div>
    <p class="muted">مستوى الصفحة بيتحسب لوحده من عدد الأخطاء: صفر = ممتاز، ١–٢ ثابتة، ٣–٦ بتردد، أكتر من ٦ ناسيها. التقييم هنا بيحدّث جدول التثبيت ومش بيتحسب من اختبارات اليوم.</p></div>`;
@@ -1836,7 +1858,7 @@ function misWeights(a,b){
   S.mistakes.forEach(m=>{if(m.n<4&&AY[m.aid])se[AY[m.aid].s]=(se[AY[m.aid].s]||0)+1});
   const add=(aid,x)=>{if(aid>=a&&aid<=b&&AY[aid])w.set(aid,(w.get(aid)||0)+x)};
   S.mistakes.forEach(m=>{if(!AY[m.aid])return;const age=Math.max(0,(now-m.id)/864e5),c=(S.wc[m.aid+'|'+m.word]||{n:1}).n;
-    add(m.aid,(m.n<4?2:.4)*(1+c)+.3*pageErr(m.page)+.1*(se[AY[m.aid].s]||0)+4*Math.exp(-age/10))});
+    add(m.aid,(m.n<4?2:.4)*(1+c)+.3*pageErrT(m.page)+.1*(se[AY[m.aid].s]||0)+4*Math.exp(-age/10))});
   for(const k in S.wc){const i=k.indexOf('|');add(+k.slice(0,i),.5*S.wc[k].n)}
   return w;
 }
@@ -1957,7 +1979,7 @@ function applyProblems(){
   const q=QZ.cur,pr=q.pr,pages=[...new Set((q.ls||[]).map(k=>Math.floor(k/100)))];
   if(pr.sim)q.mw.forEach(k=>{const i=k.indexOf('|'),aid=+k.slice(0,i),w=k.slice(i+1),zp=zwFor(aid,w);S.mistakes.forEach(m=>{if(m.aid===aid&&m.word===w)m.sim=zp?zp.e.id:(m.sim||true)})});
   if(pr.hes)pages.forEach(p=>{pageRate(p,2);S.pages[p].due=addDays(TODAY(),1)});
-  if(pr.none&&!q.errs)pages.forEach(p=>{if(!(S.pages[p]&&S.pages[p].r))pageRate(p,3)});
+  if(pr.none&&!q.errs)pages.forEach(p=>{if(!prc(p))pageRate(p,3)});
   save();
 }
 const qzRev=()=>!!(QZ&&QZ.cur&&QZ.cur.ls&&!QZ.cur.done);
@@ -2191,7 +2213,7 @@ function misFilter(v,noJ){return S.mistakes.filter(m=>AY[m.aid]&&(v.st==='all'||
 function renderMis(){
   if(!ZW&&S.mistakes.some(m=>m.sim))loadZW().catch(()=>{});
   const v=mv(),all=S.mistakes.filter(m=>AY[m.aid]),open=all.filter(m=>m.n<4),fixed=all.length-open.length;
-  const words=Object.values(S.wc).reduce((a,x)=>a+x.n,0),pages=Object.keys(S.pc).filter(p=>pageErr(+p)>0).length;
+  const words=Object.values(S.wc).reduce((a,x)=>a+x.n,0),pages=[...new Set([].concat(Object.keys(S.pc),...(S.khs||[]).map(r=>Object.keys(r.pc||{}))))].filter(p=>pageErrT(+p)>0).length;
   /* chart: the 30 juz, counted with the same filters (without the juz filter itself) */
   const jc=Array(31).fill(0);misFilter(v,true).forEach(m=>{jc[Math.ceil(D.r[m.aid-1]/8)]+=mCnt(m)});const jm=Math.max(1,...jc);
   const list=misFilter(v,false),sortF={n:(a,b)=>mCnt(b)-mCnt(a)||b.id-a.id,new:(a,b)=>b.id-a.id,mus:(a,b)=>a.aid-b.aid||a.id-b.id}[v.o];
@@ -2200,11 +2222,11 @@ function renderMis(){
   gs.sort(v.g==='d'&&v.o!=='n'?(a,b)=>b.last-a.last:{n:(a,b)=>b.n-a.n||b.last-a.last,new:(a,b)=>b.last-a.last,mus:(a,b)=>a.first-b.first}[v.o]);
   if(!gs.some(g=>MOPEN.has(v.g+':'+g.k))&&gs[0])MOPEN.add(v.g+':'+gs[0].k);
   const seg=(id,opts,cur)=>`<div class="seg" id="${id}">${opts.map(([k,l])=>`<button data-v="${k}" aria-pressed="${String(k)===String(cur)}">${l}</button>`).join('')}</div>`;
-  const item=m=>{const c=mCnt(m),op=m.n<4;return `<div class="item"><div><b>«${esc(m.word)}»</b> <span class="muted">${where(m.aid)} – سطر ${AR(m.line)}</span>${m.sim?(ZID[m.sim]?` <button class="pchip" data-zo="${m.sim}">متشابه – ${esc(zNum(ZID[m.sim]))}</button>`:' <span class="pchip">متشابه</span>'):''}${m.q?' <span class="pchip">من اختبار</span>':''}
+  const item=m=>{const c=mCnt(m),op=m.n<4;return `<div class="item"><div><b>«${esc(m.word)}»</b> <span class="muted">${where(m.aid)} – سطر ${AR(m.line)}</span>${m.sim?(ZID[m.sim]?` <button class="pchip" data-zo="${m.sim}">متشابه – ${esc(zNum(ZID[m.sim]))}</button>`:' <span class="pchip">متشابه</span>'):''}${m.q?' <span class="pchip">من اختبار</span>':''}${S.khs.length&&m.k?' <span class="pchip">الختمة '+AR(m.k)+'</span>':''}
     ${NG('m:'+m.id)?`<div class="notebox">${esc(NG('m:'+m.id))}</div>`:''}<div class="dots">${[0,1,2,3].map(i=>`<i class="${i<m.n?'on':''}"></i>`).join('')}</div><div class="muted">${op?(m.due<=TODAY()?'مستحق النهارده':'الموعد '+m.due):'اتثبّت'} – اتسجّل ${dayLab(ymd(new Date(m.id)))}</div></div>
     <div class="row mact"><span class="pchip ${c>=2?'warn':''}">${AR(c)} مرة</span><button data-o="${m.id}">افتح</button>${op?`<button data-ok="${m.id}">راجعتها</button>`:''}<button class="tg" data-sim="${m.id}" aria-pressed="${!!m.sim}">متشابه</button><button class="tg${NG('m:'+m.id)?' hasnote':''}" data-mnt="${m.id}">ملاحظة</button><button class="g" data-del="${m.id}" aria-label="حذف">${ic('trash','ii')}</button></div></div>`};
   const repW=Object.keys(S.wc).map(k=>{const i=k.indexOf('|');return {aid:+k.slice(0,i),w:k.slice(i+1),n:S.wc[k].n,p:S.wc[k].p}}).filter(x=>x.n>=2&&AY[x.aid]).sort((a,b)=>b.n-a.n).slice(0,12);
-  const repP=Object.keys(S.pc).map(Number).map(p=>({p,n:pageErr(p)})).filter(x=>x.n>=2).sort((a,b)=>b.n-a.n).slice(0,8);
+  const repP=[...new Set([].concat(Object.keys(S.pc),...(S.khs||[]).map(r=>Object.keys(r.pc||{}))))].map(Number).map(p=>({p,n:pageErrT(p)})).filter(x=>x.n>=2).sort((a,b)=>b.n-a.n).slice(0,8);
   const repCard=(repW.length||repP.length)?`<details class="card mgrp"><summary><h2 style="display:inline">مواضع الغلط المتكررة</h2></summary>
    ${repW.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">سورة ${esc(sname(AY[x.aid].s))} آية ${AR(AY[x.aid].a)} – صفحة ${AR(x.p)}</span></div><div class="row"><span class="pchip warn">${AR(x.n)} مرة</span><button data-rp="${x.p}" data-aid="${x.aid}">افتح</button></div></div>`).join('')}
    ${repP.map(x=>`<div class="item"><div>صفحة ${AR(x.p)} كلها</div><div class="row"><span class="pchip warn">${AR(x.n)} مرة غلط</span><button data-rp="${x.p}">افتح</button></div></div>`).join('')}</details>`:'';
@@ -2289,7 +2311,8 @@ function renderMe(){
   const heat=[];for(let i=34;i>=0;i--){const k=addDays(TODAY(),-i),r=S.days[k];const l=!kept(k)?0:(r.c&&r.c.done&&r.s&&r.s.done)?2:1;heat.push(`<i data-l="${l}" class="${i===0?'t':''}" title="${k}"></i>`)}
   $('#t-me').innerHTML=`
    ${AUDIO?'':`<div class="card"><h2>النسخة الكاملة بالتلاوة</h2><p class="muted">افتح النسخة دي علشان تسمع الآيات بصوت الشيوخ آية بآية، وتثبّتها على شاشة الموبايل. بياناتك هناك منفصلة: انسخ كود النسخة الاحتياطية من تحت والصقه هناك في "حالتي" ثم "استرجاع".</p><a href="https://abdallahmasoud670-bit.github.io/muraja3a/" target="_blank" rel="noopener" style="display:inline-block;background:var(--accent);color:var(--accent-ink);padding:8px 14px;border-radius:8px;text-decoration:none;font-weight:600;align-self:flex-start">افتح النسخة الكاملة</a></div>`}
-   <div class="card"><h2>خريطة الأجزاء</h2><p class="muted">اللون من عدد أخطائك في الصفحات اللي اتختبرت. الرقم تحت الجزء: صفحات اتختبرت من إجمالي الجزء.</p><div class="grid">${cells.join('')}</div>
+   <div class="card"><div class="row sp"><h2>الختمات</h2><button id="meKh">الختمات والتقارير</button></div><p class="muted">أنت في الختمة رقم ${AR(S.kh.n)}${S.khs.length?'، و'+AR(S.khs.length)+' ختمة ليها تقرير محفوظ':''}. كل ختمة بتتحفظ بتقريرها ولا تتمسح، وعلامات الأخطاء على المصحف بتفضل من كل الختمات.</p></div>
+   <div class="card"><h2>خريطة الأجزاء</h2><p class="muted">اللون من عدد أخطائك في الختمة الحالية في الصفحات اللي اتختبرت. الرقم تحت الجزء: صفحات اتختبرت من إجمالي الجزء.</p><div class="grid">${cells.join('')}</div>
     <div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز ${AR(cnt[4])}</span><span><i style="background:var(--st3)"></i>ثابت ${AR(cnt[3])}</span><span><i style="background:var(--st2)"></i>بتردد ${AR(cnt[2])}</span><span><i style="background:var(--st1)"></i>ناسيه ${AR(cnt[1])}</span><span><i style="background:var(--st0)"></i>لم يُختبر ${AR(cnt[0])}</span></div></div>
    <div class="card"><h2>آخر ٣٥ يوم</h2><div class="heat">${heat.join('')}</div><div class="legend"><span><i style="background:var(--st3)"></i>جلستين</span><span><i style="background:var(--st2)"></i>أقل من كده</span></div></div>
    <div class="card"><h2>تأكد من المصحف بعينك</h2><p class="muted">النص اتقارن آليًا بنص مجمع الملك فهد. توزيع السطور من بيانات مصحف المدينة ولازم تتأكد منه بعينك على عينة. افتح كل صفحة وقارن بمصحفك، وعلّم اللي طابقت. صفحة ٧٧ اتأكدت منها بالفعل مقابل مصحفك.</p>
@@ -2303,6 +2326,7 @@ function renderMe(){
   const el=$('#t-me');
   el.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>openPage(JS[+b.dataset.j]));
   el.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const p=+b.dataset.v;S.verified[p]=!S.verified[p];if(!S.verified[p])delete S.verified[p];save();openPage(p)});
+  el.querySelector('#meKh').onclick=()=>openKh();
   el.querySelector('#flr').onclick=fltReset;if(AUDIO)el.querySelector('#dlo').onclick=openDL;
   const bk=el.querySelector('#bk');bk.value=JSON.stringify(S);
   el.querySelector('#cp').onclick=()=>{bk.select();(navigator.clipboard?navigator.clipboard.writeText(bk.value):Promise.reject()).then(()=>toast('اتنسخ')).catch(()=>toast('حدد الكود وانسخه يدويًا'))};
@@ -2315,7 +2339,147 @@ function renderMe(){
   const ub=el.querySelector('#ub');if(ub)ub.onclick=()=>{let o=null;try{o=JSON.parse(localStorage.getItem(KEY+'-prev'))}catch(e){}if(!o||!o.days){toast('مفيش نسخة قبل الاسترجاع');return}
     toast('ترجّع البيانات اللي كانت قبل آخر استرجاع؟',[{label:'رجّعها',fn:()=>{try{localStorage.setItem(KEY+'-prev',JSON.stringify(S))}catch(e){}S=o;load2();save();applyTheme();renderAll();toast('رجعت البيانات اللي كانت قبل الاسترجاع')}},{label:'إلغاء',fn:()=>{}}])};
 }
-function load2(){if(S.qc&&Array.isArray(S.qc.types)&&!S.qc.zv){S.qc.types=S.qc.types.concat(['zwd','zws','zwf','zwc','zwr']);S.qc.zv=1}S.cursor=S.cursor||0;S.sessions=S.sessions||0;S.days=S.days||{};S.pages=S.pages||{};S.mistakes=S.mistakes||[];S.notes=S.notes||{};S.nts=S.nts||{};S.verified=S.verified||{};S.theme=S.theme||'auto';S.pc=S.pc||{};S.wc=S.wc||{};if(S.sound===undefined)S.sound=true;if(S.margin===undefined)S.margin=true}
+function load2(){if(S.qc&&Array.isArray(S.qc.types)&&!S.qc.zv){S.qc.types=S.qc.types.concat(['zwd','zws','zwf','zwc','zwr']);S.qc.zv=1}S.cursor=S.cursor||0;S.sessions=S.sessions||0;S.days=S.days||{};S.pages=S.pages||{};S.mistakes=S.mistakes||[];S.notes=S.notes||{};S.nts=S.nts||{};S.verified=S.verified||{};S.theme=S.theme||'auto';S.pc=S.pc||{};S.wc=S.wc||{};if(S.sound===undefined)S.sound=true;if(S.margin===undefined)S.margin=true;migKh()}
+
+/* ---- khatmas (phase 5c) ----
+   S.kh  = the current khatma {n, start (set by hand), st0 (first session after the last close), from (close date of the one before), s0 (S.sessions at its start), done {d,ses} (the cursor came back to 0, waiting for a yes)}
+   S.khs = closed khatmas, never deleted: {n,start,end,closed,ses,pc,kw,jl,mis,open,sim,top,kh0,cur,sesAt}
+   S.kw  = word mistakes of the current khatma (S.wc stays the total that colours the mushaf); S.pc = the current khatma's page counter.
+   Every mistake carries k (its khatma), every page rating too; data from before this phase is khatma S.kh.n at migration. */
+function migKh(){
+  if(!Array.isArray(S.khs))S.khs=[];
+  if(!S.kh||!S.kh.n){const n=Math.floor((S.sessions||0)/60)+1;
+    S.kh={n,start:null,s0:(n-1)*60};
+    S.mistakes.forEach(m=>{if(!m.k)m.k=n});
+    for(const p in S.pages)if(S.pages[p]&&!S.pages[p].k)S.pages[p].k=n;
+    if(!S.kw){S.kw={};for(const k in S.wc)if(S.wc[k]&&S.wc[k].n>0)S.kw[k]=S.wc[k].n}}
+  if(!S.kw||typeof S.kw!=='object')S.kw={};
+}
+function khStart(){const k=S.kh;if(k.start)return k.start;if(k.st0)return k.st0;if(k.from)return null;return Object.keys(S.days).filter(kept).sort()[0]||null}
+const dDiff=(a,b)=>Math.round((Date.parse(b)-Date.parse(a))/864e5);
+const dFmt=k=>k?AR(k.split('-').reverse().join('/')):'لسه';
+function khDays(r){if(!r.start)return {span:0,act:0};const e=r.end<r.start?r.start:r.end,span=dDiff(r.start,e)+1;let act=0;for(const k in S.days)if(k>=r.start&&k<=e&&kept(k))act++;return {span,act}}
+/* a page's forgetting and hesitation go to the surah its header names (word mistakes go to their own surah) */
+const psur=p=>AY[FA[p]].s;
+function khTop(r){
+  let f=0,s=0,w=0;const pg=[],jz={},sr={};
+  const SR=x=>sr[x]||(sr[x]={s:x,f:0,h:0,w:0,t:0});
+  for(const p in r.pc){const c=r.pc[p],cf=c.f||0,cs=c.s||0,cw=c.w||0,t=cf+cs+cw;f+=cf;s+=cs;w+=cw;if(!t)continue;
+    pg.push({p:+p,f:cf,s:cs,w:cw,t});
+    const j=juzOfPage(+p),J=jz[j]||(jz[j]={j,f:0,s:0,w:0,t:0});J.f+=cf;J.s+=cs;J.w+=cw;J.t+=t;
+    if(cf+cs){const R=SR(psur(+p));R.f+=cf;R.h+=cs;R.t+=cf+cs}}
+  const wd=[];
+  for(const k in r.kw){const i=k.indexOf('|'),aid=+k.slice(0,i),word=k.slice(i+1),n=r.kw[k];if(!AY[aid]||!(n>0))continue;
+    const R=SR(AY[aid].s);R.w+=n;R.t+=n;
+    const m=S.mistakes.filter(x=>x.aid===aid&&x.word===word).sort((a,b)=>(a.n<4?0:1)-(b.n<4?0:1)||b.id-a.id)[0];
+    wd.push({aid,w:word,n,p:AY[aid].page,sim:m&&m.sim?m.sim:0,st:m?(m.n<4?1:2):0})}
+  const by=(a,b)=>b.t-a.t||b.f-a.f;
+  return {f,s,w,pg:pg.sort(by).slice(0,10),jz:Object.values(jz).sort(by).slice(0,3),sr:Object.values(sr).filter(x=>x.s).sort(by).slice(0,5),wd:wd.sort((a,b)=>b.n-a.n||a.aid-b.aid).slice(0,10)};
+}
+/* the current khatma in the same shape the archive keeps */
+function khData(){
+  const n=S.kh.n,jl=[0];for(let j=1;j<=30;j++)jl.push(juzState(j).s);
+  const ms=S.mistakes.filter(m=>m.k===n&&AY[m.aid]);
+  const r={n,start:khStart(),end:S.kh.done?S.kh.done.d:TODAY(),pc:JSON.parse(JSON.stringify(S.pc)),kw:Object.assign({},S.kw),jl,
+    mis:ms.length,open:ms.filter(m=>m.n<4).length,sim:ms.filter(m=>m.sim).length,ses:Math.max(0,S.sessions-(S.kh.s0||0))};
+  r.top=khTop(r);return r;
+}
+const LVJ=['لم يُختبر','ناسيه','بتردد','ثابت','ممتاز'];
+const khBr=(f,s,w)=>[f?AR(f)+' نسيان':'',s?AR(s)+' تردد':'',w?AR(w)+' في كلمات':''].filter(Boolean).join(' – ')||'من غير أخطاء';
+function khHTML(r,prev){
+  const T=r.top,tot=T.f+T.s+T.w,{span,act}=khDays(r),lc=[0,0,0,0,0];for(let j=1;j<=30;j++)lc[r.jl[j]||0]++;
+  const ref=aid=>'سورة '+esc(sname(AY[aid].s))+' آية '+AR(AY[aid].a);
+  const J=T.jz[0];
+  let h=`<div class="mstats"><div><b>${AR(span)}</b><span>يوم من أول يوم لآخر يوم</span></div><div><b>${AR(act)}</b><span>يوم راجعت فيه فعلًا</span></div><div><b>${AR(r.ses)}</b><span>جلسة من ٦٠</span></div><div><b>${AR(tot)}</b><span>غلطة في الختمة</span></div></div>
+   <p class="muted">من ${dFmt(r.start)} لحد ${dFmt(r.end)}${span>act?' – '+AR(span-act)+' يوم من غير مراجعة':''}</p>
+   <b class="khh">الأخطاء بالنوع</b><div class="chips"><span class="pchip">نسيان ${AR(T.f)}</span><span class="pchip">تردد ${AR(T.s)}</span><span class="pchip">في كلمات ${AR(T.w)}</span><span class="pchip">متشابهات ${AR(r.sim)} موضع</span><span class="pchip">${AR(r.mis)} موضع اتسجّل – ${AR(r.mis-r.open)} اتثبّت</span></div>
+   <b class="khh">أكبر نقطة ضعف</b>`;
+  if(!tot)h+='<p class="muted">مفيش أخطاء متسجلة في الختمة دي.</p>';
+  else{
+    h+=J?`<div class="item"><div><b>أضعف جزء: الجزء ${AR(J.j)}</b> <span class="muted">${AR(J.t)} مرة (${khBr(J.f,J.s,J.w)}) – تقديره ${LVJ[r.jl[J.j]||0]}</span></div><button data-kp="${JS[J.j]}">افتح</button></div>`:'';
+    if(T.jz.length>1)h+=`<p class="muted">بعده: ${T.jz.slice(1).map(x=>'الجزء '+AR(x.j)+' ('+AR(x.t)+')').join('، ')}</p>`;
+    h+=`<b class="khh">أضعف ${AR(T.sr.length)} سور</b>`+T.sr.map(x=>`<div class="item"><div>سورة ${esc(sname(x.s))} <span class="muted">${AR(x.t)} مرة (${khBr(x.f,x.h,x.w)})</span></div><button data-kp="${AY[ID_BY_KEY[x.s+':1']].page}">افتح</button></div>`).join('');
+    h+=`<b class="khh">أضعف ${AR(T.pg.length)} صفحات</b>`+T.pg.map(x=>`<div class="item"><div>صفحة ${AR(x.p)} <span class="muted">${esc(pageSurahName(x.p))} – ${AR(x.t)} مرة (${khBr(x.f,x.s,x.w)})</span></div><button data-kp="${x.p}">افتح</button></div>`).join('');
+    if(T.wd.length)h+=`<b class="khh">أكتر ${AR(T.wd.length)} كلمات اتكرر فيها الغلط</b>`+T.wd.map(x=>`<div class="item"><div><b>«${esc(x.w)}»</b> <span class="muted">${ref(x.aid)} – صفحة ${AR(x.p)}</span>
+      <div class="chips"><span class="pchip ${x.n>=2?'warn':''}">${AR(x.n)} مرة</span>${x.sim?(ZID[x.sim]?`<button class="pchip" data-zo="${x.sim}">متشابه – ${esc(zNum(ZID[x.sim]))}</button>`:'<span class="pchip">متشابه</span>'):'<span class="pchip">غلط في الكلمة</span>'}<span class="pchip ${x.st===2?'s3':''}">${x.st===1?'لسه تحت التثبيت':x.st===2?'اتثبّتت':'اتشالت من القايمة'}</span></div></div><button data-kp="${x.p}" data-ka="${x.aid}">افتح</button></div>`).join('');
+  }
+  h+=`<b class="khh">تقدير الأجزاء</b><div class="grid">${r.jl.slice(1).map((s,i)=>`<button class="juz" data-kj="${i+1}" data-s="${s||0}" aria-label="الجزء ${i+1}: ${LVJ[s||0]}">${AR(i+1)}</button>`).join('')}</div>
+   <div class="legend"><span><i style="background:linear-gradient(135deg,#fff,#a9d4ff)"></i>ممتاز ${AR(lc[4])}</span><span><i style="background:var(--st3)"></i>ثابت ${AR(lc[3])}</span><span><i style="background:var(--st2)"></i>بتردد ${AR(lc[2])}</span><span><i style="background:var(--st1)"></i>ناسيه ${AR(lc[1])}</span><span><i style="background:var(--st0)"></i>لم يُختبر ${AR(lc[0])}</span></div>`;
+  if(prev&&prev.top){
+    const P=prev.top,pt=P.f+P.s+P.w,pd=khDays(prev);
+    const row=(l,a,b,lowGood)=>{const good=lowGood?b<a:b>a,c=b===a?'':good?'s3':'warn',t=b===a?'زي ما هي':good?'اتحسنت':'رجعت';return `<div class="item"><div>${l}</div><span class="pchip ${c}">${AR(a)} ← ${AR(b)} – ${t}</span></div>`};
+    const up=[],dn=[];for(let j=1;j<=30;j++){const a=prev.jl[j]||0,b=r.jl[j]||0;if(a&&b&&b>a)up.push(j);if(a&&b&&b<a)dn.push(j)}
+    h+=`<b class="khh">مقارنة بالختمة رقم ${AR(prev.n)}</b>
+     ${row('الأخطاء كلها',pt,tot,true)}${row('نسيان',P.f,T.f,true)}${row('تردد',P.s,T.s,true)}${row('غلط في كلمات',P.w,T.w,true)}${row('متشابهات',prev.sim||0,r.sim||0,true)}
+     ${row('أجزاء ممتازة',prev.jl.filter((x,i)=>i&&x===4).length,lc[4],false)}${row('أجزاء ثابتة',prev.jl.filter((x,i)=>i&&x===3).length,lc[3],false)}${pd.span&&span?row('أيام الختمة',pd.span,span,true):''}
+     <p class="muted">${up.length?'اتحسن: '+up.map(j=>'الجزء '+AR(j)).join('، ')+'. ':''}${dn.length?'رجع: '+dn.map(j=>'الجزء '+AR(j)).join('، ')+'.':''}${!up.length&&!dn.length?'مفيش جزء اتغيّر تقديره (من الأجزاء اللي اتختبرت في الختمتين).':''}</p>`;
+  }
+  return h;
+}
+function khWire(el){
+  el.querySelectorAll('[data-kp]').forEach(b=>b.onclick=()=>{closeSheet();openPage(+b.dataset.kp,b.dataset.ka?+b.dataset.ka:null)});
+  el.querySelectorAll('[data-kj]').forEach(b=>b.onclick=()=>{closeSheet();openPage(JS[+b.dataset.kj])});
+  el.querySelectorAll('[data-zo]').forEach(b=>b.onclick=()=>zOpen(+b.dataset.zo));
+}
+/* the khatmas screen: the current one (live report, start date, end now) and every closed report */
+function openKh(openN){
+  if(!ZW&&S.mistakes.some(m=>m.sim))loadZW().then(()=>{if($('#khsheet'))openKh(openN)}).catch(()=>{});
+  const cur=khData(),L=S.khs[S.khs.length-1]||null,base=S.kh.n-1-S.khs.length;
+  $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" id="khsheet" role="dialog" aria-label="الختمات">
+   <div class="row sp"><h3>الختمات</h3><button class="g" id="x">إغلاق</button></div>
+   <div class="card${S.kh.done?' khdue':''}"><div class="row sp"><b>الختمة الحالية: رقم ${AR(S.kh.n)}</b><span class="muted">${S.kh.done?'خلصت':AR(Math.round(S.cursor/60*100))+'٪ – الجلسة الجاية '+AR(S.cursor+1)+' من ٦٠'}</span></div>
+    <label class="row">بدأت يوم <input type="date" id="khst" value="${cur.start||''}" max="${TODAY()}" aria-label="تاريخ بداية الختمة"></label>
+    <span class="muted">${S.kh.start?'التاريخ ده انت اللي حطيته. <button class="g lnk" id="khsa">خليه تلقائي</button>':'تلقائي: أول يوم راجعت فيه في الختمة دي. تقدر تغيّره.'}</span>
+    ${S.kh.done?`<p><b>الختمة دي خلصت يوم ${dFmt(S.kh.done.d)}</b> (المصحف كله اتراجع). اقفلها علشان يتحفظ تقريرها ويبدأ عدّاد الختمة الجديدة.</p><div class="row"><button class="p" id="khc">اقفلها واحفظ تقريرها</button></div>`:''}
+    <details class="mgrp"${openN===S.kh.n?' open':''}><summary><span>تقرير الختمة لحد النهارده</span></summary>${khHTML(cur,L)}</details>
+    ${S.kh.done?'':'<div class="row"><button id="khe">إنهاء الختمة الآن</button></div>'}</div>
+   ${S.khs.slice().reverse().map((r,ri)=>{const i=S.khs.length-1-ri,d=khDays(r);return `<details class="card mgrp"${openN===r.n?' open':''}><summary><span>الختمة رقم ${AR(r.n)}</span><span class="cnt">${dFmt(r.start)} – ${dFmt(r.end)} – ${AR(d.span)} يوم</span></summary>
+    <label class="row">تاريخ البداية <input type="date" data-ks="${i}" value="${r.start||''}" max="${r.end}" aria-label="تاريخ بداية الختمة ${r.n}"></label>
+    ${khHTML(r,S.khs[i-1]||null)}
+    <div class="row"><button data-kt="${i}">اختبرني على أخطاء الختمة دي</button>${i===S.khs.length-1?'<button class="g" id="khro">رجّع الختمة دي مفتوحة</button>':''}</div></details>`}).join('')}
+   ${base>0?`<p class="muted">قبل ما التقارير تبدأ كنت خلصت ${AR(base)} ختمة من غير تقرير.</p>`:''}
+   <p class="muted">علامات الأخطاء على المصحف ولونها من كل الختمات وما بتتشالش. الاختبار الذكي بيسحب من أخطاء كل الختمات.</p></div>`;
+  const el=$('#khsheet');
+  $('#sbk').onclick=$('#x').onclick=closeSheet;khWire(el);
+  const st=$('#khst');st.onchange=()=>{const v=st.value;if(v&&v>TODAY()){toast('التاريخ ده لسه ما جاش');return}if(v)S.kh.start=v;else delete S.kh.start;save();renderAll();openKh(S.kh.n)};
+  const sa=$('#khsa');if(sa)sa.onclick=()=>{delete S.kh.start;save();renderAll();openKh(S.kh.n)};
+  const kc=$('#khc');if(kc)kc.onclick=()=>khAsk(true);
+  const ke=$('#khe');if(ke)ke.onclick=()=>khAsk(false);
+  el.querySelectorAll('[data-ks]').forEach(b=>b.onchange=()=>{const r=S.khs[+b.dataset.ks];if(!r||!b.value)return;if(b.value>r.end){toast('البداية لازم تبقى قبل النهاية');return}r.start=b.value;save();openKh(r.n)});
+  el.querySelectorAll('[data-kt]').forEach(b=>b.onclick=()=>{const r=S.khs[+b.dataset.kt];if(!r)return;
+    const aids=S.mistakes.filter(m=>m.k===r.n).map(m=>m.aid).concat(Object.keys(r.kw||{}).map(k=>+k.slice(0,k.indexOf('|'))));closeSheet();startList(aids)});
+  const ro=$('#khro');if(ro)ro.onclick=()=>toast('ترجّع الختمة رقم '+AR(L.n)+' مفتوحة؟ تقريرها هيتشال لحد ما تقفلها تاني، وأخطاء الختمة الحالية هتتضم ليها.',[{label:'رجّعها',fn:()=>{khReopen();openKh(S.kh.n)}},{label:'إلغاء',fn:()=>{}}]);
+}
+/* the yes before the reset: what is cleared and what stays */
+function khAsk(auto){
+  const n=S.kh.n;
+  $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="إنهاء الختمة">
+   <div class="row sp"><h3>${auto?'خلصت الختمة رقم '+AR(n):'إنهاء الختمة رقم '+AR(n)+' الآن'}</h3><button class="g" id="x">إغلاق</button></div>
+   <p>${auto?'راجعت المصحف كله: ٦٠ جلسة، ٦٠٤ وجه. ':''}هنحفظ تقرير الختمة دي كامل ونبدأ الختمة رقم ${AR(n+1)}.</p>
+   <div class="card"><b>اللي هيبدأ من الصفر</b><span>تقدير الصفحات والأجزاء ورفّ الأجزاء (هيبقى «لم يُختبر»)، وعدّاد أخطاء الختمة.</span></div>
+   <div class="card"><b>اللي هيفضل زي ما هو</b><span>علامات الأخطاء على المصحف ولونها، وكل أخطائك وجدول تثبيتها، والملاحظات، والتدبّرات، والعلامة. والاختبار الذكي بيسحب من أخطاء كل الختمات.</span></div>
+   ${auto?'':`<label class="row"><input type="checkbox" id="khr"${S.cursor?' checked':''}> ابدأ الختمة الجديدة من أول المصحف (الجلسة ١). لو شلتها هتكمّل من الجلسة ${AR(S.cursor+1)}.</label>`}
+   <div class="row"><button class="p" id="khok">اقفلها وابدأ الختمة رقم ${AR(n+1)}</button><button id="khno">${auto?'بعدين':'إلغاء'}</button></div>
+   <p class="muted">لو قفلتها بالغلط تقدر ترجّعها مفتوحة من شاشة «الختمات».</p></div>`;
+  $('#sbk').onclick=$('#x').onclick=$('#khno').onclick=()=>{closeSheet();if(auto)toast('الختمة خلصت. اقفلها من الرئيسية لما تحب')};
+  $('#khok').onclick=()=>{const rs=!auto&&$('#khr')&&$('#khr').checked;const r=khClose(rs);toast('اتقفلت الختمة رقم '+AR(r.n)+' واتحفظ تقريرها');openKh(r.n)};
+}
+function khClose(reset){
+  const r=khData();r.closed=TODAY();r.kh0=JSON.parse(JSON.stringify(S.kh));r.cur=S.cursor;r.sesAt=S.sessions;
+  S.khs.push(r);S.pc={};S.kw={};if(reset)S.cursor=0;
+  S.kh={n:r.n+1,start:null,s0:S.sessions,from:TODAY()};
+  save();renderAll();return r;
+}
+/* the last closed khatma opens again: the current one's counters join it */
+function khReopen(silent){
+  const r=S.khs.pop();if(!r)return;const cn=S.kh.n;
+  const pc=r.pc||{};for(const p in S.pc){const a=pc[p]||(pc[p]={f:0,s:0,w:0}),c=S.pc[p];a.f+=c.f||0;a.s+=c.s||0;a.w+=c.w||0}S.pc=pc;
+  const kw=r.kw||{};for(const k in S.kw)kw[k]=(kw[k]||0)+S.kw[k];S.kw=kw;
+  S.mistakes.forEach(m=>{if(m.k===cn)m.k=r.n});for(const p in S.pages){const x=S.pages[p];if(x&&x.k===cn)x.k=r.n}
+  if(S.sessions===r.sesAt)S.cursor=r.cur;
+  S.kh=r.kh0||{n:r.n,start:r.start,s0:0};
+  save();renderAll();if(!silent)toast('رجعت الختمة رقم '+AR(r.n)+' مفتوحة');
+}
 
 function renderAll(){
   renderToday();renderTest();renderMis();renderTad();renderMe();if(AUDIO)renderAud();
