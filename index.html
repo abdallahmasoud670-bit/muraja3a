@@ -515,6 +515,14 @@ details.asb summary{cursor:pointer;font-weight:600}details.asb p{margin:6px 0}
 .scard .mq{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--accent) 10%,transparent);line-height:1.9}
 .scard .fd p{margin:0 0 8px;line-height:1.9}.scard .ah{margin:10px 0 4px;font-weight:600;color:var(--accent)}
 .wmg{font-size:.85rem;line-height:1.7;margin:-2px 0 6px;text-align:center;max-width:300px}
+/* phase 5d: the Zawawi count of a surah, on its mushaf heading and its card */
+.zsb{font-family:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;display:inline-flex;align-items:center;gap:4px;margin-inline-start:8px;padding:0 9px;border-radius:99px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font-size:.72em;line-height:1.7;vertical-align:middle;cursor:pointer;white-space:nowrap}
+.scard .zsb{font-size:.85rem;margin:0}
+.zsl h4{margin:12px 0 4px;font-size:.88rem;color:var(--muted)}
+.zsi{margin-bottom:6px;border-radius:10px;background:var(--bg)}
+.zsi .sr{margin:0;background:transparent}
+.zsi .sr b{color:var(--accent);font-weight:600}
+.zsd{padding:0 12px 8px}.zsd summary{cursor:pointer;font-size:.8rem;color:var(--accent);padding:2px 0}
 .sr .srx{align-self:flex-start;margin-top:4px;font-size:.8rem;padding:2px 10px;border:1px solid var(--line);border-radius:99px;color:var(--accent)}
 
 /* ---- polish 2026-11 (style ج): calm glass surfaces, glow only on what matters (main action, menu button, the active thing).
@@ -805,9 +813,9 @@ function pageHTML(p,o){
     if(e===0)h+='<div class="ln blank"></div>';
     else if(typeof e==='string'){
       const c=e[0],s=+e.slice(1)||1;
-      if(c==='b')h+=`<div class="ln sura${S.nts&&S.nts['s:'+s]?' sn':''}" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}</div>`;
+      if(c==='b')h+=`<div class="ln sura${S.nts&&S.nts['s:'+s]?' sn':''}" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}${zsBadge(s)}</div>`;
       else if(c==='m')h+=`<div class="ln bsm">${esc(ayahText(1))}</div>`;
-      else if(c==='B')h+=`<div class="ln sura${S.nts&&S.nts['s:'+s]?' sn':''}" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}</div>`;
+      else if(c==='B')h+=`<div class="ln sura${S.nts&&S.nts['s:'+s]?' sn':''}" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}${zsBadge(s)}</div>`;
     }else h+=buildLine(e,i,o,mk,gl);
   });
   return h;
@@ -3082,7 +3090,7 @@ function loadZW(){
   return ZWP;
 }
 function zNeed(fn){if(ZW){fn();return}toast('جاري تحميل معجم المتشابهات…');loadZW().then(fn).catch(()=>toast('معجم المتشابهات محتاج نت أول مرة (أو نزّله من «بدون نت»)'))}
-function zwReady(){document.querySelectorAll('.leaf').forEach(placeMarks);renderZDay();renderMis();if(TAB==='test'&&QZ&&QZ.cur&&QZ.cur.pr&&QZ.cur.pr.sim)renderTest()}
+function zwReady(){document.querySelectorAll('.leaf').forEach(placeMarks);zsFill();renderZDay();renderMis();if(TAB==='test'&&QZ&&QZ.cur&&QZ.cur.pr&&QZ.cur.pr.sim)renderTest()}
 /* labels and the book's text: Quran quoted inside [[ ]] is drawn in the mushaf font */
 const zHasL=s=>/[ء-ي]/.test(String(s||''));
 const zPlain=s=>String(s||'').replace(/\[\[|\]\]|[~\[\]"]/g,'').replace(/\s+/g,' ').trim();
@@ -3186,6 +3194,50 @@ function zOpenAyat(ids){zNeed(()=>{
   if(es.length===1){zSheet(()=>zEntryV(es[0],{aid:ids[0]}));return}
   zSheet(()=>({title:'متشابهات '+(ids.length===1?esc(zLab({ids:[ids[0]]})):'السطر ده'),label:'متشابهات',
     body:`<p class="muted">${ids.length>1?'الآيات اللي بتبدأ في السطر: '+ids.map(i=>esc(zLab({ids:[i]}))).join(' – ')+'. ':''}${AR(es.length)} بند في معجم الزواوي. دوس على بند تشوف مواضعه وعلامته.</p>${es.map(zRow).join('')}`}))})}
+/* phase 5d: the Zawawi entries of a whole surah. The count = entries with at least one place in the surah (the owner chose
+   entries over ayat, 2026-11-09), so the badge number is the length of the list it opens. Built once after loadZW(). */
+let ZSU=null;
+function zsEntries(s){
+  if(!ZW)return null;
+  if(!ZSU){ZSU=[];ZW.e.forEach(e=>{const seen=new Set();e.P.forEach(p=>{const a=AY[p.ids[0]];if(seen.has(a.s))return;seen.add(a.s);(ZSU[a.s]=ZSU[a.s]||[]).push({e,id:p.ids[0]})})});
+    ZSU.forEach(l=>l&&l.sort((x,y)=>x.id-y.id||x.e.id-y.e.id))}
+  return ZSU[s]||[];
+}
+function zsBadge(s){const l=zsEntries(s);return l&&l.length?`<span class="zsb" data-zs="${s}" role="button" tabindex="0" title="متشابهات السورة في معجم الزواوي" aria-label="${AR(l.length)} بند متشابهات في سورة ${esc(D.n[s])}">م ${AR(l.length)}</span>`:''}
+/* headings drawn before the dictionary loaded get their badge now */
+function zsFill(){document.querySelectorAll('.ln.sura[data-s]').forEach(el=>{if(!el.querySelector('.zsb'))el.insertAdjacentHTML('beforeend',zsBadge(+el.dataset.s))});
+  const c=$('#sheetRoot .scard #szs');if(c)c.outerHTML=zsCardBtn(+c.dataset.s)}
+function zsCardBtn(s){
+  if(!ZW)return `<span id="szs" data-s="${s}" class="muted">متشابهات الزواوي: جاري التحميل…</span>`;
+  const n=zsEntries(s).length;
+  return n?`<button class="zsb" id="szs" data-s="${s}" data-zs="${s}">متشابهات السورة في الزواوي: ${AR(n)} بند</button>`:`<span id="szs" data-s="${s}" class="muted">مفيش بند للسورة دي في معجم الزواوي</span>`;
+}
+let ZSQ={s:0,q:''};
+function openZSur(s){zNeed(()=>{
+  s=+s;const L=zsEntries(s);if(ZSQ.s!==s)ZSQ={s,q:''};
+  zSheet(()=>({tall:true,title:'متشابهات سورة '+esc(D.n[s]),label:'متشابهات سورة '+D.n[s],
+    body:`<p class="zmeta">${AR(L.length)} بند في معجم الزواوي فيه آية أو أكتر من سورة ${esc(D.n[s])}، بترتيب أول آية ليه في السورة. دوس على البند تشوف مواضعه والفرق وعلامة الزواوي، أو افتح «الفرق بين المواضع» هنا.</p>
+     ${L.length>8?`<label class="srbox">${ic('search')}<input id="zsq" type="search" autocomplete="off" placeholder="دوّر في بنود السورة: لفظ أو رقم بند" aria-label="دوّر في بنود السورة"></label>`:''}
+     <div id="zsr" class="zsl"></div>`,
+    wire:()=>{
+      const box=$('#zsr'),inp=$('#zsq');
+      const row=x=>{const e=x.e,mine=e.P.filter(p=>AY[p.ids[0]].s===s);
+        return `<div class="zsi"><button class="sr" data-zo="${e.id}" data-aid="${x.id}"><span class="srt">${zQ(e.t||e.h)}</span><span class="srm">${esc(zNum(e))} – ${AR(e.P.length)} ${e.P.length===1?'موضع':'مواضع'}: ${e.P.map(p=>mine.includes(p)?'<b>'+esc(zLab(p))+'</b>':esc(zLab(p))).join('، ')}</span></button>${e.P.length>1?`<details class="zsd" data-e="${e.id}"><summary>الفرق بين المواضع</summary><div></div></details>`:''}</div>`};
+      const draw=()=>{const q=NRM(LATN(ZSQ.q).trim().replace(/^(?:ال)?بند\s*/,''));
+        const xr=new Set();if(q.length>=2&&!/^\d+$/.test(q))ZW.x.forEach(r=>{if(!r.sx)r.sx=NRM(zPlain(r.h)+' '+zPlain(r.t));if(r.sx.includes(q))r.to.forEach(k=>xr.add(k))});
+        const r=!q?L:L.filter(x=>{const e=x.e;if(/^\d+$/.test(q))return String(e.n)===q;if(!e.sx)e.sx=NRM(zPlain(e.h)+' '+zPlain(e.t));return e.sx.includes(q)||xr.has(e.n)});
+        let h=q?`<p class="muted">${AR(r.length)} بند</p>`:'',last=0;
+        r.forEach(x=>{if(!q&&x.id!==last){last=x.id;const a=AY[x.id];h+=`<h4>آية ${AR(a.a)} – صفحة ${AR(a.page)}</h4>`}h+=row(x)});
+        box.innerHTML=h||'<p class="muted">مفيش بند بالكلام ده.</p>'};
+      box.addEventListener('toggle',ev=>{const d=ev.target;if(!d.open||!d.dataset||!d.dataset.e)return;const v=d.querySelector('div');if(v.innerHTML)return;
+        const e=ZID[+d.dataset.e];v.innerHTML=zCmp(e,{go:true,cut:3,max:6})},true);
+      if(inp){inp.value=ZSQ.q;let tm=0;inp.oninput=()=>{clearTimeout(tm);tm=setTimeout(()=>{ZSQ.q=inp.value;draw()},160)}}
+      draw();
+    }}));
+})}
+/* the badge sits inside the clickable heading: catch it first so it opens the list, not the surah card */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-zs]');if(!b)return;e.preventDefault();e.stopPropagation();openZSur(+b.dataset.zs)},true);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.zs){e.preventDefault();e.stopPropagation();openZSur(+e.target.dataset.zs)}},true);
 document.addEventListener('click',e=>{
   const z=e.target.closest('[data-zo]');if(z){e.preventDefault();zOpen(+z.dataset.zo,{aid:+z.dataset.aid||0});return}
   const g=e.target.closest('[data-zgo]');if(g){const id=+g.dataset.zgo;closeSheet();openPage(AY[id].page,id);return}
@@ -3387,13 +3439,14 @@ function openSurah(s){
   };
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet tall scard" role="dialog" aria-label="بطاقة السورة">
    <div class="row sp"><h3>سورة ${esc(D.n[s])}</h3><button class="g" id="x">إغلاق</button></div>
-   <div class="smeta"><span>رقمها ${AR(s)}</span><span>${stype(s)}</span><span>${AR(AYC[s])} آية</span><span>من صفحة ${AR(p1)}</span></div>
+   <div class="smeta"><span>رقمها ${AR(s)}</span><span>${stype(s)}</span><span>${AR(AYC[s])} آية</span><span>من صفحة ${AR(p1)}</span>${zsCardBtn(s)}</div>
    <div class="row"><button class="p" id="sgo">افتح السورة</button>${AUDIO?'<button id="sau">اسمعها</button>':''}<button id="snt" class="${NG('s:'+s)?'tg hasnote':''}">${NG('s:'+s)?'ملاحظتي على السورة':'ملاحظة على السورة'}</button></div>
    <div id="scb"></div></div>`;
   $('#sbk').onclick=$('#x').onclick=closeSheet;
   $('#sgo').onclick=()=>{closeSheet();openPage(p1,id1)};
   $('#snt').onclick=()=>openNotes('ملاحظة على سورة '+D.n[s],[{k:'s:'+s,l:'ملاحظتي'}]);
   const au=$('#sau');if(au)au.onclick=()=>{AU.until=0;playAyah(id1)};
+  if(!ZW)loadZW().then(zsFill).catch(()=>{const c=$('#szs');if(c)c.textContent='متشابهات الزواوي محتاجة نت أول مرة'});
   draw();if(!BKN)loadBK().then(draw).catch(()=>{const b=$('#scb');if(b)b.innerHTML='<p class="muted">البطاقة محتاجة نت أول مرة (أو نزّلها من «بدون نت»).</p>'});
 }
 
