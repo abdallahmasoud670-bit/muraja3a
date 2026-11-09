@@ -69,6 +69,7 @@ nav{scrollbar-width:thin}
 .w{white-space:nowrap;border-radius:4px;cursor:pointer}
 .w.mk{background:linear-gradient(to bottom,transparent 58%,color-mix(in srgb,var(--st1) 30%,transparent) 58%,color-mix(in srgb,var(--st1) 30%,transparent) 92%,transparent 92%);border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .w.hl{background:color-mix(in srgb,var(--gold) 28%,transparent)}
+.ln.sura.sn{box-shadow:0 0 0 3px rgba(255,214,10,.75) inset}
 .w.an{background:rgba(255,221,45,.26);border-radius:5px}
 .w.wn{background:rgba(255,214,10,.62);border-radius:5px;box-decoration-break:clone}
 .ib.hasnote,.ib.hasnote svg{color:#e2b300}.ib.hasnote{box-shadow:inset 0 -3px 0 #ffd60a}
@@ -795,9 +796,9 @@ function pageHTML(p,o){
     if(e===0)h+='<div class="ln blank"></div>';
     else if(typeof e==='string'){
       const c=e[0],s=+e.slice(1)||1;
-      if(c==='b')h+=`<div class="ln sura" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}</div>`;
+      if(c==='b')h+=`<div class="ln sura${S.nts&&S.nts['s:'+s]?' sn':''}" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}</div>`;
       else if(c==='m')h+=`<div class="ln bsm">${esc(ayahText(1))}</div>`;
-      else if(c==='B')h+=`<div class="ln sura" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}</div>`;
+      else if(c==='B')h+=`<div class="ln sura${S.nts&&S.nts['s:'+s]?' sn':''}" data-s="${s}" title="بطاقة السورة">سورة ${esc(sname(s))}</div>`;
     }else h+=buildLine(e,i,o,mk,gl);
   });
   return h;
@@ -1220,11 +1221,12 @@ function toggleBookmark(){
 }
 /* ---- notes on anything. Ayah notes stay in S.notes (the tadabbur ones); the rest live in S.nts under a typed key:
    w:<ayahId>|<word>  p:<page>  r:<quarter 1-240>  j:<juz>  m:<mistake id>. A note shows a yellow highlight where it sits. ---- */
-const NKIND={w:'كلمة',a:'آية',p:'وجه',r:'ربع',j:'جزء',m:'خطأ'};
+const NKIND={w:'كلمة',a:'آية',s:'سورة',p:'وجه',r:'ربع',j:'جزء',m:'خطأ'};
 function NG(k){if(k[0]==='a')return S.notes[k.slice(2)]||'';return (S.nts&&S.nts[k])||''}
 function NSET(k,v){v=(v||'').trim();if(k[0]==='a'){const id=+k.slice(2);if(v)S.notes[id]=v;else delete S.notes[id]}else{S.nts=S.nts||{};if(v)S.nts[k]=v;else delete S.nts[k]}}
+function pageSurahs(p){const s=new Set();D.p[p-1].forEach(e=>{if(Array.isArray(e))e[1].forEach(id=>s.add(D.a[id-1][0]));else if(typeof e==='string'&&(e[0]==='b'||e[0]==='B'))s.add(+e.slice(1)||1)});return [...s]}
 function pageRubs(p){const s=new Set();D.p[p-1].forEach(e=>{if(Array.isArray(e))e[1].forEach(id=>s.add(D.r[id-1]))});return [...s]}
-const pageHasNote=p=>!!(NG('p:'+p)||NG('j:'+juzOfPage(p))||pageRubs(p).some(r=>NG('r:'+r)));
+const pageHasNote=p=>!!(NG('p:'+p)||pageSurahs(p).some(x=>NG('s:'+x))||NG('j:'+juzOfPage(p))||pageRubs(p).some(r=>NG('r:'+r)));
 function refreshNotes(){renderMushaf();if(READ)applyReaderFit();if($('#t-tad'))renderTad();if($('#t-mis')&&TAB==='mis')renderMis()}
 function openNotes(title,rows){
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet" role="dialog" aria-label="${esc(title)}"><div class="row sp"><h3>${esc(title)}</h3><button class="g" id="x">إغلاق</button></div>${rows.map((r,i)=>`<label class="muted" for="nn${i}">${esc(r.l)}</label><textarea id="nn${i}" placeholder="اكتب ملاحظتك هنا">${esc(NG(r.k))}</textarea>`).join('')}</div>`;
@@ -1235,6 +1237,7 @@ function openNotes(title,rows){
 }
 function pageNotes(p){
   const rows=[{k:'p:'+p,l:'الوجه (صفحة '+AR(p)+')'}];
+  pageSurahs(p).forEach(x=>rows.push({k:'s:'+x,l:'سورة '+sname(x)}));
   pageRubs(p).forEach(r=>rows.push({k:'r:'+r,l:rubLabel(r)}));
   const j=juzOfPage(p);rows.push({k:'j:'+j,l:'الجزء '+AR(j)});
   openNotes('ملاحظات الصفحة '+AR(p),rows);
@@ -1242,6 +1245,7 @@ function pageNotes(p){
 function noteWhere(k){
   const t=k[0],v=k.slice(2);
   if(t==='w'){const i=v.indexOf('|'),id=+v.slice(0,i),A=AY[id];return A?{lab:'كلمة «'+v.slice(i+1)+'»',sub:'سورة '+sname(A.s)+' – آية '+AR(A.a)+' – صفحة '+AR(A.page),p:A.page,aid:id}:null}
+  if(t==='s')return {lab:'سورة '+sname(+v),sub:'',p:AY[ID_BY_KEY[v+':1']].page};
   if(t==='p')return {lab:'الوجه '+AR(v),sub:'',p:+v};
   if(t==='r')return {lab:rubLabel(+v),sub:'الجزء '+AR(Math.ceil(v/8)),p:RUBP[v]};
   if(t==='j')return {lab:'الجزء '+AR(v),sub:'',p:JS[+v]};
@@ -2243,7 +2247,7 @@ function allNotesCard(){
   const host=$('#t-tad');if(!host)return;
   const qn=NRM(LATN(NQ).trim());
   const list=keys.filter(k=>!qn||NRM(S.nts[k]).includes(qn)||NRM(noteWhere(k).lab).includes(qn)||NRM(NKIND[k[0]]).includes(qn));
-  const ord={w:0,p:1,r:2,j:3,m:4};list.sort((a,b)=>(noteWhere(a).p-noteWhere(b).p)||(ord[a[0]]-ord[b[0]]));
+  const ord={w:0,s:1,p:2,r:3,j:4,m:5};list.sort((a,b)=>(noteWhere(a).p-noteWhere(b).p)||(ord[a[0]]-ord[b[0]]));
   const c=document.createElement('div');c.className='card';
   c.innerHTML=`<h2>كل ملاحظاتي (${AR(keys.length)})</h2><p class="muted">ملاحظات الكلمات والوجوه والأرباع والأجزاء والأخطاء. ملاحظات الآيات فوق في «تدبّراتي». اضغط على أي كلمة في المصحف واختار «ملاحظة»، أو زرار الملاحظات في شريط الصفحة.</p>
    ${keys.length?`<input id="nq" type="search" placeholder="دوّر في ملاحظاتك" value="${esc(NQ)}">`:''}
@@ -3220,10 +3224,11 @@ function openSurah(s){
   $('#sheetRoot').innerHTML=`<div class="back" id="sbk"></div><div class="sheet tall scard" role="dialog" aria-label="بطاقة السورة">
    <div class="row sp"><h3>سورة ${esc(D.n[s])}</h3><button class="g" id="x">إغلاق</button></div>
    <div class="smeta"><span>رقمها ${AR(s)}</span><span>${stype(s)}</span><span>${AR(AYC[s])} آية</span><span>من صفحة ${AR(p1)}</span></div>
-   <div class="row"><button class="p" id="sgo">افتح السورة</button>${AUDIO?'<button id="sau">اسمعها</button>':''}</div>
+   <div class="row"><button class="p" id="sgo">افتح السورة</button>${AUDIO?'<button id="sau">اسمعها</button>':''}<button id="snt" class="${NG('s:'+s)?'tg hasnote':''}">${NG('s:'+s)?'ملاحظتي على السورة':'ملاحظة على السورة'}</button></div>
    <div id="scb"></div></div>`;
   $('#sbk').onclick=$('#x').onclick=closeSheet;
   $('#sgo').onclick=()=>{closeSheet();openPage(p1,id1)};
+  $('#snt').onclick=()=>openNotes('ملاحظة على سورة '+D.n[s],[{k:'s:'+s,l:'ملاحظتي'}]);
   const au=$('#sau');if(au)au.onclick=()=>{AU.until=0;playAyah(id1)};
   draw();if(!BKN)loadBK().then(draw).catch(()=>{const b=$('#scb');if(b)b.innerHTML='<p class="muted">البطاقة محتاجة نت أول مرة (أو نزّلها من «بدون نت»).</p>'});
 }
